@@ -8,8 +8,10 @@ export default withAuth(
   {
     secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
-      authorized: ({ token }) => {
-        return !!token;
+      authorized: ({}) => {
+        // TODO: find better way to handle middleware on only protected pages
+        // return !!token;
+        return true;
       },
     },
   },
