@@ -6,7 +6,7 @@ import IngredientForm from "./ingredient-form";
 import { RouterOutputs } from "~/utils/api";
 
 export type Ingredient = {
-  id: string;
+  id: string | null;
   name: string;
   quantity: number;
   unit: string;
@@ -78,7 +78,8 @@ const RecipeForm = ({
     setIngredientFormState(IngredientType.Edit);
     setEditableIngredient(ingredient);
   };
-  const deleteIngredient = (id: string) => {
+  const deleteIngredient = (id: string | null) => {
+    if (!id) return;
     const updatedIngredients = [...ingredients].filter(
       (ingredient: Ingredient) => ingredient.id !== id,
     );

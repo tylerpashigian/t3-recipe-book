@@ -53,7 +53,7 @@ const IngredientForm = ({
   ) => {
     event.preventDefault();
     updateIngredient({
-      id: ingredient.id,
+      id: ingredient?.id ?? null,
       name: ingredientName,
       quantity: +ingredientQuantity,
       unit: ingredientUnit,
