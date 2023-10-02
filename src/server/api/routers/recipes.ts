@@ -1,7 +1,31 @@
+import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
 export const recipesRouter = createTRPCRouter({
-  getAll: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.recipe.findMany();
+  getAll: publicProcedure.query(async ({ ctx }) => {
+    const recipes = await ctx.prisma.recipe.findMany({ take: 100 });
+    const users = (
+      await ctx.prisma.user.findMany({
+        where: { id: { in: [...recipes.map((recipe) => recipe.authorId)] } },
+      })
+    ).map((user) => ({
+      id: user.id,
+      name: user.name,
+      profilePicture: user.image,
+    }));
+
+    return recipes.map((recipe) => {
+      const author = users.find((user) => user.id === recipe.authorId);
+      // Implementing to be typesafe. May want to allow undefined here for deleted users
+      if (!author)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "No author found for recipe",
+        });
+      return {
+        recipe,
+        author,
+      };
+    });
   }),
 });
