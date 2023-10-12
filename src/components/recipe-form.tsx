@@ -3,7 +3,8 @@ import { useState } from "react";
 import useInput from "~/hooks/useInput";
 import Image from "next/image";
 import IngredientForm from "./ingredient-form";
-import { RouterOutputs } from "~/utils/api";
+import { api } from "~/utils/api";
+import Button, { ButtonStyle } from "./UI/button";
 
 export type Ingredient = {
   id: string | null;
@@ -18,8 +19,6 @@ type Recipe = {
   description: string;
   instructions: string;
 };
-
-type RecipeWithUser = RouterOutputs["recipes"]["getAll"][number];
 
 export enum DetailsPageType {
   Details,
@@ -69,6 +68,12 @@ const RecipeForm = ({
     reset: resetRecipeInstructionsInput,
   } = useInput((value: string) => true, instructions);
 
+  const {
+    data: recipeData,
+    isLoading,
+    mutate,
+  } = api.recipes.create.useMutation({});
+
   const addIngredient = (ingredient: Ingredient) => {
     console.log(ingredient);
 
@@ -110,6 +115,11 @@ const RecipeForm = ({
 
   const onSubmitHandler = (event: React.FormEvent) => {
     event.preventDefault();
+    mutate({
+      name: recipeName,
+      description: recipeDescription,
+      instructions: recipeInstrcutions,
+    });
   };
 
   return (
@@ -122,8 +132,8 @@ const RecipeForm = ({
           height={100}
         />
       )}
-      <form onSubmit={onSubmitHandler}>
-        <div className="flex flex-col space-y-2">
+      <form onSubmit={onSubmitHandler} className="space-y-2">
+        <div className="flex flex-col">
           <div>
             <label htmlFor="recipe-name">Recipe Name</label>
             <input
@@ -176,6 +186,15 @@ const RecipeForm = ({
           viewState={ingredientFormState}
           updateIngredient={updateIngredient}
         />
+        <div className="mx-auto flex justify-center pt-6">
+          <Button
+            type="submit"
+            disabled={isLoading}
+            style={isLoading ? ButtonStyle.disabled : ButtonStyle.primary}
+          >
+            <>{isLoading ? "Loading" : "Submit"}</>
+          </Button>
+        </div>
       </form>
     </>
   );

@@ -1,5 +1,6 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
+import Button from "~/components/UI/button";
 import RecipeForm from "~/components/recipe-form";
 
 import { api } from "~/utils/api";
@@ -39,12 +40,13 @@ function AuthShowcase() {
       <p className="text-center text-2xl text-white">
         {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
       </p>
-      <button
-        className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
-        onClick={sessionData ? () => void signOut() : () => void signIn()}
+      <Button
+        onClickHandler={
+          sessionData ? () => void signOut() : () => void signIn()
+        }
       >
-        {sessionData ? "Sign out" : "Sign in"}
-      </button>
+        <>{sessionData ? "Sign out" : "Sign in"}</>
+      </Button>
       <RecipeForm />
     </div>
   );
