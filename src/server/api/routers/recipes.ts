@@ -39,6 +39,9 @@ export const recipesRouter = createTRPCRouter({
         name: z.string(),
         description: z.string(),
         instructions: z.string(),
+        ingredients: z
+          .object({ name: z.string(), quantity: z.number(), unit: z.string() })
+          .array(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -48,6 +51,9 @@ export const recipesRouter = createTRPCRouter({
           name: input.name,
           description: input.description,
           instructions: input.instructions,
+          ingredients: {
+            create: input.ingredients,
+          },
         },
       });
     }),

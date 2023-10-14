@@ -62,10 +62,23 @@ model Recipe {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    name String
-    description String @db.VarChar(255)
+    name         String
+    description  String @db.VarChar(255)
     instructions String @db.VarChar(255)
-    authorId String
+    authorId     String
 
+    ingredients  Ingredient[]
     @@index([authorId])
+}
+
+model Ingredient {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    
+    name      String
+    quantity  Int
+    unit      String
+
+    recipes   Recipe[]
 }

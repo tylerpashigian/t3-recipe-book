@@ -119,6 +119,7 @@ const RecipeForm = ({
       name: recipeName,
       description: recipeDescription,
       instructions: recipeInstrcutions,
+      ingredients: localIngredients,
     });
   };
 
