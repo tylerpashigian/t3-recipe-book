@@ -1,14 +1,10 @@
-import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
-import Button from "~/components/UI/button";
 import RecipeForm from "~/components/recipe-form";
 
 import { api } from "~/utils/api";
 
 export default function Home() {
   const { data, isLoading } = api.recipes.getAll.useQuery();
-
-  console.log(data);
 
   return (
     <>
@@ -20,34 +16,14 @@ export default function Home() {
       <main className="flex min-h-screen flex-col items-center justify-center">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
           <div className="flex flex-col items-center gap-2">
-            <p className="text-2xl text-white">
+            <p className="text-2xl">
               {isLoading && "Loading tRPC query..."}
               {!isLoading && data ? `${data.length} recipe(s)` : "No data"}
             </p>
-            <AuthShowcase />
+            <RecipeForm />
           </div>
         </div>
       </main>
     </>
-  );
-}
-
-function AuthShowcase() {
-  const { data: sessionData } = useSession();
-
-  return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <p className="text-center text-2xl text-white">
-        {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
-      </p>
-      <Button
-        onClickHandler={
-          sessionData ? () => void signOut() : () => void signIn()
-        }
-      >
-        <>{sessionData ? "Sign out" : "Sign in"}</>
-      </Button>
-      <RecipeForm />
-    </div>
   );
 }

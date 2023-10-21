@@ -8,7 +8,10 @@ import {
 
 export const recipesRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
-    const recipes = await ctx.prisma.recipe.findMany({ take: 100 });
+    const recipes = await ctx.prisma.recipe.findMany({
+      take: 100,
+      include: { ingredients: true },
+    });
     const users = (
       await ctx.prisma.user.findMany({
         where: { id: { in: [...recipes.map((recipe) => recipe.authorId)] } },

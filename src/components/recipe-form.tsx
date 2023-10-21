@@ -134,7 +134,7 @@ const RecipeForm = ({
         />
       )}
       <form onSubmit={onSubmitHandler} className="space-y-2">
-        <div className="flex flex-col">
+        <div className="flex flex-col space-y-2">
           <div>
             <label htmlFor="recipe-name">Recipe Name</label>
             <input
