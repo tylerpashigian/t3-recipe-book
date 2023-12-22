@@ -5,24 +5,45 @@
 import Link from "next/link";
 import React, { useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
-import Button from "./button";
+import Button, { ButtonSize } from "./button";
 import Drawer from "./drawer";
+import { useRouter } from "next/router";
+import { FaUser } from "react-icons/fa6";
 
-export function AuthShowcase() {
+type Props = {
+  setIsDrawerOpen: (isOpen: boolean) => void;
+};
+
+export function AuthShowcase({ setIsDrawerOpen }: Props) {
   const { data: sessionData } = useSession();
+  const router = useRouter();
+
+  const createHandler = () => {
+    setIsDrawerOpen(false);
+    void router.push("/auth/register");
+  };
+
+  const displayName: string | undefined =
+    sessionData?.user.name ?? sessionData?.user?.username;
 
   return (
-    <div className="flex flex-col items-start">
+    <div className="flex flex-col items-start space-y-3">
       <p className="text-center text-2xl">
-        {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
+        {displayName && <span>Logged in as {displayName}</span>}
       </p>
       <Button
+        size={ButtonSize.full}
         onClickHandler={
           sessionData ? () => void signOut() : () => void signIn()
         }
       >
         <>{sessionData ? "Sign out" : "Sign in"}</>
       </Button>
+      {!sessionData && (
+        <Button size={ButtonSize.full} onClickHandler={createHandler}>
+          <>Create</>
+        </Button>
+      )}
     </div>
   );
 }
@@ -36,7 +57,7 @@ const Navbar = () => {
         <nav className="flex items-center gap-4 text-lg font-medium">
           <Link
             className="flex items-center gap-2 text-lg font-semibold"
-            href="#"
+            href="/"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -59,20 +80,7 @@ const Navbar = () => {
           <>
             {sessionData ? (
               <>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  className="h-6 w-6"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
+                <FaUser />
                 <span className="sr-only">Toggle user menu</span>
               </>
             ) : (
@@ -81,13 +89,8 @@ const Navbar = () => {
           </>
         </Button>
       </header>
-      <Drawer
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        title="Menu"
-        description="Try something new!"
-      >
-        <AuthShowcase />
+      <Drawer isOpen={isOpen} setIsOpen={setIsOpen} title="Menu">
+        <AuthShowcase setIsDrawerOpen={setIsOpen} />
       </Drawer>
     </>
   );

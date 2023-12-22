@@ -4,8 +4,11 @@ import {
   getServerSession,
   type DefaultSession,
   type NextAuthOptions,
+  type User,
+  type DefaultUser,
 } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
 
 import { env } from "~/env.mjs";
 import { prisma } from "~/server/db";
@@ -21,14 +24,21 @@ declare module "next-auth" {
     user: DefaultSession["user"] & {
       id: string;
       // ...other properties
+      username?: string;
       // role: UserRole;
     };
   }
 
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
+  interface User extends DefaultUser {
+    username?: string;
+    // ...other properties
+    // role: UserRole;
+  }
+}
+
+interface Credentials {
+  username: string;
+  password: string;
 }
 
 /**
@@ -37,16 +47,23 @@ declare module "next-auth" {
  * @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt", // See https://next-auth.js.org/configuration/nextjs#caveats, middleware (currently) doesn't support the "database" strategy which is used by default when using an adapter (https://next-auth.js.org/configuration/options#session)
   },
   callbacks: {
     session({ session, token }) {
-      if (session.user && token.sub) {
-        session.user.id = token.sub;
-      }
-      return session;
+      return {
+        ...session,
+        user: {
+          ...(token.user as User),
+          id: token.sub,
+        },
+      };
+    },
+    jwt({ token, user }) {
+      if (!!user) token.user = user;
+      return token;
     },
   },
   adapter: PrismaAdapter(prisma),
@@ -54,6 +71,48 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
+    }),
+    CredentialsProvider({
+      // The name to display on the sign in form (e.g. "Sign in with...")
+      name: "credentials",
+      // `credentials` is used to generate a form on the sign in page.
+      // You can specify which fields should be submitted, by adding keys to the `credentials` object.
+      // e.g. domain, username, password, 2FA token, etc.
+      // You can pass any HTML attribute to the <input> tag through the object.
+      credentials: {
+        username: { label: "Username", type: "text", placeholder: "username" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(
+        credentials: Credentials | undefined,
+      ): Promise<User | null> {
+        try {
+          if (!credentials) return null;
+          const userCredentials = {
+            username: credentials.username,
+            password: credentials.password,
+          };
+
+          const res = await fetch(`${env.NEXTAUTH_URL}/api/auth/login`, {
+            method: "POST",
+            body: JSON.stringify(userCredentials),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          const user = (await res.json()) as User | null;
+
+          if (res.ok && user) {
+            return user;
+          } else {
+            return null;
+          }
+        } catch (e) {
+          console.log("error: ", e);
+          return null;
+        }
+      },
     }),
     /**
      * ...add more providers here.
@@ -65,6 +124,9 @@ export const authOptions: NextAuthOptions = {
      * @see https://next-auth.js.org/providers/github
      */
   ],
+  pages: {
+    signIn: "/auth/login",
+  },
 };
 
 /**

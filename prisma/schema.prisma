@@ -47,6 +47,10 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+
+    // New fields for local credentials
+    username      String?    @unique
+    password      String?    // Store the hashed password
 }
 
 model VerificationToken {

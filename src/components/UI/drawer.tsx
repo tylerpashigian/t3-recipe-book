@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import { IoClose } from "react-icons/io5";
 import { Dialog, Transition } from "@headlessui/react";
 
 type DrawerProps = {
@@ -72,37 +73,28 @@ export default function Drawer({
                       >
                         <span className="absolute -inset-2.5"></span>
                         <span className="sr-only">Close panel</span>
-                        <svg
-                          className="h-6 w-6"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke-width="1.5"
-                          stroke="currentColor"
-                          aria-hidden="true"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
+                        <IoClose />
                       </button>
                     </div>
 
                     <div className="flex h-full flex-col overflow-y-scroll bg-white py-6 shadow-xl">
-                      <div className="px-4 sm:px-6">
-                        <h2
-                          className="text-base font-semibold leading-6 text-gray-900"
-                          id="slide-over-title"
-                        >
-                          <Dialog.Title className="text-2xl font-bold md:text-4xl">
-                            {title}
-                          </Dialog.Title>
-                        </h2>
-                      </div>
+                      {!!title ? (
+                        <div className="px-4 sm:px-6">
+                          <div
+                            className="text-base font-semibold leading-6 text-gray-900"
+                            id="slide-over-title"
+                          >
+                            <Dialog.Title className="text-2xl font-bold md:text-4xl">
+                              {title}
+                            </Dialog.Title>
+                          </div>
+                        </div>
+                      ) : null}
                       <div className="relative mt-6 flex-1 px-4 sm:px-6">
                         {/* <!-- Your content --> */}
-                        <Dialog.Description>{description}</Dialog.Description>
+                        {!!description ? (
+                          <Dialog.Description>{description}</Dialog.Description>
+                        ) : null}
                         {children}
                       </div>
                     </div>
