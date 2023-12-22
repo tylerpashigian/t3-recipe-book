@@ -10,12 +10,12 @@ import Separator from "~/components/UI/separator";
 import useInput from "../../hooks/useInput";
 import { type FormEvent } from "react";
 import { useRouter } from "next/router";
-import { env } from "~/env.mjs";
 
 const Login = ({
   providers,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
+
   const { inputValue: username, valueHandler: usernameHandler } = useInput(
     (value: string) => value.trim() !== "",
     "",
@@ -26,12 +26,16 @@ const Login = ({
     "",
   );
 
+  const callbackUrl = `http${
+    process.env.NODE_ENV === "production" ? "s" : ""
+  }://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     signIn("credentials", {
       username,
       password,
-      callbackUrl: `${env.NEXT_PUBLIC_NEXTAUTH_URL}`,
+      callbackUrl,
       redirect: false,
     })
       .then((res) => {

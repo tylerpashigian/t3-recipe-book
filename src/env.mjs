@@ -32,7 +32,11 @@ export const env = createEnv({
    */
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string().min(1),
-    NEXT_PUBLIC_NEXTAUTH_URL: z.string(),
+    NEXT_PUBLIC_NEXTAUTH_URL: z.preprocess(
+      (str) => process.env.NEXT_PUBLIC_VERCEL_URL ?? str,
+      // VERCEL_URL doesn't include `https` so it cant be validated as a URL
+      process.env.VERCEL ? z.string().min(1) : z.string().url(),
+    ),
   },
 
   /**
