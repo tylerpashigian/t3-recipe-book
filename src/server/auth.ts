@@ -93,13 +93,18 @@ export const authOptions: NextAuthOptions = {
             password: credentials.password,
           };
 
-          const res = await fetch(`${env.NEXTAUTH_URL}/api/auth/login`, {
-            method: "POST",
-            body: JSON.stringify(userCredentials),
-            headers: {
-              "Content-Type": "application/json",
+          const res = await fetch(
+            `${process.env.NODE_ENV === "production" ? "https://" : ""}${
+              env.NEXTAUTH_URL
+            }/api/auth/login`,
+            {
+              method: "POST",
+              body: JSON.stringify(userCredentials),
+              headers: {
+                "Content-Type": "application/json",
+              },
             },
-          });
+          );
 
           const user = (await res.json()) as User | null;
 
