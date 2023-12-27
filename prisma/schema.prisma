@@ -71,7 +71,7 @@ model Recipe {
     instructions String @db.VarChar(255)
     authorId     String
 
-    ingredients  Ingredient[]
+    ingredients  IngredientInRecipe[]
     @@index([authorId])
 }
 
@@ -80,9 +80,19 @@ model Ingredient {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     
-    name      String
-    quantity  Int
-    unit      String
+    name      String   @unique
 
-    recipes   Recipe[]
+    recipes   IngredientInRecipe[]
+}
+
+model IngredientInRecipe {
+  ingredientId String @default(cuid())
+  recipeId     String @default(cuid())
+  quantity     Int
+  unit         String
+
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id])
+  recipe     Recipe     @relation(fields: [recipeId], references: [id])
+
+  @@id([ingredientId, recipeId])
 }

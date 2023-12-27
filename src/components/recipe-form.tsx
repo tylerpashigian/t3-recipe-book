@@ -5,6 +5,8 @@ import Image from "next/image";
 import IngredientForm from "./ingredient-form";
 import { api } from "~/utils/api";
 import Button, { ButtonStyle } from "./UI/button";
+import { IoClose } from "react-icons/io5";
+import { MdOutlineEdit } from "react-icons/md";
 
 export type Ingredient = {
   id: string | null;
@@ -59,20 +61,16 @@ const RecipeForm = ({
   const {
     inputValue: recipeDescription,
     valueHandler: recipeDescriptionHandler,
-    reset: resetRecipeDescriptionInput,
-  } = useInput((value: string) => true, description);
+    reset: resetRecipeDescription,
+  } = useInput(() => true, description);
 
   const {
     inputValue: recipeInstrcutions,
     valueHandler: recipeInstructionsHandler,
-    reset: resetRecipeInstructionsInput,
-  } = useInput((value: string) => true, instructions);
+    reset: resetRecipeInstrcutions,
+  } = useInput(() => true, instructions);
 
-  const {
-    data: recipeData,
-    isLoading,
-    mutate,
-  } = api.recipes.create.useMutation({});
+  const { isLoading, mutate } = api.recipes.create.useMutation({});
 
   const addIngredient = (ingredient: Ingredient) => {
     console.log(ingredient);
@@ -93,7 +91,6 @@ const RecipeForm = ({
 
   const updateIngredient = (updatedIngredient: Ingredient) => {
     console.log(updatedIngredient);
-
     const newIngredients = [...localIngredients].map(
       (ingredient: Ingredient) => {
         return editableIngredient?.id === ingredient.id
@@ -113,6 +110,12 @@ const RecipeForm = ({
     setIngredientFormState(IngredientType.Add);
   };
 
+  const reset = () => {
+    resetRecipeInput();
+    resetRecipeDescription();
+    resetRecipeInstrcutions();
+  };
+
   const onSubmitHandler = (event: React.FormEvent) => {
     event.preventDefault();
     mutate({
@@ -121,6 +124,7 @@ const RecipeForm = ({
       instructions: recipeInstrcutions,
       ingredients: localIngredients,
     });
+    reset();
   };
 
   return (
@@ -170,17 +174,31 @@ const RecipeForm = ({
             />
           </div>
         </div>
-        {localIngredients.map((ingredient: Ingredient) => {
-          return (
-            <div key={ingredient.id} className="flex gap-2">
-              <p>
-                {ingredient.name} ({ingredient.quantity} {ingredient.unit})
-              </p>
-              <div onClick={() => deleteIngredient(ingredient.id)}>x</div>
-              <div onClick={() => editIngredient(ingredient)}>edit</div>
-            </div>
-          );
-        })}
+        {localIngredients.length ? (
+          <>
+            <p>Ingredients</p>
+            {localIngredients.map((ingredient: Ingredient) => {
+              return (
+                <div
+                  key={ingredient.id}
+                  className="flex items-center justify-between gap-2"
+                >
+                  <p>
+                    {ingredient.name} ({ingredient.quantity} {ingredient.unit})
+                  </p>
+                  <div className="flex gap-2 hover:cursor-pointer">
+                    <div onClick={() => editIngredient(ingredient)}>
+                      <MdOutlineEdit />
+                    </div>
+                    <div onClick={() => deleteIngredient(ingredient.id)}>
+                      <IoClose />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </>
+        ) : null}
         <IngredientForm
           addIngredient={addIngredient}
           ingredient={editableIngredient}
@@ -190,8 +208,12 @@ const RecipeForm = ({
         <div className="mx-auto flex justify-center pt-6">
           <Button
             type="submit"
-            disabled={isLoading}
-            style={isLoading ? ButtonStyle.disabled : ButtonStyle.primary}
+            disabled={isLoading || recipeFormIsInvalid || !recipeIsValid}
+            style={
+              isLoading || recipeFormIsInvalid || !recipeIsValid
+                ? ButtonStyle.disabled
+                : ButtonStyle.primary
+            }
           >
             <>{isLoading ? "Loading" : "Submit"}</>
           </Button>

@@ -55,7 +55,18 @@ export const recipesRouter = createTRPCRouter({
           description: input.description,
           instructions: input.instructions,
           ingredients: {
-            create: input.ingredients,
+            create: input.ingredients.map(({ name, quantity, unit }) => {
+              return {
+                quantity,
+                unit,
+                ingredient: {
+                  connectOrCreate: {
+                    where: { name: name.toLowerCase() },
+                    create: { name: name.toLowerCase() }, // Include quantity and unit in the create field
+                  },
+                },
+              };
+            }),
           },
         },
       });

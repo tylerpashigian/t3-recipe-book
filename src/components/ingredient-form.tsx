@@ -1,8 +1,9 @@
 import { v4 as uuidv4 } from "uuid";
 
 import useInput from "~/hooks/useInput";
-import type { DetailsPageType, Ingredient } from "./recipe-form";
+import type { Ingredient } from "./recipe-form";
 import { IngredientType } from "./recipe-form";
+import { IoAdd } from "react-icons/io5";
 
 type Props = {
   ingredient?: Ingredient | null;
@@ -69,12 +70,12 @@ const IngredientForm = ({
 
   return (
     <div className="flex flex-col">
-      <p>Ingredient</p>
-      <div className="mb-md-3 mb-0 flex items-center gap-2">
+      <p>Add Ingredient</p>
+      <div className="mb-md-3 mb-0 mt-2 flex items-center gap-2">
         <div>
           <input
             type="text"
-            className="form-input mt-2 w-full rounded-xl px-4 py-3 text-black"
+            className="form-input w-full rounded-xl px-4 py-3 text-black"
             value={ingredientName}
             onChange={ingredientNameHandler}
             placeholder="Ingredient name"
@@ -84,7 +85,7 @@ const IngredientForm = ({
         <div>
           <input
             type="number"
-            className="form-input mt-2 w-full rounded-xl px-4 py-3 text-black"
+            className="form-input w-full rounded-xl px-4 py-3 text-black"
             value={ingredientQuantity}
             onChange={ingredientQuantityHandler}
             onKeyPress={(e) => !/^\d*\.?\d*$/.test(e.key) && e.preventDefault()}
@@ -95,14 +96,14 @@ const IngredientForm = ({
         <div>
           <input
             type="text"
-            className="form-input mt-2 w-full rounded-xl px-4 py-3 text-black"
+            className="form-input w-full rounded-xl px-4 py-3 text-black"
             value={ingredientUnit}
             onChange={ingredientUnitHandler}
             placeholder="Ingredient unit"
             aria-label="Ingredient unit"
           />
         </div>
-        <div className="">
+        <div className="flex items-center">
           <button
             onClick={
               viewState === IngredientType.Edit
@@ -110,7 +111,7 @@ const IngredientForm = ({
                 : addIngredientLocal
             }
           >
-            {viewState === IngredientType.Edit ? "Update" : "+"}
+            {viewState === IngredientType.Edit ? "Update" : <IoAdd />}
           </button>
         </div>
       </div>

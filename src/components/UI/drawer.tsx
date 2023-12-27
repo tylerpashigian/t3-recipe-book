@@ -65,13 +65,13 @@ export default function Drawer({
             Leaving: "ease-in-out duration-500"
               From: "opacity-100"
               To: "opacity-0" */}
-                    <div className="absolute right-0 top-0 -ml-8 flex pr-2 pt-4 sm:-ml-10 sm:pr-4">
+                    <div className="absolute right-0 top-0 -ml-8 flex pr-4 pt-7 md:-ml-10 md:pr-6">
                       <button
                         onClick={() => setIsOpen(!isOpen)}
                         type="button"
-                        className="relative rounded-md text-gray-300 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-white"
+                        className="relative rounded-md text-lg text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-white md:text-2xl"
                       >
-                        <span className="absolute -inset-2.5"></span>
+                        <span className="absolute"></span>
                         <span className="sr-only">Close panel</span>
                         <IoClose />
                       </button>
@@ -84,7 +84,7 @@ export default function Drawer({
                             className="text-base font-semibold leading-6 text-gray-900"
                             id="slide-over-title"
                           >
-                            <Dialog.Title className="text-2xl font-bold md:text-4xl">
+                            <Dialog.Title className="text-2xl font-bold md:text-3xl">
                               {title}
                             </Dialog.Title>
                           </div>
