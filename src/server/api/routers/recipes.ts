@@ -8,34 +8,43 @@ import {
 
 export const recipesRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
-    const recipes = await ctx.prisma.recipe.findMany({
+    // TODO: implement pagination as we scale
+    return await ctx.prisma.recipe.findMany({
       take: 100,
-      include: { ingredients: true },
+      select: { id: true, name: true },
     });
-    const users = (
-      await ctx.prisma.user.findMany({
-        where: { id: { in: [...recipes.map((recipe) => recipe.authorId)] } },
-      })
-    ).map((user) => ({
-      id: user.id,
-      name: user.name,
-      profilePicture: user.image,
-    }));
+  }),
+  getDetails: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const recipe = await ctx.prisma.recipe.findFirst({
+        where: { id: input.id },
+        include: { ingredients: true },
+      });
 
-    return recipes.map((recipe) => {
-      const author = users.find((user) => user.id === recipe.authorId);
+      const user = await ctx.prisma.user.findFirst({
+        where: { id: recipe?.authorId },
+      });
+
       // Implementing to be typesafe. May want to allow undefined here for deleted users
-      if (!author)
+      if (!user)
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "No author found for recipe",
         });
+
+      const author = {
+        id: user.id,
+        name: user.name,
+        profilePicture: user.image,
+        username: user.username,
+      };
+
       return {
         recipe,
         author,
       };
-    });
-  }),
+    }),
   create: protectedProcedure
     .input(
       z.object({
@@ -57,6 +66,7 @@ export const recipesRouter = createTRPCRouter({
           ingredients: {
             create: input.ingredients.map(({ name, quantity, unit }) => {
               return {
+                name,
                 quantity,
                 unit,
                 ingredient: {

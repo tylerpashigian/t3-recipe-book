@@ -35,12 +35,12 @@ export enum IngredientType {
 type Props = Partial<Recipe>;
 
 const RecipeForm = ({
-  ingredients = [],
+  ingredients: recipeIngredients = [],
   name = "",
   description = "",
   instructions = "",
 }: Props) => {
-  const [localIngredients, setLocalIngredients] = useState(ingredients);
+  const [ingredients, setIngredients] = useState(recipeIngredients);
   const [editableIngredient, setEditableIngredient] =
     useState<Ingredient | null>(null);
   const [ingredientFormState, setIngredientFormState] = useState(
@@ -73,44 +73,36 @@ const RecipeForm = ({
   const { isLoading, mutate } = api.recipes.create.useMutation({});
 
   const addIngredient = (ingredient: Ingredient) => {
-    console.log(ingredient);
-
-    setLocalIngredients([...ingredients, ingredient]);
+    setIngredients([...ingredients, ingredient]);
   };
+
   const editIngredient = (ingredient: Ingredient) => {
     setIngredientFormState(IngredientType.Edit);
     setEditableIngredient(ingredient);
   };
+
   const deleteIngredient = (id: string | null) => {
     if (!id) return;
     const updatedIngredients = [...ingredients].filter(
       (ingredient: Ingredient) => ingredient.id !== id,
     );
-    setLocalIngredients(updatedIngredients);
+    setIngredients(updatedIngredients);
   };
 
   const updateIngredient = (updatedIngredient: Ingredient) => {
-    console.log(updatedIngredient);
-    const newIngredients = [...localIngredients].map(
-      (ingredient: Ingredient) => {
-        return editableIngredient?.id === ingredient.id
-          ? updatedIngredient
-          : ingredient;
-      },
-    );
+    const newIngredients = [...ingredients].map((ingredient: Ingredient) => {
+      return editableIngredient?.id === ingredient.id
+        ? updatedIngredient
+        : ingredient;
+    });
 
-    setLocalIngredients(newIngredients);
-
-    // submitRecipe(
-    //   { ...props.recipe, ingredients: newIngredients },
-    //   props.recipe?._id
-    // );
-
+    setIngredients(newIngredients);
     setEditableIngredient(null);
     setIngredientFormState(IngredientType.Add);
   };
 
   const reset = () => {
+    setIngredients([]);
     resetRecipeInput();
     resetRecipeDescription();
     resetRecipeInstrcutions();
@@ -122,7 +114,7 @@ const RecipeForm = ({
       name: recipeName,
       description: recipeDescription,
       instructions: recipeInstrcutions,
-      ingredients: localIngredients,
+      ingredients: ingredients,
     });
     reset();
   };
@@ -174,10 +166,10 @@ const RecipeForm = ({
             />
           </div>
         </div>
-        {localIngredients.length ? (
+        {ingredients.length ? (
           <>
             <p>Ingredients</p>
-            {localIngredients.map((ingredient: Ingredient) => {
+            {ingredients.map((ingredient: Ingredient) => {
               return (
                 <div
                   key={ingredient.id}

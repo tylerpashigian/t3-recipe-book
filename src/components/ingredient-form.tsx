@@ -20,9 +20,11 @@ const IngredientForm = ({
 }: Props) => {
   const {
     inputValue: ingredientName,
+    isInputInvalid: ingredientNameInputIsInvalid,
     valueHandler: ingredientNameHandler,
     reset: resetIngredientNameInput,
-  } = useInput(() => true, ingredient?.name);
+    blurHandler: ingredientNameBlurHandler,
+  } = useInput((value: string) => value.trim() !== "", ingredient?.name);
 
   const {
     inputValue: ingredientQuantity,
@@ -70,7 +72,11 @@ const IngredientForm = ({
 
   return (
     <div className="flex flex-col">
-      <p>Add Ingredient</p>
+      <p>
+        {viewState === IngredientType.Edit
+          ? "Update Ingredient"
+          : "Add Ingredient"}
+      </p>
       <div className="mb-md-3 mb-0 mt-2 flex items-center gap-2">
         <div>
           <input
@@ -78,6 +84,7 @@ const IngredientForm = ({
             className="form-input w-full rounded-xl px-4 py-3 text-black"
             value={ingredientName}
             onChange={ingredientNameHandler}
+            onBlur={ingredientNameBlurHandler}
             placeholder="Ingredient name"
             aria-label="Ingredient name"
           />
@@ -105,6 +112,7 @@ const IngredientForm = ({
         </div>
         <div className="flex items-center">
           <button
+            disabled={ingredientNameInputIsInvalid}
             onClick={
               viewState === IngredientType.Edit
                 ? updateIngredientLocal
@@ -115,6 +123,9 @@ const IngredientForm = ({
           </button>
         </div>
       </div>
+      {ingredientNameInputIsInvalid && (
+        <p className="mt-2 text-red-400">Please enter an ingredient name</p>
+      )}
     </div>
   );
 };

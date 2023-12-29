@@ -51,6 +51,7 @@ export function AuthShowcase({ setIsDrawerOpen }: Props) {
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { data: sessionData } = useSession();
+  const router = useRouter();
   return (
     <>
       <header className="sticky top-0 z-10 flex items-center justify-between bg-white px-4 py-2 shadow-md dark:bg-gray-800">
@@ -76,18 +77,25 @@ const Navbar = () => {
             <span className="sr-only">T3 Recipe Book</span>
           </Link>
         </nav>
-        <Button onClickHandler={() => setIsOpen((prev) => !prev)}>
-          <>
-            {sessionData ? (
-              <>
-                <FaUser />
-                <span className="sr-only">Toggle user menu</span>
-              </>
-            ) : (
-              <>Login</>
-            )}
-          </>
-        </Button>
+        <div className="flex gap-2">
+          {!!sessionData && (
+            <Button onClickHandler={() => void router.push("/recipe/create")}>
+              <>Create Recipe</>
+            </Button>
+          )}
+          <Button onClickHandler={() => setIsOpen((prev) => !prev)}>
+            <>
+              {sessionData ? (
+                <>
+                  <FaUser />
+                  <span className="sr-only">Toggle user menu</span>
+                </>
+              ) : (
+                <>Login</>
+              )}
+            </>
+          </Button>
+        </div>
       </header>
       <Drawer isOpen={isOpen} setIsOpen={setIsOpen} title="Menu">
         <AuthShowcase setIsDrawerOpen={setIsOpen} />
