@@ -7,44 +7,41 @@ import { api } from "~/utils/api";
 import Button, { ButtonStyle } from "./UI/button";
 import { IoClose } from "react-icons/io5";
 import { MdOutlineEdit } from "react-icons/md";
+import { type Ingredient } from "~/models/ingredient";
+import { type Recipe } from "~/models/recipe";
 
-export type Ingredient = {
-  id: string | null;
-  name: string;
-  quantity: number;
-  unit: string;
-};
-
-type Recipe = {
-  ingredients: Ingredient[];
-  name: string;
-  description: string;
-  instructions: string;
-};
-
-export enum DetailsPageType {
-  Details,
+export enum RecipeFormType {
+  Create,
   Edit,
 }
 
-export enum IngredientType {
+export enum IngredientFormType {
   Add,
   Edit,
 }
 
-type Props = Partial<Recipe>;
+type Props = {
+  recipe?: Recipe;
+  formType?: RecipeFormType;
+  onSubmit?: (recipe?: Partial<Recipe>) => void;
+};
 
 const RecipeForm = ({
-  ingredients: recipeIngredients = [],
-  name = "",
-  description = "",
-  instructions = "",
+  onSubmit,
+  recipe,
+  formType = RecipeFormType.Create,
 }: Props) => {
-  const [ingredients, setIngredients] = useState(recipeIngredients);
+  const {
+    description,
+    ingredients: recipeIngredients,
+    instructions,
+    name,
+  } = recipe ?? {};
+  const [ingredients, setIngredients] = useState(recipeIngredients ?? []);
   const [editableIngredient, setEditableIngredient] =
     useState<Ingredient | null>(null);
   const [ingredientFormState, setIngredientFormState] = useState(
-    IngredientType.Add,
+    IngredientFormType.Add,
   );
 
   const { data } = useSession();
@@ -70,35 +67,37 @@ const RecipeForm = ({
     reset: resetRecipeInstrcutions,
   } = useInput(() => true, instructions);
 
-  const { isLoading, mutate } = api.recipes.create.useMutation({});
+  const { isLoading, mutateAsync: createRecipe } =
+    api.recipes.create.useMutation({});
+  const { mutateAsync: updateRecipe } = api.recipes.update.useMutation({});
 
   const addIngredient = (ingredient: Ingredient) => {
     setIngredients([...ingredients, ingredient]);
   };
 
   const editIngredient = (ingredient: Ingredient) => {
-    setIngredientFormState(IngredientType.Edit);
+    setIngredientFormState(IngredientFormType.Edit);
     setEditableIngredient(ingredient);
   };
 
   const deleteIngredient = (id: string | null) => {
     if (!id) return;
     const updatedIngredients = [...ingredients].filter(
-      (ingredient: Ingredient) => ingredient.id !== id,
+      (ingredient: Ingredient) => ingredient.ingredientId !== id,
     );
     setIngredients(updatedIngredients);
   };
 
   const updateIngredient = (updatedIngredient: Ingredient) => {
     const newIngredients = [...ingredients].map((ingredient: Ingredient) => {
-      return editableIngredient?.id === ingredient.id
+      return editableIngredient?.ingredientId === ingredient.ingredientId
         ? updatedIngredient
         : ingredient;
     });
 
     setIngredients(newIngredients);
     setEditableIngredient(null);
-    setIngredientFormState(IngredientType.Add);
+    setIngredientFormState(IngredientFormType.Add);
   };
 
   const reset = () => {
@@ -108,16 +107,59 @@ const RecipeForm = ({
     resetRecipeInstrcutions();
   };
 
-  const onSubmitHandler = (event: React.FormEvent) => {
+  const createHandler = async (recipe: Partial<Recipe>) => {
+    if (!recipe.name) return;
+    const cleanedRecipe = {
+      ...recipe,
+      name: recipe.name,
+    };
+    await createRecipe(cleanedRecipe, {
+      onSuccess(createdRecipe) {
+        !!createdRecipe && onSubmit?.(createdRecipe);
+      },
+      onError(error) {
+        console.log(error);
+      },
+    });
+  };
+
+  const updateHandler = async (recipe: Partial<Recipe>) => {
+    if (!recipe.id || !recipe.name) return;
+
+    const cleanedRecipe = {
+      ...recipe,
+      id: recipe.id,
+      name: recipe.name,
+    };
+
+    await updateRecipe(cleanedRecipe, {
+      onSuccess(updatedRecipe) {
+        !!updatedRecipe && onSubmit?.(updatedRecipe);
+        reset();
+      },
+      onError() {
+        console.log("error saving");
+      },
+    });
+  };
+
+  const onSubmitHandler = async (event: React.FormEvent) => {
     event.preventDefault();
-    mutate({
+
+    const recipeToUpsert = {
+      ...recipe,
       name: recipeName,
       description: recipeDescription,
       instructions: recipeInstrcutions,
       ingredients: ingredients,
-    });
-    reset();
+    };
+
+    formType === RecipeFormType.Create
+      ? await createHandler(recipeToUpsert)
+      : await updateHandler(recipeToUpsert);
   };
+
+  const buttonText = formType === RecipeFormType.Create ? "Submit" : "Update";
 
   return (
     <>
@@ -129,7 +171,10 @@ const RecipeForm = ({
           height={100}
         />
       )}
-      <form onSubmit={onSubmitHandler} className="space-y-2">
+      <form
+        onSubmit={(event) => void onSubmitHandler(event)}
+        className="space-y-2"
+      >
         <div className="flex flex-col space-y-2">
           <div>
             <label htmlFor="recipe-name">Recipe Name</label>
@@ -172,7 +217,7 @@ const RecipeForm = ({
             {ingredients.map((ingredient: Ingredient) => {
               return (
                 <div
-                  key={ingredient.id}
+                  key={ingredient.ingredientId}
                   className="flex items-center justify-between gap-2"
                 >
                   <p>
@@ -182,7 +227,9 @@ const RecipeForm = ({
                     <div onClick={() => editIngredient(ingredient)}>
                       <MdOutlineEdit />
                     </div>
-                    <div onClick={() => deleteIngredient(ingredient.id)}>
+                    <div
+                      onClick={() => deleteIngredient(ingredient.ingredientId)}
+                    >
                       <IoClose />
                     </div>
                   </div>
@@ -196,8 +243,17 @@ const RecipeForm = ({
           ingredient={editableIngredient}
           viewState={ingredientFormState}
           updateIngredient={updateIngredient}
+          recipeId={recipe?.id}
         />
-        <div className="mx-auto flex justify-center pt-6">
+        <div className="mx-auto flex justify-center gap-2 pt-6">
+          {formType === RecipeFormType.Edit && (
+            <Button
+              style={ButtonStyle.secondary}
+              onClickHandler={() => onSubmit?.()}
+            >
+              <>Cancel</>
+            </Button>
+          )}
           <Button
             type="submit"
             disabled={isLoading || recipeFormIsInvalid || !recipeIsValid}
@@ -207,7 +263,7 @@ const RecipeForm = ({
                 : ButtonStyle.primary
             }
           >
-            <>{isLoading ? "Loading" : "Submit"}</>
+            <>{isLoading ? "Loading" : buttonText}</>
           </Button>
         </div>
       </form>

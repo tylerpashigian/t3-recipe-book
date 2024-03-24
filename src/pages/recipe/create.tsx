@@ -1,8 +1,16 @@
 import Head from "next/head";
+import { useRouter } from "next/navigation";
 
 import RecipeForm from "~/components/recipe-form";
+import { type Recipe } from "~/models/recipe";
 
 export default function CreateRecipe() {
+  const router = useRouter();
+
+  const onCreate = (recipe?: Partial<Recipe>) => {
+    recipe?.id && router.push(`/recipe/${recipe.id}`);
+  };
+
   return (
     <>
       <Head>
@@ -13,7 +21,7 @@ export default function CreateRecipe() {
       <main className="flex min-h-screen flex-col items-center justify-center">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
           <div className="flex flex-col items-center gap-2">
-            <RecipeForm />
+            <RecipeForm onSubmit={onCreate} />
           </div>
         </div>
       </main>

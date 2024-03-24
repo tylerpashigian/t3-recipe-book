@@ -49,11 +49,12 @@ export const recipesRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string(),
-        description: z.string(),
-        instructions: z.string(),
+        description: z.string().optional(),
+        instructions: z.string().optional(),
         ingredients: z
           .object({ name: z.string(), quantity: z.number(), unit: z.string() })
-          .array(),
+          .array()
+          .optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -61,10 +62,10 @@ export const recipesRouter = createTRPCRouter({
         data: {
           authorId: ctx.session.user.id,
           name: input.name,
-          description: input.description,
-          instructions: input.instructions,
+          description: input.description ?? "",
+          instructions: input.instructions ?? "",
           ingredients: {
-            create: input.ingredients.map(({ name, quantity, unit }) => {
+            create: input.ingredients?.map(({ name, quantity, unit }) => {
               return {
                 name,
                 quantity,
@@ -72,7 +73,7 @@ export const recipesRouter = createTRPCRouter({
                 ingredient: {
                   connectOrCreate: {
                     where: { name: name.toLowerCase() },
-                    create: { name: name.toLowerCase() }, // Include quantity and unit in the create field
+                    create: { name: name.toLowerCase() },
                   },
                 },
               };
@@ -80,5 +81,92 @@ export const recipesRouter = createTRPCRouter({
           },
         },
       });
+    }),
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        description: z.string().optional(),
+        instructions: z.string().optional(),
+        ingredients: z
+          .object({
+            name: z.string(),
+            quantity: z.number(),
+            unit: z.string(),
+            recipeId: z.string(),
+            ingredientId: z.string(),
+          })
+          .array()
+          .optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const currentIngredients = await ctx.prisma.recipe.findFirst({
+        where: { id: input.id },
+        include: { ingredients: true },
+      });
+
+      const currentIds = (currentIngredients?.ingredients ?? []).map(
+        (ingredient) => ingredient.ingredientId,
+      );
+
+      const ingredientsToDelete = currentIds.filter(
+        (id) =>
+          !input.ingredients
+            ?.map((ingredient) => ingredient.ingredientId)
+            .includes(id),
+      );
+
+      const updatedRecipe = await ctx.prisma.recipe.update({
+        where: { id: input.id },
+        data: {
+          name: input.name,
+          description: input.description,
+          instructions: input.instructions,
+          ingredients: {
+            deleteMany: {
+              ingredientId: {
+                in: [...ingredientsToDelete],
+              },
+            },
+            upsert: input.ingredients?.map((ingredient) => ({
+              where: {
+                ingredientId_recipeId: {
+                  ingredientId: ingredient.ingredientId,
+                  recipeId: input.id,
+                },
+              },
+              update: {
+                name: ingredient.name,
+                quantity: ingredient.quantity,
+                unit: ingredient.unit,
+                ingredient: {
+                  connectOrCreate: {
+                    where: { name: ingredient.name.toLowerCase() },
+                    create: { name: ingredient.name.toLowerCase() },
+                  },
+                },
+              },
+              create: {
+                name: ingredient.name,
+                quantity: ingredient.quantity,
+                unit: ingredient.unit,
+                ingredient: {
+                  connectOrCreate: {
+                    where: { name: ingredient.name.toLowerCase() },
+                    create: { name: ingredient.name.toLowerCase() },
+                  },
+                },
+              },
+            })),
+          },
+        },
+        include: {
+          ingredients: true,
+        },
+      });
+
+      return updatedRecipe;
     }),
 });
