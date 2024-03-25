@@ -1,14 +1,37 @@
 import Head from "next/head";
 import { useRouter } from "next/navigation";
 
+import toast from "react-hot-toast";
+
+import { api } from "~/utils/api";
 import RecipeForm from "~/components/recipe-form";
 import { type Recipe } from "~/models/recipe";
 
 export default function CreateRecipe() {
   const router = useRouter();
 
-  const onCreate = (recipe?: Partial<Recipe>) => {
-    recipe?.id && router.push(`/recipe/${recipe.id}`);
+  const { isLoading, mutateAsync: createRecipe } =
+    api.recipes.create.useMutation({});
+
+  const onCreate = async (recipeToCreate?: Partial<Recipe>) => {
+    if (!recipeToCreate?.name) return;
+
+    const cleanedRecipe = {
+      ...recipeToCreate,
+      name: recipeToCreate.name,
+    };
+
+    const create = createRecipe(cleanedRecipe, {
+      onSuccess(createdRecipe) {
+        createdRecipe?.id && router.push(`/recipe/${createdRecipe.id}`);
+      },
+    });
+
+    await toast.promise(create, {
+      error: "Failed to create",
+      loading: "Creating recipe",
+      success: "Recipe created",
+    });
   };
 
   return (
@@ -21,7 +44,7 @@ export default function CreateRecipe() {
       <main className="flex min-h-screen flex-col items-center justify-center">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
           <div className="flex flex-col items-center gap-2">
-            <RecipeForm onSubmit={onCreate} />
+            <RecipeForm onSubmit={onCreate} isLoading={isLoading} />
           </div>
         </div>
       </main>

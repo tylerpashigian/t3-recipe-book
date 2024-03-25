@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { api } from "~/utils/api";
 import Button from "./UI/button";
-import RecipeForm, { RecipeFormType } from "./recipe-form";
+import RecipeForm from "./recipe-form";
 import { type Recipe } from "~/models/recipe";
+import toast from "react-hot-toast";
 // import { getQueryKey } from "@trpc/react-query";
 
 export enum DetailsPageType {
@@ -19,6 +20,8 @@ const RecipeDetails = ({ id }: Props) => {
   const { data, isLoading, refetch } = api.recipes.getDetails.useQuery({
     id: id,
   });
+  const { isLoading: isUpdating, mutateAsync: updateRecipe } =
+    api.recipes.update.useMutation({});
 
   const recipe: Recipe | undefined | null = data?.recipe;
 
@@ -30,12 +33,30 @@ const RecipeDetails = ({ id }: Props) => {
     );
   };
 
-  const onUpdate = async (_recipe?: Partial<Recipe>) => {
-    // TODO: update local copy of recipe
-    await refetch();
-    // const key = getQueryKey(api.recipes.getDetails, undefined, "query");
-    // queryClient.setQueryData(key, (oldData) => recipe);
-    setPageType(DetailsPageType.Details);
+  const onUpdate = async (recipeToUpdate?: Partial<Recipe>) => {
+    if (!recipeToUpdate?.id || !recipeToUpdate?.name) return;
+
+    const cleanedRecipe = {
+      ...recipeToUpdate,
+      id: recipeToUpdate.id,
+      name: recipeToUpdate.name,
+    };
+
+    const update = updateRecipe(cleanedRecipe, {
+      async onSuccess() {
+        // TODO: update local copy of recipe
+        await refetch();
+        // const key = getQueryKey(api.recipes.getDetails, undefined, "query");
+        // queryClient.setQueryData(key, (oldData) => recipe);
+        setPageType(DetailsPageType.Details);
+      },
+    });
+
+    await toast.promise(update, {
+      error: "Failed to update",
+      loading: "Updating recipe",
+      success: "Updated recipe",
+    });
   };
 
   return (
@@ -82,8 +103,8 @@ const RecipeDetails = ({ id }: Props) => {
           {pageType === DetailsPageType.Edit && (
             <RecipeForm
               recipe={recipe}
-              onSubmit={(recipe) => void onUpdate(recipe)}
-              formType={RecipeFormType.Edit}
+              onSubmit={(recipe) => onUpdate(recipe)}
+              isLoading={isLoading || isUpdating}
             />
           )}
         </>
