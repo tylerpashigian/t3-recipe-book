@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useSession } from "next-auth/react";
 import { api } from "~/utils/api";
 import Button from "./UI/button";
 import RecipeForm from "./recipe-form";
@@ -17,6 +18,8 @@ type Props = {
 
 const RecipeDetails = ({ id }: Props) => {
   const [pageType, setPageType] = useState(DetailsPageType.Details);
+
+  const { data: sessionData } = useSession();
   const { data, isLoading, refetch } = api.recipes.getDetails.useQuery({
     id: id,
   });
@@ -68,9 +71,11 @@ const RecipeDetails = ({ id }: Props) => {
             <div className="container mx-auto flex w-full flex-col space-y-2">
               <div className="flex">
                 <h3 className="w-full px-4 py-3 text-black">{recipe.name}</h3>
-                <Button onClickHandler={pageTypeHandler}>
-                  <>Edit</>
-                </Button>
+                {sessionData?.user.id === recipe.authorId && (
+                  <Button onClickHandler={pageTypeHandler}>
+                    <>Edit</>
+                  </Button>
+                )}
               </div>
               {recipe.description ? (
                 <div>
