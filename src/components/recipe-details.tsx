@@ -37,12 +37,18 @@ const RecipeDetails = ({ id }: Props) => {
   };
 
   const onUpdate = async (recipeToUpdate?: Partial<Recipe>) => {
-    if (!recipeToUpdate?.id || !recipeToUpdate?.name) return;
+    if (
+      !recipeToUpdate?.id ||
+      !recipeToUpdate?.name ||
+      !recipeToUpdate?.authorId
+    )
+      return;
 
     const cleanedRecipe = {
       ...recipeToUpdate,
       id: recipeToUpdate.id,
       name: recipeToUpdate.name,
+      authorId: recipeToUpdate.authorId,
     };
 
     const update = updateRecipe(cleanedRecipe, {

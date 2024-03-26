@@ -89,6 +89,7 @@ export const recipesRouter = createTRPCRouter({
         name: z.string(),
         description: z.string().optional(),
         instructions: z.string().optional(),
+        authorId: z.string(),
         ingredients: z
           .object({
             name: z.string(),
@@ -102,6 +103,8 @@ export const recipesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      if (ctx.session.user.id !== input.authorId)
+        throw new TRPCError({ code: "UNAUTHORIZED", message: "Unauthorized" });
       const currentIngredients = await ctx.prisma.recipe.findFirst({
         where: { id: input.id },
         include: { ingredients: true },
