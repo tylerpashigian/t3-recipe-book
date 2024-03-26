@@ -41,8 +41,10 @@ const RecipeDetails = ({ id }: Props) => {
       !recipeToUpdate?.id ||
       !recipeToUpdate?.name ||
       !recipeToUpdate?.authorId
-    )
+    ) {
+      setPageType(DetailsPageType.Details);
       return;
+    }
 
     const cleanedRecipe = {
       ...recipeToUpdate,
