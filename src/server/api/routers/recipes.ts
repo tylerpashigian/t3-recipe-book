@@ -172,4 +172,14 @@ export const recipesRouter = createTRPCRouter({
 
       return updatedRecipe;
     }),
+  delete: protectedProcedure
+    .input(z.object({ id: z.string(), authorId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.session.user.id !== input.authorId)
+        throw new TRPCError({ code: "UNAUTHORIZED", message: "Unauthorized" });
+      await ctx.prisma.recipe.delete({
+        where: { id: input.id },
+      });
+      return;
+    }),
 });

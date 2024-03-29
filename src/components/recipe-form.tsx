@@ -18,9 +18,15 @@ type Props = {
   recipe?: Recipe;
   isLoading?: boolean;
   onSubmit?: (recipe?: Partial<Recipe>) => Promise<void> | void;
+  onCancel?: () => Promise<void> | void;
 };
 
-const RecipeForm = ({ onSubmit, recipe, isLoading = false }: Props) => {
+const RecipeForm = ({
+  recipe,
+  isLoading = false,
+  onSubmit,
+  onCancel,
+}: Props) => {
   const {
     description,
     ingredients: recipeIngredients,
@@ -198,7 +204,7 @@ const RecipeForm = ({ onSubmit, recipe, isLoading = false }: Props) => {
         />
         <div className="mx-auto flex justify-center gap-2 pt-6">
           {!isCreating && (
-            <Button style={ButtonStyle.secondary} onClickHandler={onSubmit}>
+            <Button style={ButtonStyle.secondary} onClickHandler={onCancel}>
               <>Cancel</>
             </Button>
           )}
