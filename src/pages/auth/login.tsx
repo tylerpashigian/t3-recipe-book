@@ -10,6 +10,7 @@ import Separator from "~/components/UI/separator";
 import useInput from "../../hooks/useInput";
 import { type FormEvent } from "react";
 import { useRouter } from "next/router";
+import WithNavBar from "~/components/UI/with-nabvar";
 
 const Login = ({
   providers,
@@ -53,71 +54,73 @@ const Login = ({
   };
 
   return (
-    <div className="mx-auto mt-10 max-w-lg space-y-6 rounded p-4 shadow-md">
-      <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold">Login</h1>
-        <p className="text-zinc-500 dark:text-zinc-400">
-          Enter your username and password to login to your account
-        </p>
-      </div>
-      <div>
-        <form onSubmit={handleSubmit} className="bg-white px-8 pb-8 pt-6">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label
-                className="mb-1 block text-sm font-bold text-gray-700"
-                htmlFor="username"
-              >
-                Username
-              </label>
-              <input
-                className="focus:shadow-outline w-full appearance-none rounded border border-gray-200 px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none"
-                id="username"
-                placeholder="username"
-                required
-                type="username"
-                value={username}
-                onChange={usernameHandler}
-              />
+    <WithNavBar>
+      <div className="mx-auto max-w-lg space-y-6 rounded p-4 shadow-md">
+        <div className="space-y-2 text-center">
+          <h1 className="text-3xl font-bold">Login</h1>
+          <p className="text-zinc-500 dark:text-zinc-400">
+            Enter your username and password to login to your account
+          </p>
+        </div>
+        <div>
+          <form onSubmit={handleSubmit} className="bg-white px-8 pb-8 pt-6">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label
+                  className="mb-1 block text-sm font-bold text-gray-700"
+                  htmlFor="username"
+                >
+                  Username
+                </label>
+                <input
+                  className="focus:shadow-outline w-full appearance-none rounded border border-gray-200 px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none"
+                  id="username"
+                  placeholder="username"
+                  required
+                  type="username"
+                  value={username}
+                  onChange={usernameHandler}
+                />
+              </div>
+              <div className="space-y-2">
+                <label
+                  className="mb-1 block text-sm font-bold text-gray-700"
+                  htmlFor="password"
+                >
+                  Password
+                </label>
+                <input
+                  className="focus:shadow-outline w-full appearance-none rounded border border-gray-200 px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none"
+                  id="password"
+                  required
+                  type="password"
+                  placeholder="password"
+                  value={password}
+                  onChange={passwordHandler}
+                />
+              </div>
+              <Button type="submit" size={ButtonSize.full}>
+                <>Login</>
+              </Button>
             </div>
-            <div className="space-y-2">
-              <label
-                className="mb-1 block text-sm font-bold text-gray-700"
-                htmlFor="password"
-              >
-                Password
-              </label>
-              <input
-                className="focus:shadow-outline w-full appearance-none rounded border border-gray-200 px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none"
-                id="password"
-                required
-                type="password"
-                placeholder="password"
-                value={password}
-                onChange={passwordHandler}
-              />
-            </div>
-            <Button type="submit" size={ButtonSize.full}>
-              <>Login</>
-            </Button>
+          </form>
+          <Separator />
+          <div className="flex w-full justify-center space-y-4 pt-6">
+            {Object.values(providers).map((provider) => (
+              <div key={provider.name} className="">
+                {provider.name !== "credentials" ? (
+                  <>
+                    <button onClick={() => void signIn(provider.id)}>
+                      Sign in with {provider.name}
+                    </button>
+                  </>
+                ) : null}
+              </div>
+            ))}
           </div>
-        </form>
-        <Separator />
-        <div className="flex w-full justify-center space-y-4 pt-6">
-          {Object.values(providers).map((provider) => (
-            <div key={provider.name} className="">
-              {provider.name !== "credentials" ? (
-                <>
-                  <button onClick={() => void signIn(provider.id)}>
-                    Sign in with {provider.name}
-                  </button>
-                </>
-              ) : null}
-            </div>
-          ))}
         </div>
       </div>
-    </div>
+    </WithNavBar>
   );
 };
 

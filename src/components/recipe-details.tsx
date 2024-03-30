@@ -106,47 +106,48 @@ const RecipeDetails = ({ id }: Props) => {
         <>
           {pageType === DetailsPageType.Details && (
             <div className="container mx-auto flex w-full flex-col space-y-2">
-              <div className="flex gap-2">
-                <h3 className="w-full py-3 text-lg font-bold text-black">
+              <div className="mb-4 grid grid-cols-1 content-between items-center md:grid-cols-2">
+                <h3 className="w-full items-center py-3 text-lg font-bold text-black">
                   {recipe.name}
                 </h3>
                 {sessionData?.user.id === recipe.authorId && (
-                  <>
+                  <div className="grid w-full grid-cols-2 justify-center gap-2 md:flex md:w-auto md:justify-end">
                     <Button onClickHandler={pageTypeHandler}>
                       <>Edit</>
                     </Button>
                     <Button onClickHandler={() => void deleteHandler()}>
                       <>Delete</>
                     </Button>
-                  </>
+                  </div>
                 )}
               </div>
               {recipe.description ? (
                 <div>
-                  <p className="font-semibold">Recipe Description</p>
-                  <p className="mt-2 w-full py-3 text-black">
-                    {recipe.description}
-                  </p>
+                  <p className="mb-2 font-semibold">Recipe Description</p>
+                  <p className="w-full text-black">{recipe.description}</p>
                 </div>
               ) : null}
               {recipe.instructions ? (
                 <div>
-                  <p className="font-semibold">Instructions</p>
-                  <p className="mt-2 w-full py-3 text-black">
+                  <p className="mb-2 font-semibold">Instructions</p>
+                  <p className="w-full whitespace-pre-line text-black">
                     {recipe.instructions}
                   </p>
                 </div>
               ) : null}
-              {recipe.ingredients.length
-                ? recipe.ingredients.map((ingredient) => {
+              {recipe.ingredients.length ? (
+                <div>
+                  <p className="mb-2 font-semibold">Ingredients</p>
+                  {recipe.ingredients.map((ingredient) => {
                     return (
                       <li key={ingredient.ingredientId}>
                         {ingredient.name} ({ingredient.quantity}{" "}
                         {ingredient.unit})
                       </li>
                     );
-                  })
-                : null}
+                  })}
+                </div>
+              ) : null}
             </div>
           )}
           {pageType === DetailsPageType.Edit && (
