@@ -109,6 +109,7 @@ const RecipeForm = ({
       instructions: recipeInstrcutions,
       ingredients: ingredients,
     };
+
     try {
       await onSubmit?.(recipeToUpsert);
       reset();
@@ -134,7 +135,7 @@ const RecipeForm = ({
       >
         <div className="flex flex-col space-y-2">
           <div>
-            <label htmlFor="recipe-name">Recipe Name</label>
+            <label htmlFor="recipe-name" className="font-bold">Recipe Name</label>
             <input
               type="text"
               id="recipe-name"
@@ -148,7 +149,7 @@ const RecipeForm = ({
             )}
           </div>
           <div>
-            <label htmlFor="recipe-description">Recipe Description</label>
+            <label htmlFor="recipe-description" className="font-bold">Recipe Description</label>
             <input
               type="text"
               id="recipe-description"
@@ -158,7 +159,7 @@ const RecipeForm = ({
             />
           </div>
           <div>
-            <label htmlFor="recipe-instructions">Instructions</label>
+            <label htmlFor="recipe-instructions" className="font-bold">Instructions</label>
             <textarea
               id="recipe-instructions"
               className="form-input mt-2 w-full rounded-xl px-4 py-3 text-black"
@@ -170,7 +171,7 @@ const RecipeForm = ({
         </div>
         {ingredients.length ? (
           <>
-            <p>Ingredients</p>
+            <p className="font-bold">Ingredients</p>
             {ingredients.map((ingredient: Ingredient) => {
               return (
                 <div
@@ -178,7 +179,7 @@ const RecipeForm = ({
                   className="flex items-center justify-between gap-2"
                 >
                   <p>
-                    {ingredient.name} ({ingredient.quantity} {ingredient.unit})
+                    {ingredient.name} {ingredient.quantity ? `(${ingredient.quantity} ${ingredient.unit})` : null}
                   </p>
                   <div className="flex gap-2 hover:cursor-pointer">
                     <div onClick={() => editIngredient(ingredient)}>

@@ -32,7 +32,7 @@ const IngredientForm = ({
     inputValue: ingredientQuantity,
     valueHandler: ingredientQuantityHandler,
     reset: resetTngredientQuantityInput,
-  } = useInput(() => true, ingredient?.quantity.toString());
+  } = useInput(() => true, ingredient?.quantity);
 
   const {
     inputValue: ingredientUnit,
@@ -46,7 +46,7 @@ const IngredientForm = ({
       // Temp id to manage local state
       ingredientId: uuidv4(),
       name: ingredientName,
-      quantity: +ingredientQuantity,
+      quantity: ingredientQuantity,
       unit: ingredientUnit,
       // TODO: create a new interface with optional id?
       recipeId: recipeId ?? "",
@@ -65,7 +65,7 @@ const IngredientForm = ({
         recipeId: ingredient.recipeId,
         ingredientId: ingredient.ingredientId,
         name: ingredientName,
-        quantity: +ingredientQuantity,
+        quantity: ingredientQuantity,
         unit: ingredientUnit,
       });
     resetForm();
@@ -79,7 +79,7 @@ const IngredientForm = ({
 
   return (
     <div className="flex flex-col">
-      <p>
+      <p className="font-bold">
         {viewState === IngredientFormType.Edit
           ? "Update Ingredient"
           : "Add Ingredient"}
@@ -98,11 +98,10 @@ const IngredientForm = ({
         </div>
         <div>
           <input
-            type="number"
+            type="text"
             className="form-input w-full rounded-xl px-4 py-3 text-black"
             value={ingredientQuantity}
             onChange={ingredientQuantityHandler}
-            onKeyPress={(e) => !/^\d*\.?\d*$/.test(e.key) && e.preventDefault()}
             placeholder="Ingredient quantity"
             aria-label="Ingredient quantity"
           />
