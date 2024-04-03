@@ -52,8 +52,8 @@ CREATE TABLE "Recipe" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "name" TEXT NOT NULL,
-    "description" VARCHAR(255) NOT NULL,
-    "instructions" VARCHAR(255) NOT NULL,
+    "description" TEXT NOT NULL,
+    "instructions" TEXT NOT NULL,
     "authorId" TEXT NOT NULL,
 
     CONSTRAINT "Recipe_pkey" PRIMARY KEY ("id")
@@ -74,8 +74,7 @@ CREATE TABLE "IngredientInRecipe" (
     "ingredientId" TEXT NOT NULL,
     "recipeId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "quantity" INTEGER NOT NULL,
-    "unit" TEXT NOT NULL,
+    "quantity" TEXT NOT NULL,
 
     CONSTRAINT "IngredientInRecipe_pkey" PRIMARY KEY ("ingredientId","recipeId")
 );
@@ -114,4 +113,4 @@ ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId"
 ALTER TABLE "IngredientInRecipe" ADD CONSTRAINT "IngredientInRecipe_ingredientId_fkey" FOREIGN KEY ("ingredientId") REFERENCES "Ingredient"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "IngredientInRecipe" ADD CONSTRAINT "IngredientInRecipe_recipeId_fkey" FOREIGN KEY ("recipeId") REFERENCES "Recipe"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "IngredientInRecipe" ADD CONSTRAINT "IngredientInRecipe_recipeId_fkey" FOREIGN KEY ("recipeId") REFERENCES "Recipe"("id") ON DELETE CASCADE ON UPDATE CASCADE;

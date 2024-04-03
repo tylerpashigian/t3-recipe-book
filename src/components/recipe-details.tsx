@@ -141,7 +141,7 @@ const RecipeDetails = ({ id }: Props) => {
                   {recipe.ingredients.map((ingredient) => {
                     return (
                       <li key={ingredient.ingredientId}>
-                        {ingredient.name} {ingredient.quantity ? `(${ingredient.quantity} ${ingredient.unit})` : null}
+                        {ingredient.name} {ingredient.quantity ? `(${ingredient.quantity})` : null}
                       </li>
                     );
                   })}

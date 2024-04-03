@@ -34,12 +34,6 @@ const IngredientForm = ({
     reset: resetTngredientQuantityInput,
   } = useInput(() => true, ingredient?.quantity);
 
-  const {
-    inputValue: ingredientUnit,
-    valueHandler: ingredientUnitHandler,
-    reset: resetIngredientUnitInput,
-  } = useInput(() => true, ingredient?.unit);
-
   const addIngredientLocal = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     const ingredient = {
@@ -47,7 +41,6 @@ const IngredientForm = ({
       ingredientId: uuidv4(),
       name: ingredientName,
       quantity: ingredientQuantity,
-      unit: ingredientUnit,
       // TODO: create a new interface with optional id?
       recipeId: recipeId ?? "",
     };
@@ -66,7 +59,6 @@ const IngredientForm = ({
         ingredientId: ingredient.ingredientId,
         name: ingredientName,
         quantity: ingredientQuantity,
-        unit: ingredientUnit,
       });
     resetForm();
   };
@@ -74,7 +66,6 @@ const IngredientForm = ({
   const resetForm = () => {
     resetIngredientNameInput();
     resetTngredientQuantityInput();
-    resetIngredientUnitInput();
   };
 
   return (
@@ -104,16 +95,6 @@ const IngredientForm = ({
             onChange={ingredientQuantityHandler}
             placeholder="Ingredient quantity"
             aria-label="Ingredient quantity"
-          />
-        </div>
-        <div>
-          <input
-            type="text"
-            className="form-input w-full rounded-xl px-4 py-3 text-black"
-            value={ingredientUnit}
-            onChange={ingredientUnitHandler}
-            placeholder="Ingredient unit"
-            aria-label="Ingredient unit"
           />
         </div>
         <div className="flex items-center">

@@ -179,7 +179,7 @@ const RecipeForm = ({
                   className="flex items-center justify-between gap-2"
                 >
                   <p>
-                    {ingredient.name} {ingredient.quantity ? `(${ingredient.quantity} ${ingredient.unit})` : null}
+                    {ingredient.name} {ingredient.quantity ? `(${ingredient.quantity})` : null}
                   </p>
                   <div className="flex gap-2 hover:cursor-pointer">
                     <div onClick={() => editIngredient(ingredient)}>

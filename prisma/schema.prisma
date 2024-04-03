@@ -91,7 +91,6 @@ model IngredientInRecipe {
   recipeId     String @default(cuid())
   name         String
   quantity     String
-  unit         String
 
   ingredient Ingredient @relation(fields: [ingredientId], references: [id])
   recipe     Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)

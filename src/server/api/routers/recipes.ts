@@ -52,7 +52,7 @@ export const recipesRouter = createTRPCRouter({
         description: z.string().optional(),
         instructions: z.string().optional(),
         ingredients: z
-          .object({ name: z.string(), quantity: z.string(), unit: z.string() })
+          .object({ name: z.string(), quantity: z.string() })
           .array()
           .optional(),
       }),
@@ -65,11 +65,10 @@ export const recipesRouter = createTRPCRouter({
           description: input.description ?? "",
           instructions: input.instructions ?? "",
           ingredients: {
-            create: input.ingredients?.map(({ name, quantity, unit }) => {
+            create: input.ingredients?.map(({ name, quantity }) => {
               return {
                 name,
                 quantity,
-                unit,
                 ingredient: {
                   connectOrCreate: {
                     where: { name: name.toLowerCase() },
@@ -94,7 +93,6 @@ export const recipesRouter = createTRPCRouter({
           .object({
             name: z.string(),
             quantity: z.string(),
-            unit: z.string(),
             recipeId: z.string(),
             ingredientId: z.string(),
           })
@@ -143,7 +141,6 @@ export const recipesRouter = createTRPCRouter({
               update: {
                 name: ingredient.name,
                 quantity: ingredient.quantity,
-                unit: ingredient.unit,
                 ingredient: {
                   connectOrCreate: {
                     where: { name: ingredient.name.toLowerCase() },
@@ -154,7 +151,6 @@ export const recipesRouter = createTRPCRouter({
               create: {
                 name: ingredient.name,
                 quantity: ingredient.quantity,
-                unit: ingredient.unit,
                 ingredient: {
                   connectOrCreate: {
                     where: { name: ingredient.name.toLowerCase() },
