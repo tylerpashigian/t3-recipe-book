@@ -74,7 +74,7 @@ CREATE TABLE "IngredientInRecipe" (
     "ingredientId" TEXT NOT NULL,
     "recipeId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "quantity" TEXT NOT NULL,
+    "quantity" TEXT,
 
     CONSTRAINT "IngredientInRecipe_pkey" PRIMARY KEY ("ingredientId","recipeId")
 );
