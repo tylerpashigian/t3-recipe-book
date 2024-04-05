@@ -32,7 +32,7 @@ const IngredientForm = ({
     inputValue: ingredientQuantity,
     valueHandler: ingredientQuantityHandler,
     reset: resetTngredientQuantityInput,
-  } = useInput(() => true, ingredient?.quantity);
+  } = useInput(() => true, ingredient?.quantity ?? undefined);
 
   const addIngredientLocal = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
