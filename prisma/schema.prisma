@@ -72,8 +72,18 @@ model Recipe {
   authorId     String
 
   ingredients IngredientInRecipe[]
+  categories  RecipeCategory[]
 
   @@index([authorId])
+}
+
+model RecipeCategory {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name    String
+  recipes Recipe[]
 }
 
 model Ingredient {
@@ -87,8 +97,8 @@ model Ingredient {
 }
 
 model IngredientInRecipe {
-  ingredientId String @default(cuid())
-  recipeId     String @default(cuid())
+  ingredientId String  @default(cuid())
+  recipeId     String  @default(cuid())
   name         String
   quantity     String?
 

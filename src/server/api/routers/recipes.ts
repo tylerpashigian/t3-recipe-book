@@ -14,12 +14,18 @@ export const recipesRouter = createTRPCRouter({
       select: { id: true, name: true },
     });
   }),
+  getCategories: publicProcedure.query(async ({ ctx }) => {
+    // TODO: implement pagination as we scale
+    return await ctx.prisma.recipeCategory.findMany({
+      select: { id: true, name: true },
+    });
+  }),
   getDetails: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const recipe = await ctx.prisma.recipe.findFirst({
         where: { id: input.id },
-        include: { ingredients: true },
+        include: { ingredients: true, categories: true },
       });
 
       const user = await ctx.prisma.user.findFirst({
@@ -55,6 +61,10 @@ export const recipesRouter = createTRPCRouter({
           .object({ name: z.string(), quantity: z.string().nullable() })
           .array()
           .optional(),
+        categories: z
+          .object({ name: z.string(), id: z.string() })
+          .array()
+          .optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -78,6 +88,18 @@ export const recipesRouter = createTRPCRouter({
               };
             }),
           },
+          categories: {
+            connectOrCreate: input.categories?.map(({ id, name }) => {
+              return {
+                where: { id: id },
+                create: { id, name },
+              };
+            }),
+          },
+        },
+        include: {
+          ingredients: true,
+          categories: true,
         },
       });
     }),
@@ -98,26 +120,44 @@ export const recipesRouter = createTRPCRouter({
           })
           .array()
           .optional(),
+        categories: z
+          .object({
+            id: z.string(),
+            name: z.string(),
+          })
+          .array()
+          .optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       if (ctx.session.user.id !== input.authorId)
         throw new TRPCError({ code: "UNAUTHORIZED", message: "Unauthorized" });
-      const currentIngredients = await ctx.prisma.recipe.findFirst({
+
+      const currentRecipes = await ctx.prisma.recipe.findFirst({
         where: { id: input.id },
-        include: { ingredients: true },
+        include: { ingredients: true, categories: true },
       });
 
-      const currentIds = (currentIngredients?.ingredients ?? []).map(
+      const currentIngredientIds = (currentRecipes?.ingredients ?? []).map(
         (ingredient) => ingredient.ingredientId,
       );
 
-      const ingredientsToDelete = currentIds.filter(
+      const currentCategoryIds = (currentRecipes?.categories ?? []).map(
+        (category) => category.id,
+      );
+
+      const ingredientsToDelete = currentIngredientIds.filter(
         (id) =>
           !input.ingredients
             ?.map((ingredient) => ingredient.ingredientId)
             .includes(id),
       );
+
+      const categoriesToDelete = currentCategoryIds
+        .filter(
+          (id) => !input.categories?.some((category) => category.id === id),
+        )
+        .map((id) => ({ id }));
 
       const updatedRecipe = await ctx.prisma.recipe.update({
         where: { id: input.id },
@@ -160,9 +200,19 @@ export const recipesRouter = createTRPCRouter({
               },
             })),
           },
+          categories: {
+            connectOrCreate: input.categories?.map(({ id, name }) => {
+              return {
+                where: { id: id },
+                create: { id, name },
+              };
+            }),
+            disconnect: categoriesToDelete,
+          },
         },
         include: {
           ingredients: true,
+          categories: true,
         },
       });
 

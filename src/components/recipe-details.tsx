@@ -26,6 +26,7 @@ const RecipeDetails = ({ id }: Props) => {
   const { data, isLoading, refetch } = api.recipes.getDetails.useQuery({
     id: id,
   });
+  const { data: categories } = api.recipes.getCategories.useQuery();
   const { isLoading: isUpdating, mutateAsync: updateRecipe } =
     api.recipes.update.useMutation({});
   const { mutateAsync: deleteRecipe } = api.recipes.delete.useMutation({});
@@ -141,7 +142,10 @@ const RecipeDetails = ({ id }: Props) => {
                   {recipe.ingredients.map((ingredient) => {
                     return (
                       <li key={ingredient.ingredientId}>
-                        {ingredient.name} {ingredient.quantity ? `(${ingredient.quantity})` : null}
+                        {ingredient.name}{" "}
+                        {ingredient.quantity
+                          ? `(${ingredient.quantity})`
+                          : null}
                       </li>
                     );
                   })}
@@ -151,6 +155,7 @@ const RecipeDetails = ({ id }: Props) => {
           )}
           {pageType === DetailsPageType.Edit && (
             <RecipeForm
+              categories={categories}
               recipe={recipe}
               isLoading={isLoading || isUpdating}
               onSubmit={(recipe) => onUpdate(recipe)}

@@ -1,13 +1,12 @@
-import { useSession } from "next-auth/react";
 import { useState } from "react";
 import useInput from "~/hooks/useInput";
-import Image from "next/image";
 import IngredientForm from "./ingredient-form";
 import Button, { ButtonStyle } from "./UI/button";
+import Combobox from "./UI/combobox";
 import { IoClose } from "react-icons/io5";
 import { MdOutlineEdit } from "react-icons/md";
 import { type Ingredient } from "~/models/ingredient";
-import { type Recipe } from "~/models/recipe";
+import { type Recipe, type Category } from "~/models/recipe";
 
 export enum IngredientFormType {
   Add,
@@ -15,6 +14,7 @@ export enum IngredientFormType {
 }
 
 type Props = {
+  categories?: Category[];
   recipe?: Recipe;
   isLoading?: boolean;
   onSubmit?: (recipe?: Partial<Recipe>) => Promise<void> | void;
@@ -23,6 +23,7 @@ type Props = {
 
 const RecipeForm = ({
   recipe,
+  categories = [],
   isLoading = false,
   onSubmit,
   onCancel,
@@ -34,13 +35,14 @@ const RecipeForm = ({
     name,
   } = recipe ?? {};
   const [ingredients, setIngredients] = useState(recipeIngredients ?? []);
+  const [selectedCategories, setSelectedCategories] = useState([
+    ...(recipe?.categories ?? []),
+  ]);
   const [editableIngredient, setEditableIngredient] =
     useState<Ingredient | null>(null);
   const [ingredientFormState, setIngredientFormState] = useState(
     IngredientFormType.Add,
   );
-
-  const { data } = useSession();
 
   const {
     inputValue: recipeName,
@@ -108,6 +110,7 @@ const RecipeForm = ({
       description: recipeDescription,
       instructions: recipeInstrcutions,
       ingredients: ingredients,
+      categories: selectedCategories,
     };
 
     try {
@@ -116,113 +119,123 @@ const RecipeForm = ({
     } catch (error) {}
   };
 
+  const categoryHandler = (options: Category[]) => {
+    setSelectedCategories(options);
+  };
+
   const isCreating = recipe === undefined;
   const buttonText = isCreating ? "Submit" : "Update";
 
   return (
-    <>
-      {!!data?.user.image && (
-        <Image
-          src={data.user.image}
-          alt={"Profile Picture"}
-          width={100}
-          height={100}
-        />
-      )}
-      <form
-        onSubmit={(event) => void onSubmitHandler(event)}
-        className="space-y-2"
-      >
-        <div className="flex flex-col space-y-2">
-          <div>
-            <label htmlFor="recipe-name" className="font-bold">Recipe Name</label>
-            <input
-              type="text"
-              id="recipe-name"
-              className="form-input mt-2 w-full rounded-xl px-4 py-3 text-black"
-              value={recipeName}
-              onChange={recipeNameHandler}
-              onBlur={recipeNameBlurHandler}
-            />
-            {recipeFormIsInvalid && (
-              <p className="mt-2 text-red-400">Please enter a recipe name</p>
-            )}
-          </div>
-          <div>
-            <label htmlFor="recipe-description" className="font-bold">Recipe Description</label>
-            <input
-              type="text"
-              id="recipe-description"
-              className="form-input mt-2 w-full rounded-xl px-4 py-3 text-black"
-              value={recipeDescription}
-              onChange={recipeDescriptionHandler}
-            />
-          </div>
-          <div>
-            <label htmlFor="recipe-instructions" className="font-bold">Instructions</label>
-            <textarea
-              id="recipe-instructions"
-              className="form-input mt-2 w-full rounded-xl px-4 py-3 text-black"
-              rows={3}
-              value={recipeInstrcutions}
-              onChange={recipeInstructionsHandler}
-            />
-          </div>
+    <form
+      onSubmit={(event) => void onSubmitHandler(event)}
+      className="space-y-2"
+    >
+      <div className="flex flex-col space-y-2">
+        <div>
+          <label htmlFor="recipe-name" className="font-bold">
+            Recipe Name
+          </label>
+          <input
+            type="text"
+            id="recipe-name"
+            className="form-input mt-2 w-full rounded-xl px-4 py-3 text-black"
+            value={recipeName}
+            onChange={recipeNameHandler}
+            onBlur={recipeNameBlurHandler}
+          />
+          {recipeFormIsInvalid && (
+            <p className="mt-2 text-red-400">Please enter a recipe name</p>
+          )}
         </div>
-        {ingredients.length ? (
-          <>
-            <p className="font-bold">Ingredients</p>
-            {ingredients.map((ingredient: Ingredient) => {
-              return (
-                <div
-                  key={ingredient.ingredientId}
-                  className="flex items-center justify-between gap-2"
-                >
-                  <p>
-                    {ingredient.name} {ingredient.quantity ? `(${ingredient.quantity})` : null}
-                  </p>
-                  <div className="flex gap-2 hover:cursor-pointer">
-                    <div onClick={() => editIngredient(ingredient)}>
-                      <MdOutlineEdit />
-                    </div>
-                    <div
-                      onClick={() => deleteIngredient(ingredient.ingredientId)}
-                    >
-                      <IoClose />
-                    </div>
+        <div>
+          <label className="font-bold">Recipe Categories</label>
+          <Combobox
+            classes="mt-2"
+            options={categories}
+            initialSelections={selectedCategories}
+            onSelect={categoryHandler}
+          />
+        </div>
+        <div>
+          <label htmlFor="recipe-description" className="font-bold">
+            Recipe Description
+          </label>
+          <input
+            type="text"
+            id="recipe-description"
+            className="form-input mt-2 w-full rounded-xl px-4 py-3 text-black"
+            value={recipeDescription}
+            onChange={recipeDescriptionHandler}
+          />
+        </div>
+        <div>
+          <label htmlFor="recipe-instructions" className="font-bold">
+            Instructions
+          </label>
+          <textarea
+            id="recipe-instructions"
+            className="form-input mt-2 w-full rounded-xl px-4 py-3 text-black"
+            rows={3}
+            value={recipeInstrcutions}
+            onChange={recipeInstructionsHandler}
+          />
+        </div>
+      </div>
+      {ingredients.length ? (
+        <>
+          <p className="font-bold">Ingredients</p>
+          {ingredients.map((ingredient: Ingredient) => {
+            return (
+              <div
+                key={ingredient.ingredientId}
+                className="flex items-center justify-between gap-2"
+              >
+                <p>
+                  {ingredient.name}{" "}
+                  {ingredient.quantity ? `(${ingredient.quantity})` : null}
+                </p>
+                <div className="flex gap-2 hover:cursor-pointer">
+                  <div onClick={() => editIngredient(ingredient)}>
+                    <MdOutlineEdit />
+                  </div>
+                  <div
+                    onClick={() => deleteIngredient(ingredient.ingredientId)}
+                  >
+                    <IoClose />
                   </div>
                 </div>
-              );
-            })}
-          </>
-        ) : null}
-        <IngredientForm
-          addIngredient={addIngredient}
-          ingredient={editableIngredient}
-          viewState={ingredientFormState}
-          updateIngredient={updateIngredient}
-          recipeId={recipe?.id}
-        />
-        <div className="mx-auto flex justify-center gap-2 pt-6">
-          {!isCreating && (
-            <Button style={ButtonStyle.secondary} onClickHandler={onCancel}>
-              <>Cancel</>
-            </Button>
-          )}
-          <Button
-            type="submit"
-            disabled={isLoading || recipeFormIsInvalid || !recipeIsValid}
-            style={
-              isLoading || recipeFormIsInvalid || !recipeIsValid
-                ? ButtonStyle.disabled
-                : ButtonStyle.primary
-            }
-          >
-            <>{isLoading ? "Loading" : buttonText}</>
+              </div>
+            );
+          })}
+        </>
+      ) : null}
+      <IngredientForm
+        addIngredient={addIngredient}
+        ingredient={editableIngredient}
+        viewState={ingredientFormState}
+        updateIngredient={updateIngredient}
+        recipeId={recipe?.id}
+      />
+      <div className="mx-auto flex justify-center gap-2 pt-6">
+        {!isCreating && (
+          <Button style={ButtonStyle.secondary} onClickHandler={onCancel}>
+            <>Cancel</>
           </Button>
-        </div>
-      </form>
-    </>
+        )}
+        <Button
+          type="submit"
+          disabled={isLoading || recipeFormIsInvalid || !recipeIsValid}
+          style={
+            isLoading || recipeFormIsInvalid || !recipeIsValid
+              ? ButtonStyle.disabled
+              : ButtonStyle.primary
+          }
+        >
+          <>{isLoading ? "Loading" : buttonText}</>
+        </Button>
+      </div>
+    </form>
   );
 };
 

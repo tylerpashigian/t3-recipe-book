@@ -11,6 +11,7 @@ import WithNavBar from "~/components/UI/with-nabvar";
 export default function CreateRecipe() {
   const router = useRouter();
 
+  const { data: categories } = api.recipes.getCategories.useQuery();
   const { isLoading, mutateAsync: createRecipe } =
     api.recipes.create.useMutation({});
 
@@ -46,7 +47,11 @@ export default function CreateRecipe() {
         <main className="flex flex-col">
           <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
             <div className="flex flex-col items-center gap-2">
-              <RecipeForm onSubmit={onCreate} isLoading={isLoading} />
+              <RecipeForm
+                categories={categories}
+                onSubmit={onCreate}
+                isLoading={isLoading}
+              />
             </div>
           </div>
         </main>
