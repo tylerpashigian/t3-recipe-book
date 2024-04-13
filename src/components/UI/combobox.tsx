@@ -30,7 +30,7 @@ const Combobox = <T extends Options, P extends Options>({
         });
 
   const [selectedOptions, setSelectedOptions] = useState<T[]>(
-    (options as T[]).filter((option) =>
+    options.filter((option) =>
       initialSelections.some(
         (selectedOption) => option.id === selectedOption.id,
       ),

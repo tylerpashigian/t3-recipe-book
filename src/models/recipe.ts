@@ -1,4 +1,4 @@
-import { RecipeCategory, type Prisma } from "@prisma/client";
+import { type RecipeCategory, type Prisma } from "@prisma/client";
 
 export type Recipe = Prisma.RecipeGetPayload<{
   include: {
