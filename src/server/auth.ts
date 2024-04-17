@@ -53,13 +53,6 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     session({ session, token }) {
-      console.log("Login URL in Session");
-      console.log(
-        `${process.env.NODE_ENV === "production" ? "https://" : ""}${
-          env.NEXTAUTH_URL
-        }/api/auth/login`,
-      );
-
       return {
         ...session,
         user: {
@@ -99,12 +92,6 @@ export const authOptions: NextAuthOptions = {
             username: credentials.username,
             password: credentials.password,
           };
-
-          console.log(
-            `${process.env.NODE_ENV === "production" ? "https://" : ""}${
-              env.NEXTAUTH_URL
-            }/api/auth/login`,
-          );
 
           const res = await fetch(
             `${process.env.NODE_ENV === "production" ? "https://" : ""}${
