@@ -53,6 +53,13 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     session({ session, token }) {
+      console.log("Login URL in Session");
+      console.log(
+        `${process.env.NODE_ENV === "production" ? "https://" : ""}${
+          env.NEXTAUTH_URL
+        }/api/auth/login`,
+      );
+
       return {
         ...session,
         user: {
