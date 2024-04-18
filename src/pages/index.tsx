@@ -1,7 +1,7 @@
 import Head from "next/head";
-import WithNavBar from "~/components/UI/with-nabvar";
 
-import Recipes from "~/components/recipes";
+import WithNavBar from "~/components/UI/with-nabvar";
+import Hero from "~/components/hero";
 
 export default function Home() {
   return (
@@ -15,7 +15,7 @@ export default function Home() {
         <main className="flex flex-col">
           <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
             <div className="flex flex-col items-center gap-2">
-              <Recipes />
+              <Hero />
             </div>
           </div>
         </main>
