@@ -2,7 +2,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import WithNavBar from "~/components/UI/with-nabvar";
 
-import RecipeDetails from "~/components/recipe-details";
+import RecipeDetails from "~/components/recipe/recipe-details";
 
 export default function Recipe() {
   // TODO: add SSR or SSG

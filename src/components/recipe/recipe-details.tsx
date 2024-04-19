@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useSession } from "next-auth/react";
 import { api } from "~/utils/api";
-import Button from "./UI/button";
+import Button from "~/components/UI/button";
 import RecipeForm from "./recipe-form";
 import { type Recipe } from "~/models/recipe";
 import toast from "react-hot-toast";

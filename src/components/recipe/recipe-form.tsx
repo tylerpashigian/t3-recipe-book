@@ -1,8 +1,8 @@
 import { useState } from "react";
 import useInput from "~/hooks/useInput";
 import IngredientForm from "./ingredient-form";
-import Button, { ButtonStyle } from "./UI/button";
-import Combobox from "./UI/combobox";
+import Button, { ButtonStyle } from "../UI/button";
+import Combobox from "~/components/UI/combobox";
 import { IoClose } from "react-icons/io5";
 import { MdOutlineEdit } from "react-icons/md";
 import { type Ingredient } from "~/models/ingredient";

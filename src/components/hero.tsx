@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 
-const Landing = () => {
+const Hero = () => {
   return (
     <section className="w-full">
       <div className="container grid items-center gap-4 px-4 lg:grid-cols-2 lg:gap-8 ">
@@ -34,4 +34,4 @@ const Landing = () => {
   );
 };
 
-export default Landing;
+export default Hero;

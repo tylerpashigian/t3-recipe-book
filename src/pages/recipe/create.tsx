@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 import { api } from "~/utils/api";
-import RecipeForm from "~/components/recipe-form";
+import RecipeForm from "~/components/recipe/recipe-form";
 import { type Recipe } from "~/models/recipe";
 import WithNavBar from "~/components/UI/with-nabvar";
 
