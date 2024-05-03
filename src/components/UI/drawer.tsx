@@ -10,13 +10,13 @@ type DrawerProps = {
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export default function Drawer({
+const Drawer = ({
   title = "",
   description = "",
   children,
   isOpen,
   setIsOpen,
-}: DrawerProps) {
+}: DrawerProps) => {
   return (
     <Transition show={isOpen} as={Fragment}>
       <Dialog
@@ -107,4 +107,6 @@ export default function Drawer({
       </Dialog>
     </Transition>
   );
-}
+};
+
+export default Drawer;
