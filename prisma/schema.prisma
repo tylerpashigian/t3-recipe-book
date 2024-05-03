@@ -40,13 +40,14 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String           @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?          @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
+  favorites     RecipeFavorite[]
 
   // New fields for local credentials
   username String? @unique
@@ -73,6 +74,7 @@ model Recipe {
 
   ingredients IngredientInRecipe[]
   categories  RecipeCategory[]
+  favorites   RecipeFavorite[]
 
   @@index([authorId])
 }
@@ -106,4 +108,14 @@ model IngredientInRecipe {
   recipe     Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@id([ingredientId, recipeId])
+}
+
+// Needs to be an explicit many to many relation to ensure uniqueness
+model RecipeFavorite {
+  userId   String @default(cuid())
+  recipeId String @default(cuid())
+  User     User   @relation(fields: [userId], references: [id])
+  Recipe   Recipe @relation(fields: [recipeId], references: [id])
+
+  @@id([userId, recipeId])
 }

@@ -10,7 +10,6 @@ export const recipesRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
     // TODO: implement pagination as we scale
     return await ctx.prisma.recipe.findMany({
-      take: 100,
       select: { id: true, name: true },
     });
   }),
@@ -25,8 +24,15 @@ export const recipesRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const recipe = await ctx.prisma.recipe.findFirst({
         where: { id: input.id },
-        include: { ingredients: true, categories: true },
+        include: { ingredients: true, categories: true, favorites: true },
       });
+
+      if (!recipe) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "No recipe found",
+        });
+      }
 
       const user = await ctx.prisma.user.findFirst({
         where: { id: recipe?.authorId },
@@ -47,7 +53,13 @@ export const recipesRouter = createTRPCRouter({
       };
 
       return {
-        recipe,
+        recipe: {
+          ...recipe,
+          favoriteCount: recipe?.favorites.length,
+          isFavorited: !!recipe?.favorites.find(
+            (favorite) => favorite.userId === ctx.session?.user.id,
+          ),
+        },
         author,
       };
     }),
@@ -226,6 +238,36 @@ export const recipesRouter = createTRPCRouter({
       await ctx.prisma.recipe.delete({
         where: { id: input.id },
       });
+      return;
+    }),
+  favorite: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        authorId: z.string(),
+        isFavorited: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (input.isFavorited) {
+        // Add the recipe to the user's favorites
+        await ctx.prisma.recipeFavorite.create({
+          data: {
+            userId: ctx.session.user.id,
+            recipeId: input.id,
+          },
+        });
+      } else {
+        // Remove the recipe from the user's favorites
+        await ctx.prisma.recipeFavorite.delete({
+          where: {
+            userId_recipeId: {
+              recipeId: input.id,
+              userId: ctx.session.user.id,
+            },
+          },
+        });
+      }
       return;
     }),
 });
