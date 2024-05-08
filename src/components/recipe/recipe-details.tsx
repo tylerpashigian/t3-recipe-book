@@ -130,9 +130,9 @@ const RecipeDetails = ({ id }: Props) => {
         <>
           {pageType === DetailsPageType.Details && (
             <div className="container mx-auto flex w-full flex-col space-y-2">
-              <div className="mb-4 grid grid-cols-1 content-between items-center md:grid-cols-2">
-                <div className="flex w-full items-center gap-3">
-                  <h3 className="py-3 text-lg font-bold text-black">
+              <div className="mb-4 grid grid-cols-1 content-between items-center gap-4 md:grid-cols-2 lg:py-3">
+                <div className="flex w-full flex-col items-start gap-1 lg:flex-row lg:items-center lg:gap-3">
+                  <h3 className="text-lg font-bold text-black">
                     {recipe.name}
                   </h3>
                   <div className="flex items-center gap-3">
