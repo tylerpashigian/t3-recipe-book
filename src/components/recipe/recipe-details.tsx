@@ -7,6 +7,7 @@ import { type Recipe } from "~/models/recipe";
 import toast from "react-hot-toast";
 import { useRouter } from "next/router";
 import LikeButton from "../UI/like-button";
+import { GetStaticPaths, GetStaticPropsContext, NextPage } from "next";
 // import { getQueryKey } from "@trpc/react-query";
 
 export enum DetailsPageType {
@@ -23,6 +24,10 @@ const RecipeDetails = ({ id }: Props) => {
 
   const { data: sessionData } = useSession();
   const router = useRouter();
+
+  if (router.isFallback) {
+    return <>Loading....</>;
+  }
 
   const { data, isLoading, refetch } = api.recipes.getDetails.useQuery({
     id: id,

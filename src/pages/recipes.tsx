@@ -7,7 +7,7 @@ import React from "react";
 import { api } from "~/utils/api";
 
 const Recipes = () => {
-  const { data, isLoading } = api.recipes.getAll.useQuery();
+  const { data, isLoading } = api.recipes.getAll.useQuery({});
 
   return (
     <>

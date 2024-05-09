@@ -3,8 +3,8 @@ import type {
   InferGetServerSidePropsType,
 } from "next";
 import { getCsrfToken, getProviders, signIn } from "next-auth/react";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../server/auth";
+// import { getServerSession } from "next-auth/next";
+// import { authOptions } from "../../server/auth";
 import Button, { ButtonSize } from "~/components/UI/button";
 import Separator from "~/components/UI/separator";
 import useInput from "../../hooks/useInput";
@@ -125,15 +125,15 @@ const Login = ({
 };
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const session = await getServerSession(context.req, context.res, authOptions);
+  // const session = await getServerSession(context.req, context.res, authOptions);
   const csrfToken = await getCsrfToken(context);
 
   // If the user is already logged in, redirect.
   // Note: Make sure not to redirect to the same page
   // To avoid an infinite loop!
-  if (session) {
-    return { redirect: { destination: "/" } };
-  }
+  // if (session) {
+  //   return { redirect: { destination: "/" } };
+  // }
 
   const providers = await getProviders();
 
