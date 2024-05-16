@@ -1,35 +1,26 @@
+import { useState } from "react";
+import { GetStaticPropsContext } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import WithNavBar from "~/components/UI/with-nabvar";
-import { GetStaticPaths, GetStaticPropsContext } from "next";
-import { createServerSideHelpers } from "@trpc/react-query/server";
-import { api } from "~/utils/api";
-import { type Recipe } from "~/models/recipe";
 
-import { DetailsPageType } from "~/components/recipe/recipe-details";
-import { appRouter } from "~/server/api/root";
-import { useSession } from "next-auth/react";
-import { PrismaClient } from "@prisma/client";
-// import { authOptions, getServerAuthSession } from "~/server/auth";
-// import { getServerSession } from "next-auth";
+import { createServerSideHelpers } from "@trpc/react-query/server";
 import toast from "react-hot-toast";
-import { useState } from "react";
-import LikeButton from "~/components/UI/like-button";
-import Button from "~/components/UI/button";
-import RecipeForm from "~/components/recipe/recipe-form";
 import superjson from "superjson";
 
+import WithNavBar from "~/components/UI/with-nabvar";
+import RecipeDetails, {
+  DetailsPageType,
+} from "~/components/recipe/recipe-details";
+import RecipeForm from "~/components/recipe/recipe-form";
+import { api } from "~/utils/api";
+import prisma from "~/utils/prisma";
+import { type Recipe } from "~/models/recipe";
+import { appRouter } from "~/server/api/root";
+
 export default function Recipe({ id }: { id: string }) {
-  // TODO: add SSR or SSG
   const router = useRouter();
 
   const [pageType, setPageType] = useState(DetailsPageType.Details);
-
-  const { data: sessionData } = useSession();
-
-  if (router.isFallback) {
-    return <>Loading....</>;
-  }
 
   const { data, isLoading, refetch } = api.recipes.getDetails.useQuery({
     id: id,
@@ -41,7 +32,6 @@ export default function Recipe({ id }: { id: string }) {
   const { mutateAsync: favoriteRecipe } = api.recipes.favorite.useMutation({});
 
   const recipe: Recipe | undefined | null = data?.recipe;
-  // const recipe = serverRecipe.recipe;
 
   const pageTypeHandler = () => {
     setPageType((prevType) =>
@@ -142,76 +132,16 @@ export default function Recipe({ id }: { id: string }) {
         <main className="flex flex-col">
           <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
             <div className="flex flex-col items-center gap-2">
-              {/* <RecipeDetails id={router.query.id as string} /> */}
               <>
                 {recipe && !isLoading && (
                   <>
                     {pageType === DetailsPageType.Details && (
-                      <div className="container mx-auto flex w-full flex-col space-y-2">
-                        <div className="mb-4 grid grid-cols-1 content-between items-center gap-4 md:grid-cols-2 lg:py-3">
-                          <div className="flex w-full flex-col items-start gap-1 lg:flex-row lg:items-center lg:gap-3">
-                            <h3 className="text-lg font-bold text-black">
-                              {recipe.name}
-                            </h3>
-                            <div className="flex items-center gap-3">
-                              {!!sessionData && (
-                                <LikeButton
-                                  isInitiallyLiked={recipe.isFavorited}
-                                  onClick={(favorited: boolean) =>
-                                    void onFavorite(favorited)
-                                  }
-                                />
-                              )}
-                              <span>{recipe.favoriteCount} Favorites(s)</span>
-                            </div>
-                          </div>
-                          {sessionData?.user.id === recipe.authorId && (
-                            <div className="grid w-full grid-cols-2 justify-center gap-2 md:flex md:w-auto md:justify-end">
-                              <Button onClickHandler={pageTypeHandler}>
-                                <>Edit</>
-                              </Button>
-                              <Button
-                                onClickHandler={() => void deleteHandler()}
-                              >
-                                <>Delete</>
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                        {recipe.description ? (
-                          <div>
-                            <p className="mb-2 font-semibold">
-                              Recipe Description
-                            </p>
-                            <p className="w-full text-black">
-                              {recipe.description}
-                            </p>
-                          </div>
-                        ) : null}
-                        {recipe.instructions ? (
-                          <div>
-                            <p className="mb-2 font-semibold">Instructions</p>
-                            <p className="w-full whitespace-pre-line text-black">
-                              {recipe.instructions}
-                            </p>
-                          </div>
-                        ) : null}
-                        {recipe.ingredients.length ? (
-                          <div>
-                            <p className="mb-2 font-semibold">Ingredients</p>
-                            {recipe.ingredients.map((ingredient) => {
-                              return (
-                                <li key={ingredient.ingredientId}>
-                                  {ingredient.name}{" "}
-                                  {ingredient.quantity
-                                    ? `(${ingredient.quantity})`
-                                    : null}
-                                </li>
-                              );
-                            })}
-                          </div>
-                        ) : null}
-                      </div>
+                      <RecipeDetails
+                        recipe={recipe}
+                        pageTypeHandler={pageTypeHandler}
+                        onDelete={deleteHandler}
+                        onFavorite={onFavorite}
+                      />
                     )}
                     {pageType === DetailsPageType.Edit && (
                       <RecipeForm
@@ -233,66 +163,38 @@ export default function Recipe({ id }: { id: string }) {
   );
 }
 
-export async function getStaticPaths({}: GetStaticPaths) {
-  // const products = await getProductsFromDatabase();
-
-  // const paths = products.map((product) => ({
-  //   params: { id: product.id },
-  // }));
-
-  const prisma = new PrismaClient();
+export async function getStaticPaths({}: GetStaticPropsContext) {
   const helpers = createServerSideHelpers({
     router: appRouter,
     ctx: { session: null, prisma },
-    transformer: superjson, // optional - adds superjson serialization
+    transformer: superjson,
   });
-  const recipes = await helpers.recipes.getAll.fetch({ max: 5 });
+
+  const recipes = await helpers.recipes.getAll.fetch({ max: 10 });
   const paths = recipes.map((recipe) => ({ params: { id: recipe.id } }));
 
-  // const paths = [{ params: { id: "clvppfpua0000o8xg85tf7msn" } }];
-  // const paths = [];
-  // console.log("Paths: ", paths);
-
-  // fallback: false means pages that don’t have the
-  // correct id will 404.
   return {
     paths,
-    fallback: true,
+    fallback: "blocking",
   };
 }
-
-// params will contain the id for each generated page.
-// export function getStaticProps({ params }: GetStaticPropsContext) {
-//   console.log("Params: ", params);
-//   return {
-//     props: {
-//       id: "clvppfpua0000o8xg85tf7msn",
-//     },
-//   };
-// }
 
 export async function getStaticProps(
   context: GetStaticPropsContext<{ id: string }>,
 ) {
-  // const { data: sessionData } = useSession();
-  // await getServerSession(context.req, context.res, authOptions);
-  // console.log(sessionData);
-  const prisma = new PrismaClient();
   const helpers = createServerSideHelpers({
     router: appRouter,
     ctx: { session: null, prisma },
-    transformer: superjson, // optional - adds superjson serialization
+    transformer: superjson,
   });
   const id = context.params?.id ?? "";
   await helpers.recipes.getDetails.prefetch({ id });
 
   return {
     props: {
-      // serverRecipe,
       trpcState: helpers.dehydrate(),
       id,
-      // },
     },
-    revalidate: 1,
+    revalidate: 10,
   };
 }

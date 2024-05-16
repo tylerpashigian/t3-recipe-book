@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { motion } from "framer-motion";
 import { IoHeart } from "react-icons/io5";
@@ -15,6 +15,10 @@ const LikeButton = ({
   onClick,
 }: Props) => {
   const [isLiked, setLiked] = useState(isInitiallyLiked);
+
+  useEffect(() => {
+    setLiked(isInitiallyLiked);
+  }, [isInitiallyLiked]);
 
   const handleClick = (event: React.FormEvent) => {
     event.preventDefault();
