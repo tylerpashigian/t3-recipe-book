@@ -1,16 +1,16 @@
+import { type FormEvent } from "react";
 import type {
   GetServerSidePropsContext,
   InferGetServerSidePropsType,
 } from "next";
+import { useRouter } from "next/router";
+
 import { getCsrfToken, getProviders, signIn } from "next-auth/react";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../server/auth";
+
 import Button, { ButtonSize } from "~/components/UI/button";
 import Separator from "~/components/UI/separator";
-import useInput from "../../hooks/useInput";
-import { type FormEvent } from "react";
-import { useRouter } from "next/router";
 import WithNavBar from "~/components/UI/with-nabvar";
+import useInput from "../../hooks/useInput";
 
 const Login = ({
   providers,
@@ -125,16 +125,7 @@ const Login = ({
 };
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const session = await getServerSession(context.req, context.res, authOptions);
   const csrfToken = await getCsrfToken(context);
-
-  // If the user is already logged in, redirect.
-  // Note: Make sure not to redirect to the same page
-  // To avoid an infinite loop!
-  if (session) {
-    return { redirect: { destination: "/" } };
-  }
-
   const providers = await getProviders();
 
   return {

@@ -16,6 +16,16 @@ const config = {
       },
     ],
   },
+  experimental: {
+    swcPlugins: [
+      [
+        "next-superjson-plugin",
+        {
+          excluded: [],
+        },
+      ],
+    ],
+  },
   reactStrictMode: true,
 
   /**

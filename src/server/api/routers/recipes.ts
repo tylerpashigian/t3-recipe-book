@@ -7,12 +7,15 @@ import {
 } from "~/server/api/trpc";
 
 export const recipesRouter = createTRPCRouter({
-  getAll: publicProcedure.query(async ({ ctx }) => {
-    // TODO: implement pagination as we scale
-    return await ctx.prisma.recipe.findMany({
-      select: { id: true, name: true },
-    });
-  }),
+  getAll: publicProcedure
+    .input(z.object({ max: z.number().optional() }))
+    .query(async ({ ctx, input }) => {
+      // TODO: implement pagination as we scale
+      return await ctx.prisma.recipe.findMany({
+        take: input.max,
+        select: { id: true, name: true },
+      });
+    }),
   getCategories: publicProcedure.query(async ({ ctx }) => {
     // TODO: implement pagination as we scale
     return await ctx.prisma.recipeCategory.findMany({

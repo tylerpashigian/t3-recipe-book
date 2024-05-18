@@ -44,6 +44,9 @@ dependencies:
   next-auth:
     specifier: ^4.22.4
     version: 4.23.1(next@13.5.6)(react-dom@18.2.0)(react@18.2.0)
+  next-superjson-plugin:
+    specifier: 0.6.1
+    version: 0.6.1(next@13.5.6)(superjson@1.13.1)
   react:
     specifier: 18.2.0
     version: 18.2.0
@@ -1768,6 +1771,12 @@ packages:
       function-bind: 1.1.1
     dev: true
 
+  /hoist-non-react-statics@3.3.2:
+    resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
+    dependencies:
+      react-is: 16.13.1
+    dev: false
+
   /ignore@5.2.4:
     resolution: {integrity: sha512-MAb38BcSbH0eHNBxn7ql2NH/kX33OkB3lZ1BNdh7ENeRChHTYsTvWrMubiIAMNS2llXEEgZ1MUOBtXChP3kaFQ==}
     engines: {node: '>= 4'}
@@ -2172,6 +2181,17 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       uuid: 8.3.2
+    dev: false
+
+  /next-superjson-plugin@0.6.1(next@13.5.6)(superjson@1.13.1):
+    resolution: {integrity: sha512-rhuLUey6+XZY+wUoF8uJNN146mYdkPmeKAmHZvVnCgocIVPwsYvY5qgIZBCCmeyJuEj67qctAdMk0eCXTyLmSw==}
+    peerDependencies:
+      next: ^13.0 || ^14.0
+      superjson: ^1 || ^2
+    dependencies:
+      hoist-non-react-statics: 3.3.2
+      next: 13.5.6(react-dom@18.2.0)(react@18.2.0)
+      superjson: 1.13.1
     dev: false
 
   /next@13.5.6(react-dom@18.2.0)(react@18.2.0):
@@ -2624,7 +2644,6 @@ packages:
 
   /react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
-    dev: true
 
   /react-ssr-prepass@1.5.0(react@18.2.0):
     resolution: {integrity: sha512-yFNHrlVEReVYKsLI5lF05tZoHveA5pGzjFbFJY/3pOqqjGOmMmqx83N4hIjN2n6E1AOa+eQEUxs3CgRnPmT0RQ==}
