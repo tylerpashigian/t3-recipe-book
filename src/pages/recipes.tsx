@@ -2,12 +2,22 @@ import Head from "next/head";
 import WithNavBar from "~/components/UI/with-nabvar";
 
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 
 import { api } from "~/utils/api";
+import { Input } from "~/components/UI/input";
+import Combobox from "~/components/UI/combobox";
+import { Category } from "~/models/recipe";
 
 const Recipes = () => {
-  const { data, isLoading } = api.recipes.getAll.useQuery({});
+  const [query, setQuery] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
+
+  const { data: categories } = api.recipes.getCategories.useQuery();
+  const { data, isLoading } = api.recipes.getAll.useQuery({
+    query,
+    categories: selectedCategories.map((category) => category.name),
+  });
 
   return (
     <>
@@ -27,6 +37,18 @@ const Recipes = () => {
                   data?.length > 0 &&
                   `${data.length} recipe(s)`}
               </p>
+              <Input
+                onChange={(query) => setQuery(query.target.value)}
+                value={query}
+              />
+              <div>
+                <Combobox
+                  classes="mt-2"
+                  options={categories ?? []}
+                  initialSelections={selectedCategories}
+                  onSelect={setSelectedCategories}
+                />
+              </div>
               <>
                 {!isLoading && data && data.length > 0
                   ? data.map((recipe) => (

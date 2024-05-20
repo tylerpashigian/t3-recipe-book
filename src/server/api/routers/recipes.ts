@@ -8,11 +8,28 @@ import {
 
 export const recipesRouter = createTRPCRouter({
   getAll: publicProcedure
-    .input(z.object({ max: z.number().optional() }))
+    .input(
+      z.object({
+        max: z.number().optional(),
+        query: z.string().optional(),
+        categories: z.string().array().optional(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       // TODO: implement pagination as we scale
       return await ctx.prisma.recipe.findMany({
         take: input.max,
+        where: {
+          name: { contains: input.query, mode: "insensitive" },
+          ...(input.categories?.length
+            ? {
+                categories: {
+                  some: { name: { in: input.categories, mode: "insensitive" } },
+                },
+              }
+            : {}),
+        },
+        orderBy: { favorites: { _count: "desc" } },
         select: { id: true, name: true },
       });
     }),

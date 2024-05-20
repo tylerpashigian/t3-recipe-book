@@ -13,7 +13,7 @@ const WithNavBar = ({ children }: any) => {
 
   return (
     <div
-      className={`absolute top-0 flex min-h-screen w-full items-center justify-center pt-[${navHeight}px]`}
+      className={`absolute top-0 flex w-full items-center justify-center pt-[${navHeight}px]`}
     >
       {children}
     </div>
