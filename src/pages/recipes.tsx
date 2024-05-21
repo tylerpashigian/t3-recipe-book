@@ -6,17 +6,19 @@ import React, { useState } from "react";
 
 import { api } from "~/utils/api";
 import { Input } from "~/components/UI/input";
-import Combobox from "~/components/UI/combobox";
-import { Category } from "~/models/recipe";
+import { Combobox, OptionType } from "~/components/UI/combobox";
+import { categoryToOption } from "~/models/mappings/recipe";
 
 const Recipes = () => {
   const [query, setQuery] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<OptionType[]>(
+    [],
+  );
 
   const { data: categories } = api.recipes.getCategories.useQuery();
   const { data, isLoading } = api.recipes.getAll.useQuery({
     query,
-    categories: selectedCategories.map((category) => category.name),
+    categories: selectedCategories.map((category) => category.value),
   });
 
   return (
@@ -41,14 +43,12 @@ const Recipes = () => {
                 onChange={(query) => setQuery(query.target.value)}
                 value={query}
               />
-              <div>
-                <Combobox
-                  classes="mt-2"
-                  options={categories ?? []}
-                  initialSelections={selectedCategories}
-                  onSelect={setSelectedCategories}
-                />
-              </div>
+              <Combobox
+                className="w-full"
+                options={[...(categories ?? []).map(categoryToOption)]}
+                selected={selectedCategories}
+                onChange={setSelectedCategories}
+              />
               <>
                 {!isLoading && data && data.length > 0
                   ? data.map((recipe) => (

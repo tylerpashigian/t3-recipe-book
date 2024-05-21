@@ -5,10 +5,17 @@
 import Link from "next/link";
 import React, { useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
-import Button, { ButtonSize } from "./button";
-import Drawer from "./drawer";
+import { Button } from "./button";
 import { useRouter } from "next/router";
 import { FaUser } from "react-icons/fa6";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "./sheet";
 
 type Props = {
   setIsDrawerOpen: (isOpen: boolean) => void;
@@ -32,15 +39,13 @@ export function AuthShowcase({ setIsDrawerOpen }: Props) {
         {displayName && <span>Logged in as {displayName}</span>}
       </p>
       <Button
-        size={ButtonSize.full}
-        onClickHandler={
-          sessionData ? () => void signOut() : () => void signIn()
-        }
+        className="w-full"
+        onClick={sessionData ? () => void signOut() : () => void signIn()}
       >
         <>{sessionData ? "Sign out" : "Sign in"}</>
       </Button>
       {!sessionData && (
-        <Button size={ButtonSize.full} onClickHandler={createHandler}>
+        <Button className="w-full" onClick={createHandler}>
           <>Create</>
         </Button>
       )}
@@ -52,6 +57,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { data: sessionData } = useSession();
   const router = useRouter();
+
   return (
     <>
       <header className="sticky top-0 z-10 flex items-center justify-between bg-white px-4 py-2 shadow-md dark:bg-gray-800">
@@ -79,11 +85,11 @@ const Navbar = () => {
         </nav>
         <div className="flex gap-2">
           {!!sessionData && (
-            <Button onClickHandler={() => void router.push("/recipe/create")}>
+            <Button onClick={() => void router.push("/recipe/create")}>
               <>Create Recipe</>
             </Button>
           )}
-          <Button onClickHandler={() => setIsOpen((prev) => !prev)}>
+          {/* <Button onClickHandler={() => setIsOpen((prev) => !prev)}>
             <>
               {sessionData ? (
                 <>
@@ -94,12 +100,31 @@ const Navbar = () => {
                 <>Login</>
               )}
             </>
-          </Button>
+          </Button> */}
+          <Sheet open={isOpen} onOpenChange={() => setIsOpen((prev) => !prev)}>
+            <SheetTrigger asChild>
+              <Button>
+                {sessionData ? (
+                  <div>
+                    <FaUser />
+                    <span className="sr-only">Toggle user menu</span>
+                  </div>
+                ) : (
+                  <>Login</>
+                )}
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Profile</SheetTitle>
+              </SheetHeader>
+              <SheetDescription>
+                <AuthShowcase setIsDrawerOpen={setIsOpen} />
+              </SheetDescription>
+            </SheetContent>
+          </Sheet>
         </div>
       </header>
-      <Drawer isOpen={isOpen} setIsOpen={setIsOpen} title="Menu">
-        <AuthShowcase setIsDrawerOpen={setIsOpen} />
-      </Drawer>
     </>
   );
 };

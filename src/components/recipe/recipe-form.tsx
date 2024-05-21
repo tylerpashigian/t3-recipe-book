@@ -1,12 +1,15 @@
 import { useState } from "react";
 import useInput from "~/hooks/useInput";
-import IngredientForm from "./ingredient-form";
-import Button, { ButtonStyle } from "../UI/button";
-import Combobox from "~/components/UI/combobox";
 import { IoClose } from "react-icons/io5";
 import { MdOutlineEdit } from "react-icons/md";
+import { Button } from "../UI/button";
+import { Input } from "../UI/input";
+import { Combobox } from "../UI/combobox";
+import { Textarea } from "../UI/textarea";
+import IngredientForm from "./ingredient-form";
 import { type Ingredient } from "~/models/ingredient";
 import { type Recipe, type Category } from "~/models/recipe";
+import { categoryToOption, optionToCategory } from "~/models/mappings/recipe";
 
 export enum IngredientFormType {
   Add,
@@ -36,7 +39,7 @@ const RecipeForm = ({
   } = recipe ?? {};
   const [ingredients, setIngredients] = useState(recipeIngredients ?? []);
   const [selectedCategories, setSelectedCategories] = useState([
-    ...(recipe?.categories ?? []),
+    ...(recipe?.categories.map(categoryToOption) ?? []),
   ]);
   const [editableIngredient, setEditableIngredient] =
     useState<Ingredient | null>(null);
@@ -110,17 +113,13 @@ const RecipeForm = ({
       description: recipeDescription,
       instructions: recipeInstrcutions,
       ingredients: ingredients,
-      categories: selectedCategories,
+      categories: selectedCategories.map(optionToCategory),
     };
 
     try {
       await onSubmit?.(recipeToUpsert);
       reset();
     } catch (error) {}
-  };
-
-  const categoryHandler = (options: Category[]) => {
-    setSelectedCategories(options);
   };
 
   const isCreating = recipe === undefined;
@@ -136,10 +135,10 @@ const RecipeForm = ({
           <label htmlFor="recipe-name" className="font-bold">
             Recipe Name
           </label>
-          <input
+          <Input
             type="text"
             id="recipe-name"
-            className="form-input mt-2 w-full rounded-xl px-4 py-3 text-black"
+            className="mt-2 w-full px-4 py-3 text-black"
             value={recipeName}
             onChange={recipeNameHandler}
             onBlur={recipeNameBlurHandler}
@@ -151,20 +150,20 @@ const RecipeForm = ({
         <div>
           <label className="font-bold">Recipe Categories</label>
           <Combobox
-            classes="mt-2"
-            options={categories}
-            initialSelections={selectedCategories}
-            onSelect={categoryHandler}
+            className="mt-2"
+            options={[...(categories ?? []).map(categoryToOption)]}
+            selected={selectedCategories}
+            onChange={setSelectedCategories}
           />
         </div>
         <div>
           <label htmlFor="recipe-description" className="font-bold">
             Recipe Description
           </label>
-          <input
+          <Input
             type="text"
             id="recipe-description"
-            className="form-input mt-2 w-full rounded-xl px-4 py-3 text-black"
+            className="mt-2 w-full px-4 py-3 text-black"
             value={recipeDescription}
             onChange={recipeDescriptionHandler}
           />
@@ -173,9 +172,9 @@ const RecipeForm = ({
           <label htmlFor="recipe-instructions" className="font-bold">
             Instructions
           </label>
-          <textarea
+          <Textarea
             id="recipe-instructions"
-            className="form-input mt-2 w-full rounded-xl px-4 py-3 text-black"
+            className="mt-2 w-full rounded-xl px-4 py-3 text-black"
             rows={3}
             value={recipeInstrcutions}
             onChange={recipeInstructionsHandler}
@@ -219,18 +218,13 @@ const RecipeForm = ({
       />
       <div className="mx-auto flex justify-center gap-2 pt-6">
         {!isCreating && (
-          <Button style={ButtonStyle.secondary} onClickHandler={onCancel}>
+          <Button variant={"secondary"} onClick={onCancel}>
             <>Cancel</>
           </Button>
         )}
         <Button
           type="submit"
           disabled={isLoading || recipeFormIsInvalid || !recipeIsValid}
-          style={
-            isLoading || recipeFormIsInvalid || !recipeIsValid
-              ? ButtonStyle.disabled
-              : ButtonStyle.primary
-          }
         >
           <>{isLoading ? "Loading" : buttonText}</>
         </Button>
