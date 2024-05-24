@@ -24,7 +24,7 @@ export const recipesRouter = createTRPCRouter({
           ...(input.categories?.length
             ? {
                 categories: {
-                  some: { name: { in: input.categories, mode: "insensitive" } },
+                  some: { id: { in: input.categories, mode: "insensitive" } },
                 },
               }
             : {}),

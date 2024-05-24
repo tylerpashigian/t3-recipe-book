@@ -1,125 +1,155 @@
-import React, { useState } from "react";
-import { Combobox as HeadlessCombobox, Transition } from "@headlessui/react";
-import { HiOutlineCheck, HiOutlineSelector } from "react-icons/hi";
+import * as React from "react";
+import { cn } from "~/lib/utils";
+import { Check, ChevronsUpDown, X } from "lucide-react";
 
-type Options = {
-  id: string;
-  name: string;
-};
+import { Badge } from "~/components/UI/badge";
+import { Button } from "~/components/UI/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "~/components/UI/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/UI/popover";
 
-type Props<T, P> = {
-  options: T extends Options ? T[] : never;
-  initialSelections: P extends Options ? P[] : never;
-  classes?: string;
-  onSelect?: (options: T[]) => void;
-};
+export type OptionType = Record<"value" | "label", string>;
 
-const Combobox = <T extends Options, P extends Options>({
-  options,
-  initialSelections,
-  classes,
-  onSelect,
-}: Props<T, P>) => {
-  const [query, setQuery] = useState("");
+interface ComboboxProps {
+  options: Record<"value" | "label", string>[];
+  selected: Record<"value" | "label", string>[];
+  onChange: React.Dispatch<
+    React.SetStateAction<Record<"value" | "label", string>[]>
+  >;
+  className?: string;
+  placeholder?: string;
+}
 
-  const filteredOptions =
-    query === ""
-      ? options ?? []
-      : (options ?? []).filter((option) => {
-          return option.name.toLowerCase().includes(query.toLowerCase());
-        });
+const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
+  ({ options, selected, onChange, className, ...props }, ref) => {
+    const [open, setOpen] = React.useState(false);
 
-  const [selectedOptions, setSelectedOptions] = useState<T[]>(
-    options.filter((option) =>
-      initialSelections.some(
-        (selectedOption) => option.id === selectedOption.id,
-      ),
-    ) as T[],
-  );
+    const handleUnselect = (item: Record<"value" | "label", string>) => {
+      onChange(selected.filter((i) => i.value !== item.value));
+    };
 
-  const changeHandler = (options: T[]) => {
-    setSelectedOptions(options);
-    onSelect?.(options);
-  };
+    // on delete key press, remove last selected item
+    React.useEffect(() => {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Backspace" && selected.length > 0) {
+          onChange(
+            selected.filter((_, index) => index !== selected.length - 1),
+          );
+        }
 
-  return (
-    <div className={classes}>
-      <HeadlessCombobox
-        value={selectedOptions}
-        onChange={changeHandler}
-        multiple
-      >
-        <div className="relative">
-          {selectedOptions.length ? (
-            <p className="mb-2">{selectedOptions.length} Selections</p>
-          ) : null}
-          <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
-            <HeadlessCombobox.Input
-              className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0"
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search for category"
-            />
-            <HeadlessCombobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-              <HiOutlineSelector
-                className="h-5 w-5 text-gray-400"
-                aria-hidden="true"
-              />
-            </HeadlessCombobox.Button>
-          </div>
-          <Transition
-            leave="transition ease-in duration-100"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-            afterLeave={() => setQuery("")}
+        // close on escape
+        if (e.key === "Escape") {
+          setOpen(false);
+        }
+      };
+
+      document.addEventListener("keydown", handleKeyDown);
+
+      return () => {
+        document.removeEventListener("keydown", handleKeyDown);
+      };
+    }, [onChange, selected]);
+
+    return (
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild className={className}>
+          <Button
+            ref={ref}
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className={`group w-full justify-between ${
+              selected.length > 1 ? "h-full" : "h-10"
+            }`}
+            onClick={() => setOpen(!open)}
           >
-            <HeadlessCombobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm">
-              {filteredOptions.length === 0 && query !== "" ? (
-                <div className="relative cursor-default select-none px-4 py-2 text-gray-700">
-                  Nothing found.
-                </div>
-              ) : (
-                filteredOptions.map((option) => (
-                  <HeadlessCombobox.Option
-                    key={option.id}
-                    className={({ active }) =>
-                      `relative flex cursor-default select-none py-2 pl-4 pr-10 hover:cursor-pointer ${
-                        active ? "bg-gray-600 text-white" : "text-gray-900"
-                      }`
-                    }
-                    value={option}
+            <>
+              <div className="flex flex-wrap items-center gap-1">
+                {selected.map((item) => (
+                  <Badge
+                    variant="outline"
+                    key={item.value}
+                    className="flex items-center gap-1 group-hover:bg-background"
+                    onClick={() => handleUnselect(item)}
                   >
-                    {({ selected, active }) => (
-                      <div className="row flex">
-                        <span
-                          className={`block truncate ${
-                            selected ? "font-medium" : "font-normal"
-                          }`}
-                        >
-                          {option.name}
-                        </span>
-                        {selected ? (
-                          <span
-                            className={`absolute inset-y-0 right-0 flex items-center pr-4 ${
-                              active ? "text-white" : "text-gray-600"
-                            }`}
-                          >
-                            <HiOutlineCheck
-                              className="h-5 w-5"
-                              aria-hidden="true"
-                            />
-                          </span>
-                        ) : null}
-                      </div>
+                    {item.label}
+                    <Button
+                      asChild
+                      variant="outline"
+                      size="badgeIcon"
+                      className="border-none"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleUnselect(item);
+                        }
+                      }}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleUnselect(item);
+                      }}
+                    >
+                      <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                    </Button>
+                  </Badge>
+                ))}
+                {selected.length === 0 && (
+                  <span>{props.placeholder ?? "Select ..."}</span>
+                )}
+              </div>
+              <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+            </>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-full p-0">
+          <Command className={className}>
+            <CommandInput placeholder="Search ..." />
+            <CommandEmpty>No item found.</CommandEmpty>
+            <CommandGroup className="max-h-64 overflow-auto">
+              {options.map((option) => (
+                <CommandItem
+                  key={option.value}
+                  onSelect={() => {
+                    onChange(
+                      selected.some((item) => item.value === option.value)
+                        ? selected.filter((item) => item.value !== option.value)
+                        : [...selected, option],
+                    );
+                    setOpen(true);
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      selected.some((item) => item.value === option.value)
+                        ? "opacity-100"
+                        : "opacity-0",
                     )}
-                  </HeadlessCombobox.Option>
-                ))
-              )}
-            </HeadlessCombobox.Options>
-          </Transition>
-        </div>
-      </HeadlessCombobox>
-    </div>
-  );
-};
+                  />
+                  {option.label}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    );
+  },
+);
 
-export default Combobox;
+Combobox.displayName = "Combobox";
+
+export { Combobox };

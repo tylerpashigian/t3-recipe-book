@@ -2,8 +2,8 @@ import React from "react";
 
 import { useSession } from "next-auth/react";
 
-import Button from "~/components/UI/button";
 import { type Recipe } from "~/models/recipe";
+import { Button } from "../UI/button";
 import LikeButton from "~/components/UI/like-button";
 // import { getQueryKey } from "@trpc/react-query";
 
@@ -28,7 +28,7 @@ const RecipeDetails = ({
   const { data: sessionData } = useSession();
 
   return (
-    <div className="container mx-auto flex w-full flex-col space-y-2">
+    <div className="mx-auto flex w-full flex-col space-y-2">
       <div className="mb-4 grid grid-cols-1 content-between items-center gap-4 md:grid-cols-2 lg:py-3">
         <div className="flex w-full flex-col items-start gap-1 lg:flex-row lg:items-center lg:gap-3">
           <h3 className="text-lg font-bold text-black">{recipe.name}</h3>
@@ -44,10 +44,10 @@ const RecipeDetails = ({
         </div>
         {sessionData?.user.id === recipe.authorId && (
           <div className="grid w-full grid-cols-2 justify-center gap-2 md:flex md:w-auto md:justify-end">
-            <Button onClickHandler={pageTypeHandler}>
+            <Button onClick={pageTypeHandler}>
               <>Edit</>
             </Button>
-            <Button onClickHandler={() => void onDelete()}>
+            <Button onClick={() => void onDelete()}>
               <>Delete</>
             </Button>
           </div>

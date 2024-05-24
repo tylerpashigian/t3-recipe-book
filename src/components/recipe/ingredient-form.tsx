@@ -4,6 +4,7 @@ import { IoAdd } from "react-icons/io5";
 import useInput from "~/hooks/useInput";
 import { IngredientFormType } from "./recipe-form";
 import { type Ingredient } from "~/models/ingredient";
+import { Input } from "../UI/input";
 
 type Props = {
   ingredient?: Ingredient | null;
@@ -77,9 +78,9 @@ const IngredientForm = ({
       </p>
       <div className="mb-md-3 mb-0 mt-2 flex items-center gap-2">
         <div>
-          <input
+          <Input
             type="text"
-            className="form-input w-full rounded-xl px-4 py-3 text-black"
+            className="w-full px-4 py-3 text-black"
             value={ingredientName}
             onChange={ingredientNameHandler}
             onBlur={ingredientNameBlurHandler}
@@ -88,9 +89,9 @@ const IngredientForm = ({
           />
         </div>
         <div>
-          <input
+          <Input
             type="text"
-            className="form-input w-full rounded-xl px-4 py-3 text-black"
+            className="w-full px-4 py-3 text-black"
             value={ingredientQuantity}
             onChange={ingredientQuantityHandler}
             placeholder="Ingredient quantity"
