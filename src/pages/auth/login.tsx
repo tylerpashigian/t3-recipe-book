@@ -112,7 +112,11 @@ const Login = ({
                 <div key={provider.name} className="">
                   {provider.name !== "credentials" ? (
                     <>
-                      <button onClick={() => void signIn(provider.id)}>
+                      <button
+                        onClick={() =>
+                          void signIn(provider.id, { callbackUrl: "/" })
+                        }
+                      >
                         Sign in with {provider.name}
                       </button>
                     </>
