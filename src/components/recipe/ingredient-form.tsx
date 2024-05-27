@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 import { v4 as uuidv4 } from "uuid";
 import { IoAdd } from "react-icons/io5";
 
@@ -34,6 +36,14 @@ const IngredientForm = ({
     valueHandler: ingredientQuantityHandler,
     reset: resetTngredientQuantityInput,
   } = useInput(() => true, ingredient?.quantity ?? undefined);
+
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    viewState === IngredientFormType.Edit &&
+      inputRef.current &&
+      inputRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [viewState, inputRef.current, ingredient]);
 
   const addIngredientLocal = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -79,6 +89,7 @@ const IngredientForm = ({
       <div className="mb-md-3 mb-0 mt-2 flex items-center gap-2">
         <div>
           <Input
+            ref={inputRef}
             type="text"
             className="w-full px-4 py-3 text-black"
             value={ingredientName}
