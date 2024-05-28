@@ -3,8 +3,10 @@ import React from "react";
 import { useSession } from "next-auth/react";
 
 import { type Recipe } from "~/models/recipe";
+import { type Author } from "~/models/author";
 import { Button } from "../UI/button";
 import LikeButton from "~/components/UI/like-button";
+import Link from "next/link";
 // import { getQueryKey } from "@trpc/react-query";
 
 export enum DetailsPageType {
@@ -14,6 +16,7 @@ export enum DetailsPageType {
 
 type Props = {
   recipe: Recipe;
+  author?: Author;
   pageTypeHandler: () => void;
   onDelete: () => Promise<void>;
   onFavorite: (favorited: boolean) => Promise<void>;
@@ -21,11 +24,14 @@ type Props = {
 
 const RecipeDetails = ({
   recipe,
+  author,
   pageTypeHandler,
   onDelete,
   onFavorite,
 }: Props) => {
   const { data: sessionData } = useSession();
+
+  const displayName = author?.name ?? author?.username;
 
   return (
     <div className="mx-auto flex w-full flex-col space-y-2">
@@ -80,6 +86,14 @@ const RecipeDetails = ({
           })}
         </div>
       ) : null}
+      {author && displayName && (
+        <Link href={`/profile/${author.id}`}>
+          Author:
+          <Button className="px-2" variant={"link"}>
+            {displayName}
+          </Button>
+        </Link>
+      )}
     </div>
   );
 };
