@@ -137,6 +137,7 @@ export default function Recipe({ id }: { id: string }) {
                   <>
                     {pageType === DetailsPageType.Details && (
                       <RecipeDetails
+                        author={data?.author}
                         recipe={recipe}
                         pageTypeHandler={pageTypeHandler}
                         onDelete={deleteHandler}

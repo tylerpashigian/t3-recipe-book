@@ -34,21 +34,27 @@ export function AuthShowcase({ setIsDrawerOpen }: Props) {
     sessionData?.user.name ?? sessionData?.user?.username;
 
   return (
-    <div className="flex flex-col items-start space-y-3">
-      <p className="text-center text-2xl">
+    <div className="flex min-w-[20vw] flex-col items-start space-y-3">
+      <p className="text-center text-lg font-bold text-black">
         {displayName && <span>Logged in as {displayName}</span>}
       </p>
+      {!!sessionData ? (
+        <Link className="w-full" href={`/profile/${sessionData?.user.id}`}>
+          <Button className="w-full" onClick={() => setIsDrawerOpen(false)}>
+            <>View Profile</>
+          </Button>
+        </Link>
+      ) : (
+        <Button className="w-full" onClick={createHandler}>
+          <>Create</>
+        </Button>
+      )}
       <Button
         className="w-full"
         onClick={sessionData ? () => void signOut() : () => void signIn()}
       >
         <>{sessionData ? "Sign out" : "Sign in"}</>
       </Button>
-      {!sessionData && (
-        <Button className="w-full" onClick={createHandler}>
-          <>Create</>
-        </Button>
-      )}
     </div>
   );
 }
@@ -89,18 +95,6 @@ const Navbar = () => {
               <>Create Recipe</>
             </Button>
           )}
-          {/* <Button onClickHandler={() => setIsOpen((prev) => !prev)}>
-            <>
-              {sessionData ? (
-                <>
-                  <FaUser />
-                  <span className="sr-only">Toggle user menu</span>
-                </>
-              ) : (
-                <>Login</>
-              )}
-            </>
-          </Button> */}
           <Sheet open={isOpen} onOpenChange={() => setIsOpen((prev) => !prev)}>
             <SheetTrigger asChild>
               <Button>

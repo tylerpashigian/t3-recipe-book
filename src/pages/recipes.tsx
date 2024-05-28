@@ -8,6 +8,7 @@ import { api } from "~/utils/api";
 import { Input } from "~/components/UI/input";
 import { Combobox, OptionType } from "~/components/UI/combobox";
 import { categoryToOption } from "~/models/mappings/recipe";
+import { Button } from "~/components/UI/button";
 
 const Recipes = () => {
   const [query, setQuery] = useState("");
@@ -53,7 +54,7 @@ const Recipes = () => {
                 {!isLoading && data && data.length > 0
                   ? data.map((recipe) => (
                       <Link href={`/recipe/${recipe.id}`} key={recipe.id}>
-                        <p>{recipe.name}</p>
+                        <Button variant={"link"}>{recipe.name}</Button>
                       </Link>
                     ))
                   : null}
