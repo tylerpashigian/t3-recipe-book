@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useLayoutEffect, useState } from "react";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const WithNavBar = ({ children, classes }: any) => {
   const [navHeight, setNavHeight] = useState(0);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const navBar = document.querySelector("header");
     if (navBar) {
       setNavHeight(navBar.offsetHeight);
@@ -13,7 +13,10 @@ const WithNavBar = ({ children, classes }: any) => {
 
   return (
     <div
-      className={`absolute top-0 flex w-full items-center justify-center pt-[${navHeight}px] ${classes}`}
+      className={`absolute top-0 min-h-[calc(100dvh)] w-full justify-center ${classes}`}
+      style={{
+        paddingTop: `${navHeight}px`,
+      }}
     >
       {children}
     </div>

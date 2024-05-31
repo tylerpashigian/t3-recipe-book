@@ -54,8 +54,8 @@ function Register() {
 
   return (
     <WithNavBar>
-      <div className="flex h-screen items-center justify-center">
-        <div className="mx-auto max-w-lg space-y-6 rounded p-4 shadow-md">
+      <main className="flex flex-col">
+        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
           <div className="space-y-2 text-center">
             <h1 className="text-3xl font-bold">Create Account</h1>
             <p className="text-zinc-500 dark:text-zinc-400">
@@ -91,7 +91,7 @@ function Register() {
                 >
                   Password
                 </label>
-                <input
+                <Input
                   className="mt-2 w-full px-4 py-3 text-black"
                   id="password"
                   required
@@ -139,12 +139,12 @@ function Register() {
                 <>Sign Up</>
               </Button>
               <Link href="/auth/login" className="text-center">
-                Have an account? Sign in
+                <Button variant={"ghost"}>Have an account? Sign in</Button>
               </Link>
             </div>
           </form>
         </div>
-      </div>
+      </main>
     </WithNavBar>
   );
 }
