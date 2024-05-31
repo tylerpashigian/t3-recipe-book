@@ -12,10 +12,8 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <WithNavBar>
-        <main className="container absolute bottom-0 left-0 right-0 top-0 flex flex-col items-center justify-center gap-12 px-4">
-          <div className="flex flex-col items-center gap-2">
-            <Hero />
-          </div>
+        <main>
+          <Hero />
         </main>
       </WithNavBar>
     </>

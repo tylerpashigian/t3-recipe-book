@@ -1,10 +1,22 @@
-import React from "react";
+import React, { useLayoutEffect, useState } from "react";
 import Link from "next/link";
 
 const Hero = () => {
+  const [navHeight, setNavHeight] = useState(0);
+
+  useLayoutEffect(() => {
+    const navBar = document.querySelector("header");
+    if (navBar) {
+      setNavHeight(navBar.offsetHeight);
+    }
+  }, []);
+
   return (
-    <section className="w-full">
-      <div className="container grid items-center gap-4 px-4 lg:grid-cols-2 lg:gap-8 ">
+    <section
+      style={{ height: `calc(100dvh - ${navHeight}px)` }}
+      className={"w-full items-center"}
+    >
+      <div className="container grid h-full items-center justify-center gap-4 px-4 lg:grid-cols-2 lg:gap-8">
         <div className="hidden lg:block">
           <img
             alt="Hero Image"
