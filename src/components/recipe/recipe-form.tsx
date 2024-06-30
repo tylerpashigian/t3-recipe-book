@@ -128,7 +128,7 @@ const RecipeForm = ({
   return (
     <form
       onSubmit={(event) => void onSubmitHandler(event)}
-      className="space-y-2"
+      className="w-full space-y-2 md:w-1/2"
     >
       <div className="flex flex-col space-y-2">
         <div>
@@ -188,7 +188,7 @@ const RecipeForm = ({
             return (
               <div
                 key={ingredient.ingredientId}
-                className="flex items-center justify-between gap-2"
+                className="flex w-full items-center justify-between gap-2"
               >
                 <p>
                   {ingredient.name}{" "}

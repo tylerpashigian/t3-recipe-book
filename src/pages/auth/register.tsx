@@ -55,7 +55,7 @@ function Register() {
   return (
     <WithNavBar>
       <main className="flex flex-col">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
+        <div className="container flex flex-col items-center justify-center gap-12 py-8 md:py-16">
           <div className="space-y-2 text-center">
             <h1 className="text-3xl font-bold">Create Account</h1>
             <p className="text-zinc-500 dark:text-zinc-400">

@@ -31,8 +31,8 @@ const Recipes = () => {
       </Head>
       <WithNavBar>
         <main className="flex flex-col">
-          <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-            <div className="flex flex-col items-center gap-2">
+          <div className="container flex flex-col items-center justify-center gap-12 py-8 md:py-16">
+            <div className="flex w-full flex-col items-center gap-2 md:w-1/2">
               <p className="text-2xl">
                 {isLoading && "Loading..."}
                 {!isLoading &&

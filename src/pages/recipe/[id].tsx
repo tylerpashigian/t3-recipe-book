@@ -129,9 +129,9 @@ export default function Recipe({ id }: { id: string }) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <WithNavBar>
-        <main className="flex flex-col">
-          <div className="container flex flex-col items-center justify-center gap-12 py-16">
-            <div className="flex flex-col items-center gap-2">
+        <main className="flex w-full flex-col">
+          <div className="container flex w-full flex-col items-center justify-center gap-12 py-8 md:py-16">
+            <div className="flex w-full flex-col items-center gap-2">
               <>
                 {recipe && !isLoading && (
                   <>

@@ -44,16 +44,12 @@ export default function CreateRecipe() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <WithNavBar>
-        <main className="flex flex-col">
-          <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-            <div className="flex flex-col items-center gap-2">
-              <RecipeForm
-                categories={categories}
-                onSubmit={onCreate}
-                isLoading={isLoading}
-              />
-            </div>
-          </div>
+        <main className="container flex flex-col items-center justify-center gap-12 py-8 md:py-16">
+          <RecipeForm
+            categories={categories}
+            onSubmit={onCreate}
+            isLoading={isLoading}
+          />
         </main>
       </WithNavBar>
     </>
