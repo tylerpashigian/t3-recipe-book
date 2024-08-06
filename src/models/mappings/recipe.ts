@@ -1,5 +1,5 @@
-import { OptionType } from "~/components/UI/combobox";
-import { Category } from "../recipe";
+import { type OptionType } from "~/components/UI/combobox";
+import { type Category } from "../recipe";
 
 export const categoryToOption = (category: Category): OptionType => {
   return {

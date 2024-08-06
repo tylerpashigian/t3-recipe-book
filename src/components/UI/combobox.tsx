@@ -22,9 +22,7 @@ export type OptionType = Record<"value" | "label", string>;
 interface ComboboxProps {
   options: Record<"value" | "label", string>[];
   selected: Record<"value" | "label", string>[];
-  onChange: React.Dispatch<
-    React.SetStateAction<Record<"value" | "label", string>[]>
-  >;
+  onChange: (value: OptionType[]) => void;
   className?: string;
   placeholder?: string;
 }
@@ -40,11 +38,11 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
     // on delete key press, remove last selected item
     React.useEffect(() => {
       const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === "Backspace" && selected.length > 0) {
-          onChange(
-            selected.filter((_, index) => index !== selected.length - 1),
-          );
-        }
+        // if (e.key === "Backspace" && selected.length > 0) {
+        //   onChange(
+        //     selected.filter((_, index) => index !== selected.length - 1),
+        //   );
+        // }
 
         // close on escape
         if (e.key === "Escape") {

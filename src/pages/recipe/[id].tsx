@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { GetStaticPropsContext } from "next";
+import { type GetStaticPropsContext } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
 

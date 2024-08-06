@@ -1,130 +1,125 @@
-import { useEffect, useRef } from "react";
-
-import { v4 as uuidv4 } from "uuid";
-import { IoAdd } from "react-icons/io5";
-
-import useInput from "~/hooks/useInput";
-import { IngredientFormType } from "./recipe-form";
-import { type Ingredient } from "~/models/ingredient";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { IoClose } from "react-icons/io5";
+import { MdOutlineCheck, MdOutlineEdit } from "react-icons/md";
+import { Button } from "../UI/button";
 import { Input } from "../UI/input";
-
-type Props = {
-  ingredient?: Ingredient | null;
-  updateIngredient: (ingredient: Ingredient) => void;
-  addIngredient: (ingredient: Ingredient) => void;
-  recipeId?: string;
-  viewState: IngredientFormType;
-};
+import { type Ingredient } from "~/models/ingredient";
+import { type Recipe } from "~/models/recipe";
+import { type useForm } from "@tanstack/react-form";
 
 const IngredientForm = ({
-  ingredient = null,
-  updateIngredient,
-  addIngredient,
-  recipeId,
-  viewState,
-}: Props) => {
-  const {
-    inputValue: ingredientName,
-    isInputInvalid: ingredientNameInputIsInvalid,
-    valueHandler: ingredientNameHandler,
-    reset: resetIngredientNameInput,
-    blurHandler: ingredientNameBlurHandler,
-  } = useInput((value: string) => value.trim() !== "", ingredient?.name);
+  ingredient,
+  i,
+  form,
+  onDelete,
+  onEditIngredient,
+}: {
+  ingredient: Ingredient;
+  i: number;
+  form: ReturnType<typeof useForm<Partial<Recipe>>>;
+  onDelete: (id: string) => void;
+  onEditIngredient: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
+  const [isEditing, setIsEditing] = useState(ingredient.name === "");
 
-  const {
-    inputValue: ingredientQuantity,
-    valueHandler: ingredientQuantityHandler,
-    reset: resetTngredientQuantityInput,
-  } = useInput(() => true, ingredient?.quantity ?? undefined);
-
-  const inputRef = useRef<HTMLInputElement>(null);
+  const ingredientRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    viewState === IngredientFormType.Edit &&
-      inputRef.current &&
-      inputRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-  }, [viewState, inputRef.current, ingredient]);
+    if (isEditing && ingredientRef.current) {
+      ingredientRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [isEditing]);
 
-  const addIngredientLocal = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    const ingredient = {
-      // Temp id to manage local state
-      ingredientId: uuidv4(),
-      name: ingredientName,
-      quantity: ingredientQuantity,
-      // TODO: create a new interface with optional id?
-      recipeId: recipeId ?? "",
-    };
+  useLayoutEffect(() => {
+    onEditIngredient(isEditing);
+  }, [isEditing, onEditIngredient]);
 
-    addIngredient(ingredient);
-    resetForm();
-  };
+  const state = form.useStore();
 
-  const updateIngredientLocal = (
-    event: React.MouseEvent<HTMLButtonElement>,
-  ) => {
-    event.preventDefault();
-    !!ingredient &&
-      updateIngredient({
-        recipeId: ingredient.recipeId,
-        ingredientId: ingredient.ingredientId,
-        name: ingredientName,
-        quantity: ingredientQuantity,
-      });
-    resetForm();
-  };
-
-  const resetForm = () => {
-    resetIngredientNameInput();
-    resetTngredientQuantityInput();
-  };
+  const nameError = "Please enter an ingredient name";
+  const nameIsEmpty = state.values.ingredients?.[i]?.name === "" ?? true;
 
   return (
-    <div className="flex flex-col">
-      <p className="font-bold">
-        {viewState === IngredientFormType.Edit
-          ? "Update Ingredient"
-          : "Add Ingredient"}
-      </p>
-      <div className="mb-md-3 mb-0 mt-2 flex items-center gap-2">
-        <div>
-          <Input
-            ref={inputRef}
-            type="text"
-            className="w-full px-4 py-3 text-black"
-            value={ingredientName}
-            onChange={ingredientNameHandler}
-            onBlur={ingredientNameBlurHandler}
-            placeholder="Ingredient name"
-            aria-label="Ingredient name"
-          />
-        </div>
-        <div>
-          <Input
-            type="text"
-            className="w-full px-4 py-3 text-black"
-            value={ingredientQuantity}
-            onChange={ingredientQuantityHandler}
-            placeholder="Ingredient quantity"
-            aria-label="Ingredient quantity"
-          />
-        </div>
-        <div className="flex items-center">
-          <button
-            disabled={ingredientNameInputIsInvalid}
-            onClick={
-              viewState === IngredientFormType.Edit
-                ? updateIngredientLocal
-                : addIngredientLocal
-            }
-          >
-            {viewState === IngredientFormType.Edit ? "Update" : <IoAdd />}
-          </button>
-        </div>
+    <div
+      className="flex w-full items-center justify-between gap-2"
+      ref={ingredientRef}
+    >
+      <div className="flex gap-2">
+        <form.Field
+          key={`ingredients[${i}].name`}
+          name={`ingredients[${i}].name`}
+          validators={{
+            onChange: ({ value }) => (value === "" ? nameError : undefined),
+            onBlur: ({ value }) => (value === "" ? nameError : undefined),
+          }}
+        >
+          {(subfield) =>
+            isEditing ? (
+              <Input
+                name={subfield.name}
+                id={subfield.name}
+                type="text"
+                className={`w-full px-4 py-3 text-black ${
+                  subfield.state.meta.errors.length ? "border-red-400" : null
+                }`}
+                value={subfield.state.value}
+                onChange={(e) => subfield.handleChange(e.target.value)}
+                onBlur={subfield.handleBlur}
+                placeholder="Ingredient name"
+                aria-label="Ingredient name"
+              />
+            ) : (
+              <p>{subfield.state.value}</p>
+            )
+          }
+        </form.Field>
+        <form.Field
+          key={`ingredients[${i}].quanitity`}
+          name={`ingredients[${i}].quantity`}
+        >
+          {(subfield) =>
+            isEditing ? (
+              <Input
+                name={subfield.name}
+                id={subfield.name}
+                type="text"
+                className="w-full px-4 py-3 text-black"
+                value={subfield.state.value ?? ""}
+                onBlur={subfield.handleBlur}
+                onChange={(e) => subfield.handleChange(e.target.value)}
+                placeholder="Ingredient quantity"
+                aria-label="Ingredient quantity"
+              />
+            ) : subfield.state.value ? (
+              <p>({subfield.state.value})</p>
+            ) : null
+          }
+        </form.Field>
       </div>
-      {ingredientNameInputIsInvalid && (
-        <p className="mt-2 text-red-400">Please enter an ingredient name</p>
-      )}
+      <div className="flex gap-2 hover:cursor-pointer">
+        <Button
+          variant={"ghost"}
+          disabled={nameIsEmpty}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsEditing((prev) => {
+              return !prev;
+            });
+          }}
+        >
+          {isEditing ? <MdOutlineCheck /> : <MdOutlineEdit />}
+        </Button>
+        <Button
+          variant={"ghost"}
+          onClick={(e) => {
+            e.preventDefault();
+            onDelete(ingredient.ingredientId);
+          }}
+        >
+          <IoClose />
+        </Button>
+      </div>
     </div>
   );
 };
