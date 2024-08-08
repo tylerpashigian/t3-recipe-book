@@ -3,7 +3,7 @@ import React from "react";
 import superjson from "superjson";
 import prisma from "../../utils/prisma";
 import { createServerSideHelpers } from "@trpc/react-query/server";
-import { User, Recipe } from "@prisma/client";
+import { type User, type Recipe } from "@prisma/client";
 
 import {
   Avatar,
@@ -20,7 +20,7 @@ import {
 import { FaUser } from "react-icons/fa6";
 
 import { appRouter } from "../../server/api/root";
-import { GetServerSidePropsContext } from "next";
+import { type GetServerSidePropsContext } from "next";
 import Link from "next/link";
 import { Button } from "~/components/UI/button";
 import WithNavBar from "~/components/UI/with-nabvar";

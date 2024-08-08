@@ -6,7 +6,7 @@ import React, { useState } from "react";
 
 import { api } from "~/utils/api";
 import { Input } from "~/components/UI/input";
-import { Combobox, OptionType } from "~/components/UI/combobox";
+import { Combobox, type OptionType } from "~/components/UI/combobox";
 import { categoryToOption } from "~/models/mappings/recipe";
 import { Button } from "~/components/UI/button";
 

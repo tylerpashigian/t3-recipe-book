@@ -1,15 +1,14 @@
 import { useState } from "react";
-import useInput from "~/hooks/useInput";
-import { IoClose } from "react-icons/io5";
-import { MdOutlineEdit } from "react-icons/md";
 import { Button } from "../UI/button";
 import { Input } from "../UI/input";
-import { Combobox } from "../UI/combobox";
+import { Combobox, type OptionType } from "../UI/combobox";
 import { Textarea } from "../UI/textarea";
-import IngredientForm from "./ingredient-form";
+import { v4 as uuidv4 } from "uuid";
 import { type Ingredient } from "~/models/ingredient";
 import { type Recipe, type Category } from "~/models/recipe";
 import { categoryToOption, optionToCategory } from "~/models/mappings/recipe";
+import { type FieldApi, useForm } from "@tanstack/react-form";
+import IngredientForm from "./ingredient-form";
 
 export enum IngredientFormType {
   Add,
@@ -37,197 +36,238 @@ const RecipeForm = ({
     instructions,
     name,
   } = recipe ?? {};
-  const [ingredients, setIngredients] = useState(recipeIngredients ?? []);
-  const [selectedCategories, setSelectedCategories] = useState([
-    ...(recipe?.categories.map(categoryToOption) ?? []),
-  ]);
-  const [editableIngredient, setEditableIngredient] =
-    useState<Ingredient | null>(null);
-  const [ingredientFormState, setIngredientFormState] = useState(
-    IngredientFormType.Add,
-  );
+  const [isEditingIngredient, setIsEditingIngredient] = useState(false);
 
-  const {
-    inputValue: recipeName,
-    isValueValid: recipeIsValid,
-    isInputInvalid: recipeFormIsInvalid,
-    valueHandler: recipeNameHandler,
-    blurHandler: recipeNameBlurHandler,
-    reset: resetRecipeInput,
-  } = useInput((value: string) => value.trim() !== "", name);
-
-  const {
-    inputValue: recipeDescription,
-    valueHandler: recipeDescriptionHandler,
-    reset: resetRecipeDescription,
-  } = useInput(() => true, description);
-
-  const {
-    inputValue: recipeInstrcutions,
-    valueHandler: recipeInstructionsHandler,
-    reset: resetRecipeInstrcutions,
-  } = useInput(() => true, instructions);
-
-  const addIngredient = (ingredient: Ingredient) => {
-    setIngredients([...ingredients, ingredient]);
-  };
-
-  const editIngredient = (ingredient: Ingredient) => {
-    setIngredientFormState(IngredientFormType.Edit);
-    setEditableIngredient(ingredient);
-  };
+  const form = useForm<Partial<Recipe>>({
+    defaultValues: {
+      name: name ?? "",
+      description: description ?? "",
+      instructions: instructions ?? "",
+      categories: [...(recipe?.categories ?? [])],
+      ingredients: [...(recipeIngredients ?? [])],
+    },
+    onSubmit: async ({ value }) => {
+      await onSubmitHandler(value);
+    },
+  });
 
   const deleteIngredient = (id: string | null) => {
     if (!id) return;
-    const updatedIngredients = [...ingredients].filter(
-      (ingredient: Ingredient) => ingredient.ingredientId !== id,
-    );
-    setIngredients(updatedIngredients);
+    const updatedIngredients = [
+      ...(form.getFieldValue("ingredients") ?? []),
+    ].filter((ingredient: Ingredient) => ingredient.ingredientId !== id);
+    form.setFieldValue("ingredients", updatedIngredients);
   };
 
-  const updateIngredient = (updatedIngredient: Ingredient) => {
-    const newIngredients = [...ingredients].map((ingredient: Ingredient) => {
-      return editableIngredient?.ingredientId === ingredient.ingredientId
-        ? updatedIngredient
-        : ingredient;
-    });
-
-    setIngredients(newIngredients);
-    setEditableIngredient(null);
-    setIngredientFormState(IngredientFormType.Add);
-  };
-
-  const reset = () => {
-    setIngredients([]);
-    resetRecipeInput();
-    resetRecipeDescription();
-    resetRecipeInstrcutions();
-  };
-
-  const onSubmitHandler = async (event: React.FormEvent) => {
-    event.preventDefault();
-
+  const onSubmitHandler = async (value: Partial<Recipe>) => {
     const recipeToUpsert = {
       ...recipe,
-      name: recipeName,
-      description: recipeDescription,
-      instructions: recipeInstrcutions,
-      ingredients: ingredients,
-      categories: selectedCategories.map(optionToCategory),
+      name: value.name,
+      description: value.description,
+      instructions: value.instructions,
+      ingredients: value.ingredients,
+      categories: value.categories,
     };
 
     try {
       await onSubmit?.(recipeToUpsert);
-      reset();
+      form.reset();
     } catch (error) {}
   };
 
   const isCreating = recipe === undefined;
   const buttonText = isCreating ? "Submit" : "Update";
 
+  const addIngredientButton = (
+    field: FieldApi<
+      Partial<Recipe>,
+      "ingredients",
+      undefined,
+      undefined,
+      | {
+          ingredientId: string;
+          recipeId: string;
+          name: string;
+          quantity: string | null;
+        }[]
+      | undefined
+    >,
+  ) => {
+    return (
+      <Button
+        variant={"ghost"}
+        onClick={(e) => {
+          e.preventDefault();
+          field.pushValue({
+            // Temp id to manage local state
+            ingredientId: uuidv4(),
+            recipeId: "",
+            name: "",
+            quantity: null,
+          });
+          setIsEditingIngredient(true);
+        }}
+      >
+        Add Ingredient
+      </Button>
+    );
+  };
+
   return (
     <form
-      onSubmit={(event) => void onSubmitHandler(event)}
+      onSubmit={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        void form.handleSubmit();
+      }}
       className="w-full space-y-2 md:w-1/2"
     >
       <div className="flex flex-col space-y-2">
         <div>
-          <label htmlFor="recipe-name" className="font-bold">
-            Recipe Name
-          </label>
-          <Input
-            type="text"
-            id="recipe-name"
-            className="mt-2 w-full px-4 py-3 text-black"
-            value={recipeName}
-            onChange={recipeNameHandler}
-            onBlur={recipeNameBlurHandler}
-          />
-          {recipeFormIsInvalid && (
-            <p className="mt-2 text-red-400">Please enter a recipe name</p>
-          )}
+          <form.Field
+            name="name"
+            validators={{
+              onChange: ({ value }) =>
+                value === "" ? "Please enter a recipe name" : undefined,
+            }}
+          >
+            {(field) => (
+              <>
+                <label htmlFor={field.name} className="font-bold">
+                  Recipe Name
+                </label>
+                <Input
+                  type="text"
+                  id={field.name}
+                  className="mt-2 w-full px-4 py-3 text-black"
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                />
+                {field.state.meta.errors ? (
+                  <p className="mt-2 text-red-400">
+                    {field.state.meta.errors.join(", ")}
+                  </p>
+                ) : null}
+              </>
+            )}
+          </form.Field>
         </div>
         <div>
-          <label className="font-bold">Recipe Categories</label>
-          <Combobox
-            className="mt-2"
-            options={[...(categories ?? []).map(categoryToOption)]}
-            selected={selectedCategories}
-            onChange={setSelectedCategories}
-          />
+          <form.Field name="categories">
+            {(field) => (
+              <>
+                <label className="font-bold">Recipe Categories</label>
+                <Combobox
+                  className="mt-2"
+                  options={[...(categories ?? []).map(categoryToOption)]}
+                  selected={(field.state.value ?? []).map(categoryToOption)}
+                  onChange={(value: OptionType[]) =>
+                    field.setValue(value.map(optionToCategory))
+                  }
+                />
+              </>
+            )}
+          </form.Field>
         </div>
         <div>
-          <label htmlFor="recipe-description" className="font-bold">
-            Recipe Description
-          </label>
-          <Input
-            type="text"
-            id="recipe-description"
-            className="mt-2 w-full px-4 py-3 text-black"
-            value={recipeDescription}
-            onChange={recipeDescriptionHandler}
-          />
+          <form.Field name="description">
+            {(field) => (
+              <>
+                <label htmlFor={field.name} className="font-bold">
+                  Recipe Description
+                </label>
+                <Input
+                  type="text"
+                  id={field.name}
+                  name={field.name}
+                  className="mt-2 w-full px-4 py-3 text-black"
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                />
+              </>
+            )}
+          </form.Field>
         </div>
         <div>
-          <label htmlFor="recipe-instructions" className="font-bold">
-            Instructions
-          </label>
-          <Textarea
-            id="recipe-instructions"
-            className="mt-2 w-full rounded-xl px-4 py-3 text-black"
-            rows={3}
-            value={recipeInstrcutions}
-            onChange={recipeInstructionsHandler}
-          />
+          <form.Field name="instructions">
+            {(field) => (
+              <>
+                <label htmlFor={field.name} className="font-bold">
+                  Instructions
+                </label>
+                <Textarea
+                  id={field.name}
+                  name={field.name}
+                  className="mt-2 w-full rounded-xl px-4 py-3 text-black"
+                  rows={3}
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                />
+              </>
+            )}
+          </form.Field>
         </div>
       </div>
-      {ingredients.length ? (
-        <>
-          <p className="font-bold">Ingredients</p>
-          {ingredients.map((ingredient: Ingredient) => {
-            return (
-              <div
-                key={ingredient.ingredientId}
-                className="flex w-full items-center justify-between gap-2"
-              >
-                <p>
-                  {ingredient.name}{" "}
-                  {ingredient.quantity ? `(${ingredient.quantity})` : null}
-                </p>
-                <div className="flex gap-2 hover:cursor-pointer">
-                  <div onClick={() => editIngredient(ingredient)}>
-                    <MdOutlineEdit />
+      <form.Field name="ingredients" mode="array">
+        {(field) => {
+          return (
+            <>
+              {field.state.value?.length ? (
+                <>
+                  <div className="flex items-center justify-between">
+                    <p className="font-bold">Ingredients</p>
+                    {addIngredientButton(field)}
                   </div>
-                  <div
-                    onClick={() => deleteIngredient(ingredient.ingredientId)}
-                  >
-                    <IoClose />
-                  </div>
+                  {field.state.value.map((ingredient: Ingredient, i) => {
+                    return (
+                      <IngredientForm
+                        key={ingredient.ingredientId}
+                        ingredient={ingredient}
+                        i={i}
+                        form={form}
+                        onDelete={deleteIngredient}
+                        onEditIngredient={setIsEditingIngredient}
+                      />
+                    );
+                  })}
+                </>
+              ) : (
+                <div className="flex justify-center">
+                  {addIngredientButton(field)}
                 </div>
-              </div>
-            );
-          })}
-        </>
-      ) : null}
-      <IngredientForm
-        addIngredient={addIngredient}
-        ingredient={editableIngredient}
-        viewState={ingredientFormState}
-        updateIngredient={updateIngredient}
-        recipeId={recipe?.id}
-      />
+              )}
+            </>
+          );
+        }}
+      </form.Field>
       <div className="mx-auto flex justify-center gap-2 pt-6">
         {!isCreating && (
           <Button variant={"secondary"} onClick={onCancel}>
             <>Cancel</>
           </Button>
         )}
-        <Button
-          type="submit"
-          disabled={isLoading || recipeFormIsInvalid || !recipeIsValid}
+        <form.Subscribe
+          selector={(state) =>
+            [state.canSubmit, state.isSubmitting, state.isTouched] as const
+          }
         >
-          <>{isLoading ? "Loading" : buttonText}</>
-        </Button>
+          {([canSubmit, isSubmitting, isTouched]) => (
+            <Button
+              type="submit"
+              disabled={
+                isLoading ||
+                !canSubmit ||
+                isSubmitting ||
+                !isTouched ||
+                isEditingIngredient
+              }
+            >
+              <>{isLoading ? "Loading" : buttonText}</>
+            </Button>
+          )}
+        </form.Subscribe>
       </div>
     </form>
   );
