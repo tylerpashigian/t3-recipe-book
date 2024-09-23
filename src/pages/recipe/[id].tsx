@@ -16,11 +16,19 @@ import { api } from "~/utils/api";
 import prisma from "~/utils/prisma";
 import { type Recipe } from "~/models/recipe";
 import { appRouter } from "~/server/api/root";
+import { getQueryKey } from "@trpc/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { inferRouterOutputs } from "@trpc/server";
+import { RecipesRouter } from "~/server/api/routers/recipes";
+
+type GetDetailsOutput = inferRouterOutputs<RecipesRouter>["getDetails"];
 
 export default function Recipe({ id }: { id: string }) {
   const router = useRouter();
 
   const [pageType, setPageType] = useState(DetailsPageType.Details);
+
+  const queryClient = useQueryClient();
 
   const { data, isLoading, refetch } = api.recipes.getDetails.useQuery({
     id: id,
@@ -59,12 +67,18 @@ export default function Recipe({ id }: { id: string }) {
     };
 
     const update = updateRecipe(cleanedRecipe, {
-      async onSuccess() {
+      async onSuccess(updated) {
         setPageType(DetailsPageType.Details);
-        // TODO: update local copy of recipe
-        await refetch();
-        // const key = getQueryKey(api.recipes.getDetails, undefined, "query");
-        // queryClient.setQueryData(key, (oldData) => recipe);
+        const key = getQueryKey(api.recipes.getDetails, { id }, "query");
+        queryClient.setQueryData<GetDetailsOutput | undefined>(key, (prev) => {
+          return {
+            author: prev?.author,
+            recipe: {
+              ...updated,
+            },
+          };
+        });
+        window.scrollTo({ top: 0 });
       },
     });
 
@@ -101,7 +115,7 @@ export default function Recipe({ id }: { id: string }) {
   };
 
   const deleteHandler = async () => {
-    if (!data?.recipe?.id || !data.author.id) {
+    if (!data?.recipe?.id || !data?.author?.id) {
       toast.error("Invalid recipe");
       return;
     }

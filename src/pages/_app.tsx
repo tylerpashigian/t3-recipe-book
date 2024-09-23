@@ -7,20 +7,24 @@ import { api } from "~/utils/api";
 import "~/styles/globals.css";
 import Layout from "~/components/UI/layout";
 import { Toaster } from "react-hot-toast";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },
 }) => {
+  const queryClient = new QueryClient();
   return (
-    <SessionProvider session={session}>
-      <Layout>
-        <>
-          <Component {...pageProps} />
-          <Toaster position="bottom-right" />
-        </>
-      </Layout>
-    </SessionProvider>
+    <QueryClientProvider client={queryClient}>
+      <SessionProvider session={session}>
+        <Layout>
+          <>
+            <Component {...pageProps} />
+            <Toaster position="bottom-right" />
+          </>
+        </Layout>
+      </SessionProvider>
+    </QueryClientProvider>
   );
 };
 

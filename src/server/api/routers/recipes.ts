@@ -6,6 +6,44 @@ import {
   protectedProcedure,
 } from "~/server/api/trpc";
 
+const IngredientSchema = z.object({
+  name: z.string(),
+  quantity: z.string().nullable(),
+  ingredientId: z.string(),
+  recipeId: z.string(),
+});
+
+const CategorySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+});
+
+const AuthorSchema = z.object({
+  id: z.string(),
+  name: z.string().nullable(),
+  profilePicture: z.string().nullable(),
+  username: z.string().nullable(),
+});
+
+const RecipeSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  instructions: z.string(),
+  ingredients: z.array(IngredientSchema),
+  categories: z.array(CategorySchema),
+  favoriteCount: z.number(),
+  isFavorited: z.boolean(),
+  authorId: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export const FullRecipeSchema = z.object({
+  recipe: RecipeSchema,
+  author: AuthorSchema.optional(), // Optional for users that may have been deleted
+});
+
 export const recipesRouter = createTRPCRouter({
   getAll: publicProcedure
     .input(
@@ -59,11 +97,12 @@ export const recipesRouter = createTRPCRouter({
       });
 
       // Implementing to be typesafe. May want to allow undefined here for deleted users
-      if (!user)
+      if (!user) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "No author found for recipe",
         });
+      }
 
       const author = {
         id: user.id,
@@ -72,7 +111,7 @@ export const recipesRouter = createTRPCRouter({
         username: user.username,
       };
 
-      return {
+      const recipeData = {
         recipe: {
           ...recipe,
           favoriteCount: recipe?.favorites.length,
@@ -82,6 +121,8 @@ export const recipesRouter = createTRPCRouter({
         },
         author,
       };
+
+      return FullRecipeSchema.parse(recipeData);
     }),
   create: protectedProcedure
     .input(
@@ -100,7 +141,8 @@ export const recipesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return await ctx.prisma.recipe.create({
+      console.log(input);
+      const recipe = await ctx.prisma.recipe.create({
         data: {
           authorId: ctx.session.user.id,
           name: input.name,
@@ -134,6 +176,36 @@ export const recipesRouter = createTRPCRouter({
           categories: true,
         },
       });
+
+      const user = await ctx.prisma.user.findFirst({
+        where: { id: ctx.session.user.id },
+      });
+
+      // Implementing to be typesafe. May want to allow undefined here for deleted users
+      if (!user) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "No author found for recipe",
+        });
+      }
+
+      const author = {
+        id: user.id,
+        name: user.name,
+        profilePicture: user.image,
+        username: user.username,
+      };
+
+      const recipeData = {
+        recipe: {
+          ...recipe,
+          favoriteCount: 0,
+          isFavorited: false,
+        },
+        author,
+      };
+
+      return FullRecipeSchema.parse(recipeData);
     }),
   update: protectedProcedure
     .input(
@@ -162,19 +234,27 @@ export const recipesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      if (ctx.session.user.id !== input.authorId)
+      if (ctx.session.user.id !== input.authorId) {
         throw new TRPCError({ code: "UNAUTHORIZED", message: "Unauthorized" });
+      }
 
-      const currentRecipes = await ctx.prisma.recipe.findFirst({
+      const currentRecipe = await ctx.prisma.recipe.findFirst({
         where: { id: input.id },
         include: { ingredients: true, categories: true },
       });
 
-      const currentIngredientIds = (currentRecipes?.ingredients ?? []).map(
+      if (!currentRecipe) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Recipe not found",
+        });
+      }
+
+      const currentIngredientIds = (currentRecipe.ingredients ?? []).map(
         (ingredient) => ingredient.ingredientId,
       );
 
-      const currentCategoryIds = (currentRecipes?.categories ?? []).map(
+      const currentCategoryIds = (currentRecipe.categories ?? []).map(
         (category) => category.id,
       );
 
@@ -195,8 +275,8 @@ export const recipesRouter = createTRPCRouter({
         where: { id: input.id },
         data: {
           name: input.name,
-          description: input.description,
-          instructions: input.instructions,
+          description: input.description ?? currentRecipe.description,
+          instructions: input.instructions ?? currentRecipe.instructions,
           ingredients: {
             deleteMany: {
               ingredientId: {
@@ -235,7 +315,7 @@ export const recipesRouter = createTRPCRouter({
           categories: {
             connectOrCreate: input.categories?.map(({ id, name }) => {
               return {
-                where: { id: id },
+                where: { id },
                 create: { id, name },
               };
             }),
@@ -243,16 +323,24 @@ export const recipesRouter = createTRPCRouter({
           },
         },
         include: {
+          favorites: true,
           ingredients: true,
           categories: true,
         },
       });
 
-      return updatedRecipe;
+      return RecipeSchema.parse({
+        ...updatedRecipe,
+        favoriteCount: updatedRecipe?.favorites.length,
+        isFavorited: !!updatedRecipe?.favorites.find(
+          (favorite) => favorite.userId === ctx.session?.user.id,
+        ),
+      });
     }),
   delete: protectedProcedure
     .input(z.object({ id: z.string(), authorId: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      console.log(input);
       if (ctx.session.user.id !== input.authorId)
         throw new TRPCError({ code: "UNAUTHORIZED", message: "Unauthorized" });
       await ctx.prisma.recipe.delete({
@@ -291,3 +379,5 @@ export const recipesRouter = createTRPCRouter({
       return;
     }),
 });
+
+export type RecipesRouter = typeof recipesRouter;
