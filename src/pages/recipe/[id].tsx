@@ -67,7 +67,7 @@ export default function Recipe({ id }: { id: string }) {
     };
 
     const update = updateRecipe(cleanedRecipe, {
-      async onSuccess(updated) {
+      onSuccess(updated) {
         setPageType(DetailsPageType.Details);
         const key = getQueryKey(api.recipes.getDetails, { id }, "query");
         queryClient.setQueryData<GetDetailsOutput | undefined>(key, (prev) => {

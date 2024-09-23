@@ -340,7 +340,7 @@ export const recipesRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ id: z.string(), authorId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      console.log(input);
+      // TODO: Allow deleting favorited recipes
       if (ctx.session.user.id !== input.authorId)
         throw new TRPCError({ code: "UNAUTHORIZED", message: "Unauthorized" });
       await ctx.prisma.recipe.delete({

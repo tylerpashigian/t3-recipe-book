@@ -25,7 +25,8 @@ export default function CreateRecipe() {
 
     const create = createRecipe(cleanedRecipe, {
       onSuccess(createdRecipe) {
-        createdRecipe?.id && router.push(`/recipe/${createdRecipe.id}`);
+        createdRecipe?.recipe.id &&
+          router.push(`/recipe/${createdRecipe.recipe.id}`);
       },
     });
 
