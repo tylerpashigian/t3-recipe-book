@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 
 import { useSession } from "next-auth/react";
 
@@ -6,8 +7,7 @@ import { type Recipe } from "~/models/recipe";
 import { type Author } from "~/models/author";
 import { Button } from "../UI/button";
 import LikeButton from "~/components/UI/like-button";
-import Link from "next/link";
-// import { getQueryKey } from "@trpc/react-query";
+import { formatFraction } from "~/utils/conversions";
 
 export enum DetailsPageType {
   Details,
@@ -80,7 +80,9 @@ const RecipeDetails = ({
             return (
               <li key={ingredient.ingredientId}>
                 {ingredient.name}{" "}
-                {ingredient.quantity ? `(${ingredient.quantity})` : null}
+                {ingredient.newQuantity
+                  ? `(${formatFraction(ingredient.newQuantity)} ${ingredient.unit})`
+                  : null}
               </li>
             );
           })}

@@ -9,6 +9,8 @@ import {
 const IngredientSchema = z.object({
   name: z.string(),
   quantity: z.string().nullable(),
+  newQuantity: z.number().nullable(),
+  unit: z.string().nullable(),
   ingredientId: z.string(),
   recipeId: z.string(),
 });
@@ -131,7 +133,11 @@ export const recipesRouter = createTRPCRouter({
         description: z.string().optional(),
         instructions: z.string().optional(),
         ingredients: z
-          .object({ name: z.string(), quantity: z.string().nullable() })
+          .object({
+            name: z.string(),
+            newQuantity: z.number().nullable(),
+            unit: z.string().nullable(),
+          })
           .array()
           .optional(),
         categories: z
@@ -141,7 +147,6 @@ export const recipesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      console.log(input);
       const recipe = await ctx.prisma.recipe.create({
         data: {
           authorId: ctx.session.user.id,
@@ -149,10 +154,13 @@ export const recipesRouter = createTRPCRouter({
           description: input.description ?? "",
           instructions: input.instructions ?? "",
           ingredients: {
-            create: input.ingredients?.map(({ name, quantity }) => {
+            create: input.ingredients?.map(({ name, newQuantity, unit }) => {
               return {
                 name,
-                quantity,
+                // Continuing to support existing field until final migration
+                quantity: `${newQuantity} - ${unit}`,
+                newQuantity,
+                unit,
                 ingredient: {
                   connectOrCreate: {
                     where: { name: name.toLowerCase() },
@@ -218,7 +226,8 @@ export const recipesRouter = createTRPCRouter({
         ingredients: z
           .object({
             name: z.string(),
-            quantity: z.string().nullable(),
+            newQuantity: z.number().nullable(),
+            unit: z.string().nullable(),
             recipeId: z.string(),
             ingredientId: z.string(),
           })
@@ -292,7 +301,10 @@ export const recipesRouter = createTRPCRouter({
               },
               update: {
                 name: ingredient.name,
-                quantity: ingredient.quantity,
+                // Continuing to support existing field until final migration
+                quantity: `${ingredient.newQuantity} - ${ingredient.unit}`,
+                newQuantity: ingredient.newQuantity,
+                unit: ingredient.unit,
                 ingredient: {
                   connectOrCreate: {
                     where: { name: ingredient.name.toLowerCase() },
@@ -302,7 +314,10 @@ export const recipesRouter = createTRPCRouter({
               },
               create: {
                 name: ingredient.name,
-                quantity: ingredient.quantity,
+                // Continuing to support existing field until final migration
+                quantity: `${ingredient.newQuantity} - ${ingredient.unit}`,
+                newQuantity: ingredient.newQuantity,
+                unit: ingredient.unit,
                 ingredient: {
                   connectOrCreate: {
                     where: { name: ingredient.name.toLowerCase() },
