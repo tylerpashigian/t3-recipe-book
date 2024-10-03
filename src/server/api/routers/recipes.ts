@@ -8,7 +8,7 @@ import {
 
 const IngredientSchema = z.object({
   name: z.string(),
-  newQuantity: z.number().nullable(),
+  quantity: z.number().nullable(),
   unit: z.string().nullable(),
   ingredientId: z.string(),
   recipeId: z.string(),
@@ -134,7 +134,7 @@ export const recipesRouter = createTRPCRouter({
         ingredients: z
           .object({
             name: z.string(),
-            newQuantity: z.number().nullable(),
+            quantity: z.number().nullable(),
             unit: z.string().nullable(),
           })
           .array()
@@ -153,10 +153,10 @@ export const recipesRouter = createTRPCRouter({
           description: input.description ?? "",
           instructions: input.instructions ?? "",
           ingredients: {
-            create: input.ingredients?.map(({ name, newQuantity, unit }) => {
+            create: input.ingredients?.map(({ name, quantity, unit }) => {
               return {
                 name,
-                newQuantity,
+                quantity,
                 unit,
                 ingredient: {
                   connectOrCreate: {
@@ -223,7 +223,7 @@ export const recipesRouter = createTRPCRouter({
         ingredients: z
           .object({
             name: z.string(),
-            newQuantity: z.number().nullable(),
+            quantity: z.number().nullable(),
             unit: z.string().nullable(),
             recipeId: z.string(),
             ingredientId: z.string(),
@@ -298,7 +298,7 @@ export const recipesRouter = createTRPCRouter({
               },
               update: {
                 name: ingredient.name,
-                newQuantity: ingredient.newQuantity,
+                quantity: ingredient.quantity,
                 unit: ingredient.unit,
                 ingredient: {
                   connectOrCreate: {
@@ -309,7 +309,7 @@ export const recipesRouter = createTRPCRouter({
               },
               create: {
                 name: ingredient.name,
-                newQuantity: ingredient.newQuantity,
+                quantity: ingredient.quantity,
                 unit: ingredient.unit,
                 ingredient: {
                   connectOrCreate: {

@@ -80,8 +80,10 @@ const RecipeDetails = ({
             return (
               <li key={ingredient.ingredientId}>
                 {ingredient.name}{" "}
-                {ingredient.newQuantity
-                  ? `(${formatFraction(ingredient.newQuantity)} ${ingredient.unit})`
+                {ingredient.quantity
+                  ? `(${formatFraction(ingredient.quantity)} ${
+                      ingredient.unit
+                    })`
                   : null}
               </li>
             );

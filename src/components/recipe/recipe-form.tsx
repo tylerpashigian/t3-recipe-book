@@ -88,7 +88,7 @@ const RecipeForm = ({
           ingredientId: string;
           recipeId: string;
           name: string;
-          newQuantity: number | null;
+          quantity: number | null;
           unit: string | null;
         }[]
       | undefined
@@ -104,7 +104,7 @@ const RecipeForm = ({
             ingredientId: uuidv4(),
             recipeId: "",
             name: "",
-            newQuantity: null,
+            quantity: null,
             unit: null,
           });
           setIsEditingIngredient(true);

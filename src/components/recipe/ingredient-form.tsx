@@ -75,8 +75,8 @@ const IngredientForm = ({
           }
         </form.Field>
         <form.Field
-          key={`ingredients[${i}].newQuantity`}
-          name={`ingredients[${i}].newQuantity`}
+          key={`ingredients[${i}].quantity`}
+          name={`ingredients[${i}].quantity`}
         >
           {(subfield) =>
             isEditing ? (
