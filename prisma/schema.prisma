@@ -102,7 +102,7 @@ model IngredientInRecipe {
   ingredientId String  @default(cuid())
   recipeId     String  @default(cuid())
   name         String
-  newQuantity  Float?
+  quantity     Float?
   unit         String?
 
   ingredient Ingredient @relation(fields: [ingredientId], references: [id])
