@@ -88,7 +88,6 @@ const RecipeForm = ({
           ingredientId: string;
           recipeId: string;
           name: string;
-          quantity: string | null;
           newQuantity: number | null;
           unit: string | null;
         }[]
@@ -105,7 +104,6 @@ const RecipeForm = ({
             ingredientId: uuidv4(),
             recipeId: "",
             name: "",
-            quantity: null,
             newQuantity: null,
             unit: null,
           });

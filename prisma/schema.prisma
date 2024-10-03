@@ -102,7 +102,6 @@ model IngredientInRecipe {
   ingredientId String  @default(cuid())
   recipeId     String  @default(cuid())
   name         String
-  quantity     String?
   newQuantity  Float?
   unit         String?
 
