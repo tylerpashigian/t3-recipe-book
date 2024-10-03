@@ -8,7 +8,6 @@ import {
 
 const IngredientSchema = z.object({
   name: z.string(),
-  quantity: z.string().nullable(),
   newQuantity: z.number().nullable(),
   unit: z.string().nullable(),
   ingredientId: z.string(),
@@ -157,8 +156,6 @@ export const recipesRouter = createTRPCRouter({
             create: input.ingredients?.map(({ name, newQuantity, unit }) => {
               return {
                 name,
-                // Continuing to support existing field until final migration
-                quantity: `${newQuantity} - ${unit}`,
                 newQuantity,
                 unit,
                 ingredient: {
@@ -301,8 +298,6 @@ export const recipesRouter = createTRPCRouter({
               },
               update: {
                 name: ingredient.name,
-                // Continuing to support existing field until final migration
-                quantity: `${ingredient.newQuantity} - ${ingredient.unit}`,
                 newQuantity: ingredient.newQuantity,
                 unit: ingredient.unit,
                 ingredient: {
@@ -314,8 +309,6 @@ export const recipesRouter = createTRPCRouter({
               },
               create: {
                 name: ingredient.name,
-                // Continuing to support existing field until final migration
-                quantity: `${ingredient.newQuantity} - ${ingredient.unit}`,
                 newQuantity: ingredient.newQuantity,
                 unit: ingredient.unit,
                 ingredient: {
