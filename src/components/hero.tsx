@@ -1,10 +1,10 @@
-import React, { useLayoutEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 
 const Hero = () => {
   const [navHeight, setNavHeight] = useState(0);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const navBar = document.querySelector("header");
     if (navBar) {
       setNavHeight(navBar.offsetHeight);

@@ -1,14 +1,21 @@
 import { useState } from "react";
+
+import toast from "react-hot-toast";
+import { v4 as uuidv4 } from "uuid";
+import { type FieldApi, useForm } from "@tanstack/react-form";
+import { IoClose } from "react-icons/io5";
+import { MdOutlineEdit } from "react-icons/md";
+
+import { formatFraction } from "~/utils/conversions";
 import { Button } from "../UI/button";
 import { Input } from "../UI/input";
 import { Combobox, type OptionType } from "../UI/combobox";
 import { Textarea } from "../UI/textarea";
-import { v4 as uuidv4 } from "uuid";
 import { type Ingredient } from "~/models/ingredient";
 import { type Recipe, type Category } from "~/models/recipe";
 import { categoryToOption, optionToCategory } from "~/models/mappings/recipe";
-import { type FieldApi, useForm } from "@tanstack/react-form";
 import IngredientForm from "./ingredient-form";
+import IngredientPopover from "./ingredient-popover";
 
 export enum IngredientFormType {
   Add,
@@ -36,7 +43,8 @@ const RecipeForm = ({
     instructions,
     name,
   } = recipe ?? {};
-  const [isEditingIngredient, setIsEditingIngredient] = useState(false);
+
+  const [ingredientIndex, setIngredientIndex] = useState<number | null>(null);
 
   const form = useForm<Partial<Recipe>>({
     defaultValues: {
@@ -53,10 +61,12 @@ const RecipeForm = ({
 
   const deleteIngredient = (id: string | null) => {
     if (!id) return;
-    const updatedIngredients = [
-      ...(form.getFieldValue("ingredients") ?? []),
-    ].filter((ingredient: Ingredient) => ingredient.ingredientId !== id);
-    form.setFieldValue("ingredients", updatedIngredients);
+    const index = (form.getFieldValue("ingredients") ?? []).findIndex(
+      (ingredient) => ingredient.ingredientId === id,
+    );
+    form.fieldInfo.ingredients.instance
+      ?.removeValue(index)
+      .catch(() => toast.error("Error deleting ingredient"));
   };
 
   const onSubmitHandler = async (value: Partial<Recipe>) => {
@@ -99,20 +109,40 @@ const RecipeForm = ({
         variant={"ghost"}
         onClick={(e) => {
           e.preventDefault();
+          const ingredientId = uuidv4();
           field.pushValue({
             // Temp id to manage local state
-            ingredientId: uuidv4(),
+            ingredientId: ingredientId,
             recipeId: "",
             name: "",
             quantity: null,
             unit: null,
           });
-          setIsEditingIngredient(true);
+          // I need to get the new index in the ingredients array here to set
+          // the ingredientIndex globally which triggers the modal opening
+          // How can I confirm the value has been added before searching?
+          const index = form.state.values.ingredients?.findIndex(
+            (ingredient) => ingredient.ingredientId === ingredientId,
+          );
+
+          if (index !== undefined) setIngredientIndex(index);
         }}
       >
         Add Ingredient
       </Button>
     );
+  };
+
+  const togglePopoverHandler = () => {
+    if (ingredientIndex !== null) {
+      form.state.values.ingredients?.[ingredientIndex]?.name === ""
+        ? deleteIngredient(
+            form.state.values.ingredients?.[ingredientIndex]?.ingredientId ??
+              null,
+          )
+        : null;
+      setIngredientIndex(null);
+    }
   };
 
   return (
@@ -216,30 +246,69 @@ const RecipeForm = ({
         {(field) => {
           return (
             <>
-              {field.state.value?.length ? (
-                <>
-                  <div className="flex items-center justify-between">
-                    <p className="font-bold">Ingredients</p>
-                    {addIngredientButton(field)}
+              <div className="flex items-center justify-between">
+                <p className="font-bold">Ingredients</p>
+                {addIngredientButton(field)}
+              </div>
+              {(field.state.value ?? []).map((ingredient: Ingredient, i) => {
+                return (
+                  // <AnimatePresence key={i}>
+                  <div
+                    className="flex items-center justify-between"
+                    key={`ingredients[${i}].name`}
+                    // layoutId={`modal-${i}`}
+                    // animate={isDesktop}
+                  >
+                    <p
+                    //  layoutId={`title-${i}`}
+                    >
+                      {ingredient.name}{" "}
+                      {ingredient.quantity
+                        ? `(${formatFraction(ingredient.quantity)} ${
+                            ingredient.unit
+                          })`
+                        : null}
+                    </p>
+                    <div className="flex gap-2 hover:cursor-pointer">
+                      <Button
+                        variant={"ghost"}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setIngredientIndex(i);
+                        }}
+                      >
+                        <MdOutlineEdit />
+                      </Button>
+                      <Button
+                        variant={"ghost"}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          deleteIngredient(ingredient.ingredientId);
+                        }}
+                      >
+                        <IoClose />
+                      </Button>
+                    </div>
                   </div>
-                  {field.state.value.map((ingredient: Ingredient, i) => {
-                    return (
-                      <IngredientForm
-                        key={ingredient.ingredientId}
-                        ingredient={ingredient}
-                        i={i}
-                        form={form}
-                        onDelete={deleteIngredient}
-                        onEditIngredient={setIsEditingIngredient}
-                      />
-                    );
-                  })}
-                </>
-              ) : (
-                <div className="flex justify-center">
-                  {addIngredientButton(field)}
-                </div>
-              )}
+                  // </AnimatePresence>
+                );
+              })}
+              {ingredientIndex !== null ? (
+                <IngredientPopover
+                  isOpen={ingredientIndex !== null}
+                  setIsOpen={togglePopoverHandler}
+                  i={ingredientIndex}
+                  key={ingredientIndex}
+                >
+                  <IngredientForm
+                    key={ingredientIndex}
+                    i={ingredientIndex}
+                    form={form}
+                    onEditIngredient={togglePopoverHandler}
+                  />
+                </IngredientPopover>
+              ) : null}
             </>
           );
         }}
@@ -252,23 +321,31 @@ const RecipeForm = ({
         )}
         <form.Subscribe
           selector={(state) =>
-            [state.canSubmit, state.isSubmitting, state.isTouched] as const
+            [
+              state.canSubmit,
+              state.isSubmitting,
+              state.isTouched,
+              state.isDirty,
+            ] as const
           }
         >
-          {([canSubmit, isSubmitting, isTouched]) => (
-            <Button
-              type="submit"
-              disabled={
-                isLoading ||
-                !canSubmit ||
-                isSubmitting ||
-                !isTouched ||
-                isEditingIngredient
-              }
-            >
-              <>{isLoading ? "Loading" : buttonText}</>
-            </Button>
-          )}
+          {([canSubmit, isSubmitting, isTouched, isDirty]) => {
+            return (
+              <Button
+                type="submit"
+                disabled={
+                  isLoading ||
+                  !canSubmit ||
+                  isSubmitting ||
+                  !isTouched ||
+                  !isDirty ||
+                  !!ingredientIndex
+                }
+              >
+                <>{isLoading ? "Loading" : buttonText}</>
+              </Button>
+            );
+          }}
         </form.Subscribe>
       </div>
     </form>
