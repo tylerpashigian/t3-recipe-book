@@ -1,10 +1,10 @@
-import React, { useLayoutEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const WithNavBar = ({ children, classes }: any) => {
   const [navHeight, setNavHeight] = useState(0);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const navBar = document.querySelector("header");
     if (navBar) {
       setNavHeight(navBar.offsetHeight);

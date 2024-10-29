@@ -1,148 +1,217 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { IoClose } from "react-icons/io5";
-import { MdOutlineCheck, MdOutlineEdit } from "react-icons/md";
+import { useState } from "react";
 import { Button } from "../UI/button";
 import { Input } from "../UI/input";
-import { type Ingredient } from "~/models/ingredient";
 import { type Recipe } from "~/models/recipe";
 import { type useForm } from "@tanstack/react-form";
 import { formatFraction } from "~/utils/conversions";
+import { Minus, Plus } from "lucide-react";
+import { Badge } from "../UI/badge";
 
 const IngredientForm = ({
-  ingredient,
   i,
   form,
-  onDelete,
   onEditIngredient,
 }: {
-  ingredient: Ingredient;
   i: number;
   form: ReturnType<typeof useForm<Partial<Recipe>>>;
-  onDelete: (id: string) => void;
-  onEditIngredient: React.Dispatch<React.SetStateAction<boolean>>;
+  onEditIngredient: () => void;
 }) => {
-  const [isEditing, setIsEditing] = useState(ingredient.name === "");
-
-  const ingredientRef = useRef<HTMLInputElement | null>(null);
-
-  useEffect(() => {
-    if (isEditing && ingredientRef.current) {
-      ingredientRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [isEditing]);
-
-  useLayoutEffect(() => {
-    onEditIngredient(isEditing);
-  }, [isEditing, onEditIngredient]);
-
   const state = form.useStore();
 
   const nameError = "Please enter an ingredient name";
-  const nameIsEmpty = state.values.ingredients?.[i]?.name === "" ?? true;
+
+  const [quantityIncrement, setQuantityIncrement] = useState<
+    number | undefined
+  >(undefined);
+
+  const ingredientUnits: string[] = [
+    "cups",
+    "tbsp",
+    "tsp",
+    "liter",
+    "milliliter",
+    "fluid ounce",
+    "pint",
+    "quart",
+    "gallon",
+    "gram",
+    "kilogram",
+    "ounce",
+    "pound",
+    "cloves",
+    "dash",
+    "pinch",
+    "drop",
+    "stick",
+  ];
+
+  const ingredientQuantities = [1 / 4, 1 / 3, 1 / 2, 1];
 
   return (
-    <div
-      className="flex w-full items-center justify-between gap-2"
-      ref={ingredientRef}
-    >
-      <div className="flex gap-2">
-        <form.Field
-          key={`ingredients[${i}].name`}
-          name={`ingredients[${i}].name`}
-          validators={{
-            onChange: ({ value }) => (value === "" ? nameError : undefined),
-            onBlur: ({ value }) => (value === "" ? nameError : undefined),
-          }}
-        >
-          {(subfield) =>
-            isEditing ? (
-              <Input
-                name={subfield.name}
-                id={subfield.name}
-                type="text"
-                className={`w-full px-4 py-3 text-black ${
-                  subfield.state.meta.errors.length ? "border-red-400" : null
-                }`}
-                value={subfield.state.value}
-                onChange={(e) => subfield.handleChange(e.target.value)}
-                onBlur={subfield.handleBlur}
-                placeholder="Ingredient name"
-                aria-label="Ingredient name"
-              />
-            ) : (
-              <p>{subfield.state.value}</p>
-            )
-          }
-        </form.Field>
-        <form.Field
-          key={`ingredients[${i}].quantity`}
-          name={`ingredients[${i}].quantity`}
-        >
-          {(subfield) =>
-            isEditing ? (
-              <Input
-                name={subfield.name}
-                id={subfield.name}
-                type="number"
-                className="w-full px-4 py-3 text-black"
-                value={subfield.state.value ?? ""}
-                onBlur={subfield.handleBlur}
-                onChange={(e) => subfield.handleChange(+e.target.value)}
-                placeholder="Ingredient quantity"
-                aria-label="Ingredient quantity"
-              />
-            ) : subfield.state.value ? (
-              <p> - {formatFraction(+subfield.state.value)}</p>
-            ) : null
-          }
-        </form.Field>
-        <form.Field
-          key={`ingredients[${i}].unit`}
-          name={`ingredients[${i}].unit`}
-        >
-          {(subfield) =>
-            isEditing ? (
-              <Input
-                name={subfield.name}
-                id={subfield.name}
-                type="text"
-                className="w-full px-4 py-3 text-black"
-                value={subfield.state.value ?? ""}
-                onBlur={subfield.handleBlur}
-                onChange={(e) => subfield.handleChange(e.target.value)}
-                placeholder="Ingredient unit"
-                aria-label="Ingredient unit"
-              />
-            ) : subfield.state.value ? (
-              <p>{subfield.state.value}</p>
-            ) : null
-          }
-        </form.Field>
+    <div className="flex w-full items-center justify-between gap-2">
+      {/* <AnimatePresence> */}
+      <div
+        key={`ingredients[${i}].name`}
+        // layoutId={`modal-${i}`}
+        className="flex w-full flex-col items-center justify-between gap-2"
+      >
+        <div className="flex flex-col gap-2">
+          <form.Field
+            key={`ingredients[${i}].name`}
+            name={`ingredients[${i}].name`}
+            validators={{
+              onChange: ({ value }) => (value === "" ? nameError : undefined),
+              onBlur: ({ value }) => (value === "" ? nameError : undefined),
+            }}
+          >
+            {(subfield) => (
+              <div className="flex flex-col gap-2">
+                <Input
+                  variant={"unstyled"}
+                  name={subfield.name}
+                  id={subfield.name}
+                  type="text"
+                  value={subfield.state.value}
+                  onChange={(e) => subfield.handleChange(e.target.value)}
+                  onBlur={subfield.handleBlur}
+                  placeholder="Ingredient name"
+                  aria-label="Ingredient name"
+                />
+                {!state.canSubmit ? (
+                  <p className="text-xs text-red-400">
+                    Name is required, closing without a name will remove
+                    ingredient
+                  </p>
+                ) : null}
+              </div>
+            )}
+          </form.Field>
+          <form.Field
+            key={`ingredients[${i}].quantity`}
+            name={`ingredients[${i}].quantity`}
+          >
+            {(subfield) => (
+              <div className="flex flex-col gap-2" id={subfield.name}>
+                <label>
+                  <span className="font-bold">Quantity: </span>
+                  {
+                    <span>
+                      {formatFraction(
+                        state.values.ingredients?.[i]?.quantity ?? 0,
+                      )}{" "}
+                      {state.values.ingredients?.[i]?.unit}
+                    </span>
+                  }
+                </label>
+                <div>
+                  {ingredientQuantities.map((quantity, i) => (
+                    <Badge
+                      key={i}
+                      variant={
+                        quantity === quantityIncrement ? "default" : "outline"
+                      }
+                      className="m-1 hover:cursor-pointer"
+                      onClick={() => setQuantityIncrement(quantity)}
+                    >
+                      <p>{formatFraction(quantity)}</p>
+                    </Badge>
+                  ))}
+                  <Badge
+                    variant={"destructive"}
+                    className="m-1 hover:cursor-pointer"
+                    onClick={() => subfield.handleChange(0)}
+                  >
+                    <p>Clear</p>
+                  </Badge>
+                </div>
+                <div className="flex w-full gap-2">
+                  <Button
+                    className="w-full"
+                    disabled={!quantityIncrement}
+                    onClick={() =>
+                      subfield.handleChange((prev) => {
+                        const updatedValue =
+                          (prev ?? 0) - (quantityIncrement ?? 0);
+                        return updatedValue >= 0 ? updatedValue : 0;
+                      })
+                    }
+                    aria-label="Decrement"
+                  >
+                    <Minus />
+                  </Button>
+                  <Button
+                    className="w-full"
+                    disabled={!quantityIncrement}
+                    onClick={() =>
+                      subfield.handleChange(
+                        (prev) => (prev ?? 0) + (quantityIncrement ?? 0),
+                      )
+                    }
+                    aria-label="Increment"
+                  >
+                    <Plus />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </form.Field>
+          <form.Field
+            key={`ingredients[${i}].unit`}
+            name={`ingredients[${i}].unit`}
+          >
+            {(subfield) => (
+              <div className="flex flex-col gap-2">
+                <label>Unit</label>
+                <div>
+                  {ingredientUnits.map((unit, i) => (
+                    <Badge
+                      key={i}
+                      variant={
+                        unit === subfield.state.value ? "default" : "outline"
+                      }
+                      className="m-1 hover:cursor-pointer"
+                      onClick={() => subfield.handleChange(unit)}
+                    >
+                      <p>{unit}</p>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </form.Field>
+        </div>
+        <div className="flex w-full justify-end hover:cursor-pointer">
+          <form.Subscribe selector={(state) => [state.isDirty] as const}>
+            {([_isDirty]) => (
+              <Button
+                // removing until I am able to properly distinguish apply vs close of modal
+                // disabled={!isDirty || !!nameError}
+                disabled={!state.canSubmit}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onEditIngredient();
+                }}
+              >
+                <p>Apply</p>
+              </Button>
+            )}
+          </form.Subscribe>
+        </div>
       </div>
-      <div className="flex gap-2 hover:cursor-pointer">
-        <Button
-          variant={"ghost"}
-          disabled={nameIsEmpty}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setIsEditing((prev) => {
-              return !prev;
-            });
-          }}
-        >
-          {isEditing ? <MdOutlineCheck /> : <MdOutlineEdit />}
-        </Button>
-        <Button
-          variant={"ghost"}
-          onClick={(e) => {
-            e.preventDefault();
-            onDelete(ingredient.ingredientId);
-          }}
-        >
-          <IoClose />
-        </Button>
-      </div>
+
+      {/* {isEditing && (
+          <IngredientPopover isOpen={isEditing} setIsOpen={setIsEditing} i={i}>
+            <IngredientForm
+              ingredient={ingredient}
+              i={0}
+              form={form}
+              onDelete={() => {}}
+              onEditIngredient={() => {}}
+            />
+          </IngredientPopover>
+        )} */}
+      {/* </AnimatePresence> */}
     </div>
   );
 };
