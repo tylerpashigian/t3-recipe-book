@@ -33,7 +33,11 @@ export default function Recipe({ id }: { id: string }) {
   const { data, isLoading, refetch } = api.recipes.getDetails.useQuery({
     id: id,
   });
+
   const { data: categories } = api.recipes.getCategories.useQuery();
+  const { data: allIngredients } = api.recipes.getIngredients.useQuery({
+    name: "",
+  });
   const { isLoading: isUpdating, mutateAsync: updateRecipe } =
     api.recipes.update.useMutation({});
   const { mutateAsync: deleteRecipe } = api.recipes.delete.useMutation({});
@@ -160,6 +164,7 @@ export default function Recipe({ id }: { id: string }) {
                     )}
                     {pageType === DetailsPageType.Edit && (
                       <RecipeForm
+                        allIngredients={allIngredients}
                         categories={categories}
                         recipe={recipe}
                         isLoading={isLoading || isUpdating}

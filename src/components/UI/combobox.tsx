@@ -10,6 +10,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "~/components/UI/command";
 import {
   Popover,
@@ -23,13 +24,27 @@ interface ComboboxProps {
   options: Record<"value" | "label", string>[];
   selected: Record<"value" | "label", string>[];
   onChange: (value: OptionType[]) => void;
+  isMultiSelect?: boolean;
+  allowsCustomValue?: boolean;
   className?: string;
   placeholder?: string;
 }
 
 const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
-  ({ options, selected, onChange, className, ...props }, ref) => {
+  (
+    {
+      options,
+      selected,
+      onChange,
+      isMultiSelect = true,
+      allowsCustomValue = false,
+      className,
+      ...props
+    },
+    ref,
+  ) => {
     const [open, setOpen] = React.useState(false);
+    const [searchValue, setSearchValue] = React.useState("");
 
     const handleUnselect = (item: Record<"value" | "label", string>) => {
       onChange(selected.filter((i) => i.value !== item.value));
@@ -72,38 +87,42 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
           >
             <>
               <div className="flex flex-wrap items-center gap-1">
-                {selected.map((item) => (
-                  <Badge
-                    variant="outline"
-                    key={item.value}
-                    className="flex items-center gap-1 group-hover:bg-background"
-                    onClick={() => handleUnselect(item)}
-                  >
-                    {item.label}
-                    <Button
-                      asChild
-                      variant="outline"
-                      size="badgeIcon"
-                      className="border-none"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          handleUnselect(item);
-                        }
-                      }}
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                      }}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleUnselect(item);
-                      }}
-                    >
-                      <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-                    </Button>
-                  </Badge>
-                ))}
+                {isMultiSelect
+                  ? selected.map((item) => (
+                      <Badge
+                        variant="outline"
+                        key={item.value}
+                        className="flex items-center gap-1 group-hover:bg-background"
+                        onClick={() => handleUnselect(item)}
+                      >
+                        {item.label}
+                        <Button
+                          asChild
+                          variant="outline"
+                          size="badgeIcon"
+                          className="border-none"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              handleUnselect(item);
+                            }
+                          }}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleUnselect(item);
+                          }}
+                        >
+                          <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                        </Button>
+                      </Badge>
+                    ))
+                  : selected.map((item, i) => (
+                      <p key={`${item.value}_${i}`}>{item.label}</p>
+                    ))}
                 {selected.length === 0 && (
                   <span>{props.placeholder ?? "Select ..."}</span>
                 )}
@@ -114,33 +133,62 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
         </PopoverTrigger>
         <PopoverContent className="w-full p-0">
           <Command className={className}>
-            <CommandInput placeholder="Search ..." />
-            <CommandEmpty>No item found.</CommandEmpty>
-            <CommandGroup className="max-h-64 overflow-auto">
-              {options.map((option) => (
-                <CommandItem
-                  key={option.value}
-                  onSelect={() => {
-                    onChange(
-                      selected.some((item) => item.value === option.value)
-                        ? selected.filter((item) => item.value !== option.value)
-                        : [...selected, option],
-                    );
-                    setOpen(true);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      selected.some((item) => item.value === option.value)
-                        ? "opacity-100"
-                        : "opacity-0",
-                    )}
-                  />
-                  {option.label}
-                </CommandItem>
-              ))}
-            </CommandGroup>
+            <CommandInput
+              value={searchValue}
+              onValueChange={setSearchValue}
+              placeholder="Search ..."
+            />
+            <CommandList>
+              <CommandEmpty>
+                {allowsCustomValue ? (
+                  <p
+                    className="cursor-pointer p-1"
+                    onClick={() =>
+                      onChange([
+                        {
+                          label: searchValue,
+                          value: searchValue.toLowerCase(),
+                        },
+                      ])
+                    }
+                  >
+                    <span className="font-bold">Click to add: </span>
+                    {searchValue}
+                  </p>
+                ) : (
+                  <>No item found.</>
+                )}
+              </CommandEmpty>
+              <CommandGroup className="max-h-64 overflow-auto">
+                {options.map((option) => (
+                  <CommandItem
+                    key={option.value}
+                    onSelect={() => {
+                      onChange(
+                        isMultiSelect
+                          ? selected.some((item) => item.value === option.value)
+                            ? selected.filter(
+                                (item) => item.value !== option.value,
+                              )
+                            : [...selected, option]
+                          : [option],
+                      );
+                      setOpen(true);
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        selected.some((item) => item.value === option.value)
+                          ? "opacity-100"
+                          : "opacity-0",
+                      )}
+                    />
+                    {option.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
           </Command>
         </PopoverContent>
       </Popover>

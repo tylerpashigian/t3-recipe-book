@@ -20,7 +20,6 @@ const IngredientPopover = ({
 }) => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   // const springTransition = { duration: 0.7, type: "spring", bounce: 0 };
-  console.log(i);
   return isDesktop ? (
     <Dialog open={isOpen} onOpenChange={setIsOpen} modal={true}>
       <DialogPortal forceMount>
@@ -35,12 +34,10 @@ const IngredientPopover = ({
             key={`modal-key-${i}`}
             // layoutId={`modal-${i}`}
             // transition={springTransition}
-            className="rounded-lg border bg-white p-4 shadow-lg dark:bg-slate-950 sm:rounded-lg"
+            className="flex flex-col gap-2 rounded-lg border bg-white p-8 shadow-lg dark:bg-slate-950 sm:rounded-lg"
           >
-            <div className="flex flex-col gap-2 px-4 pb-4">
-              <p>Edit Ingredient</p>
-              {children}
-            </div>
+            <p>Edit Ingredient</p>
+            {children}
           </div>
         </DialogContent>
       </DialogPortal>

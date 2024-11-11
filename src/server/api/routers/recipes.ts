@@ -78,6 +78,15 @@ export const recipesRouter = createTRPCRouter({
       select: { id: true, name: true },
     });
   }),
+  getIngredients: publicProcedure
+    .input(z.object({ name: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.prisma.ingredient.findMany({
+        where: {
+          name: { contains: input.name },
+        },
+      });
+    }),
   getDetails: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {

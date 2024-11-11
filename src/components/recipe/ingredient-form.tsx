@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../UI/button";
 import { Input } from "../UI/input";
 import { type Recipe } from "~/models/recipe";
@@ -6,17 +6,25 @@ import { type useForm } from "@tanstack/react-form";
 import { formatFraction } from "~/utils/conversions";
 import { Minus, Plus } from "lucide-react";
 import { Badge } from "../UI/badge";
+import { Combobox, OptionType } from "../UI/combobox";
+import { Ingredient } from "@prisma/client";
 
 const IngredientForm = ({
   i,
   form,
   onEditIngredient,
+  allIngredients = [],
 }: {
   i: number;
   form: ReturnType<typeof useForm<Partial<Recipe>>>;
   onEditIngredient: () => void;
+  allIngredients?: Ingredient[];
 }) => {
   const state = form.useStore();
+  const [ingredients, setIngredients] = useState(allIngredients);
+  useEffect(() => {
+    setIngredients(allIngredients);
+  }, [allIngredients]);
 
   const nameError = "Please enter an ingredient name";
 
@@ -64,45 +72,56 @@ const IngredientForm = ({
               onBlur: ({ value }) => (value === "" ? nameError : undefined),
             }}
           >
-            {(subfield) => (
-              <div className="flex flex-col gap-2">
-                <Input
-                  variant={"unstyled"}
-                  name={subfield.name}
-                  id={subfield.name}
-                  type="text"
-                  value={subfield.state.value}
-                  onChange={(e) => subfield.handleChange(e.target.value)}
-                  onBlur={subfield.handleBlur}
-                  placeholder="Ingredient name"
-                  aria-label="Ingredient name"
-                />
-                {!state.canSubmit ? (
-                  <p className="text-xs text-red-400">
-                    Name is required, closing without a name will remove
-                    ingredient
-                  </p>
-                ) : null}
-              </div>
-            )}
+            {(subfield) => {
+              return (
+                <div className="flex flex-col gap-2">
+                  <Combobox
+                    aria-label="Ingredient name"
+                    isMultiSelect={false}
+                    allowsCustomValue={true}
+                    options={ingredients.map((ingredient) => ({
+                      label: ingredient.name,
+                      value: ingredient.name,
+                    }))}
+                    selected={[
+                      {
+                        label: subfield.state.value,
+                        value: subfield.state.value.toLowerCase(),
+                      },
+                    ]}
+                    onChange={(ingredients) => {
+                      const ingredient = ingredients.length
+                        ? ingredients[0]
+                        : undefined;
+                      !!ingredient && subfield.handleChange(ingredient.label);
+                    }}
+                  />
+                  {!state.canSubmit ? (
+                    <p className="text-xs text-red-400">
+                      Name is required, closing without a name will remove
+                      ingredient
+                    </p>
+                  ) : null}
+                </div>
+              );
+            }}
           </form.Field>
+          <p>
+            <span className="font-bold">Quantity: </span>
+            {
+              <span>
+                {formatFraction(state.values.ingredients?.[i]?.quantity ?? 0)}{" "}
+                {state.values.ingredients?.[i]?.unit}
+              </span>
+            }
+          </p>
           <form.Field
             key={`ingredients[${i}].quantity`}
             name={`ingredients[${i}].quantity`}
           >
             {(subfield) => (
               <div className="flex flex-col gap-2" id={subfield.name}>
-                <label>
-                  <span className="font-bold">Quantity: </span>
-                  {
-                    <span>
-                      {formatFraction(
-                        state.values.ingredients?.[i]?.quantity ?? 0,
-                      )}{" "}
-                      {state.values.ingredients?.[i]?.unit}
-                    </span>
-                  }
-                </label>
+                <label>Amount</label>
                 <div>
                   {ingredientQuantities.map((quantity, i) => (
                     <Badge
