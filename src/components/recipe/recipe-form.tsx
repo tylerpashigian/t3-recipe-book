@@ -16,6 +16,7 @@ import { type Recipe, type Category } from "~/models/recipe";
 import { categoryToOption, optionToCategory } from "~/models/mappings/recipe";
 import IngredientForm from "./ingredient-form";
 import IngredientPopover from "./ingredient-popover";
+import { type Ingredient as PrismaIngredient } from "@prisma/client";
 
 export enum IngredientFormType {
   Add,
@@ -24,6 +25,7 @@ export enum IngredientFormType {
 
 type Props = {
   categories?: Category[];
+  allIngredients?: PrismaIngredient[];
   recipe?: Recipe;
   isLoading?: boolean;
   onSubmit?: (recipe?: Partial<Recipe>) => Promise<void> | void;
@@ -32,6 +34,7 @@ type Props = {
 
 const RecipeForm = ({
   recipe,
+  allIngredients = [],
   categories = [],
   isLoading = false,
   onSubmit,
@@ -302,6 +305,7 @@ const RecipeForm = ({
                   key={ingredientIndex}
                 >
                   <IngredientForm
+                    allIngredients={allIngredients}
                     key={ingredientIndex}
                     i={ingredientIndex}
                     form={form}

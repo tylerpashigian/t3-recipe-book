@@ -14,6 +14,8 @@ export default function CreateRecipe() {
   const { data: categories } = api.recipes.getCategories.useQuery();
   const { isLoading, mutateAsync: createRecipe } =
     api.recipes.create.useMutation({});
+  const { data: allIngredients, refetch: searchIngredients } =
+    api.recipes.getIngredients.useQuery({ name: "" });
 
   const onCreate = async (recipeToCreate?: Partial<Recipe>) => {
     if (!recipeToCreate?.name) return;
@@ -47,6 +49,7 @@ export default function CreateRecipe() {
       <WithNavBar>
         <main className="container flex flex-col items-center justify-center gap-12 py-8 md:py-16">
           <RecipeForm
+            allIngredients={allIngredients}
             categories={categories}
             onSubmit={onCreate}
             isLoading={isLoading}
