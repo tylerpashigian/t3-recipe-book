@@ -14,8 +14,9 @@ export default function CreateRecipe() {
   const { data: categories } = api.recipes.getCategories.useQuery();
   const { isLoading, mutateAsync: createRecipe } =
     api.recipes.create.useMutation({});
-  const { data: allIngredients, refetch: searchIngredients } =
-    api.recipes.getIngredients.useQuery({ name: "" });
+  const { data: allIngredients } = api.recipes.getIngredients.useQuery({
+    name: "",
+  });
 
   const onCreate = async (recipeToCreate?: Partial<Recipe>) => {
     if (!recipeToCreate?.name) return;

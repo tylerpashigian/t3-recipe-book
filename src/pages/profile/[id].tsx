@@ -75,10 +75,8 @@ const Profile = ({ user, recipes }: Props) => {
                 <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3">
                   {recipes.map((recipe) => {
                     return (
-                      <Button variant={"link"} asChild>
-                        <Link href={`/recipe/${recipe.id}`} key={recipe.id}>
-                          {recipe.name}
-                        </Link>
+                      <Button variant={"link"} key={recipe.id} asChild>
+                        <Link href={`/recipe/${recipe.id}`}>{recipe.name}</Link>
                       </Button>
                     );
                   })}
