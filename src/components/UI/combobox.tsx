@@ -173,7 +173,7 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
                             : [...selected, option]
                           : [option],
                       );
-                      setOpen(true);
+                      !isMultiSelect && setOpen(false);
                     }}
                   >
                     <Check

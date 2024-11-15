@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Button } from "../UI/button";
-import { Input } from "../UI/input";
+import { toFirstLetterUppercase } from "../../utils/string";
 import { type Recipe } from "~/models/recipe";
 import { type useForm } from "@tanstack/react-form";
 import { formatFraction } from "~/utils/conversions";
 import { Minus, Plus } from "lucide-react";
 import { Badge } from "../UI/badge";
-import { Combobox, OptionType } from "../UI/combobox";
+import { Combobox } from "../UI/combobox";
 import { Ingredient } from "@prisma/client";
 
 const IngredientForm = ({
@@ -80,21 +80,28 @@ const IngredientForm = ({
                     isMultiSelect={false}
                     allowsCustomValue={true}
                     options={ingredients.map((ingredient) => ({
-                      label: ingredient.name,
+                      label: toFirstLetterUppercase(ingredient.name),
                       value: ingredient.name,
                     }))}
-                    selected={[
-                      {
-                        label: subfield.state.value,
-                        value: subfield.state.value.toLowerCase(),
-                      },
-                    ]}
+                    selected={
+                      subfield.state.value !== ""
+                        ? [
+                            {
+                              label: toFirstLetterUppercase(
+                                subfield.state.value,
+                              ),
+                              value: subfield.state.value.toLowerCase(),
+                            },
+                          ]
+                        : []
+                    }
                     onChange={(ingredients) => {
                       const ingredient = ingredients.length
                         ? ingredients[0]
                         : undefined;
                       !!ingredient && subfield.handleChange(ingredient.label);
                     }}
+                    placeholder="Select an Ingredient..."
                   />
                   {!state.canSubmit ? (
                     <p className="text-xs text-red-400">

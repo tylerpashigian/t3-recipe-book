@@ -17,6 +17,7 @@ import { categoryToOption, optionToCategory } from "~/models/mappings/recipe";
 import IngredientForm from "./ingredient-form";
 import IngredientPopover from "./ingredient-popover";
 import { type Ingredient as PrismaIngredient } from "@prisma/client";
+import { toFirstLetterUppercase } from "~/utils/string";
 
 export enum IngredientFormType {
   Add,
@@ -201,6 +202,7 @@ const RecipeForm = ({
                   onChange={(value: OptionType[]) =>
                     field.setValue(value.map(optionToCategory))
                   }
+                  placeholder="Select a Category..."
                 />
               </>
             )}
@@ -265,7 +267,7 @@ const RecipeForm = ({
                     <p
                     //  layoutId={`title-${i}`}
                     >
-                      {ingredient.name}{" "}
+                      {toFirstLetterUppercase(ingredient.name)}{" "}
                       {ingredient.quantity
                         ? `(${formatFraction(ingredient.quantity)} ${
                             ingredient.unit

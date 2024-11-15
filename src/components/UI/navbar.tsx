@@ -39,18 +39,18 @@ export function AuthShowcase({ setIsDrawerOpen }: Props) {
         {displayName && <span>Logged in as {displayName}</span>}
       </p>
       {!!sessionData ? (
-        <Link className="w-full" href={`/profile/${sessionData?.user.id}`}>
-          <Button className="w-full" onClick={() => setIsDrawerOpen(false)}>
+        <Button size={"full"} onClick={() => setIsDrawerOpen(false)} asChild>
+          <Link href={`/profile/${sessionData?.user.id}`}>
             <>View Profile</>
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       ) : (
-        <Button className="w-full" onClick={createHandler}>
+        <Button size={"full"} onClick={createHandler}>
           <>Create</>
         </Button>
       )}
       <Button
-        className="w-full"
+        size={"full"}
         onClick={sessionData ? () => void signOut() : () => void signIn()}
       >
         <>{sessionData ? "Sign out" : "Sign in"}</>

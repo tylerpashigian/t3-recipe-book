@@ -49,6 +49,7 @@ const Recipes = () => {
                 options={[...(categories ?? []).map(categoryToOption)]}
                 selected={selectedCategories}
                 onChange={setSelectedCategories}
+                placeholder="Select a Category..."
               />
               <>
                 {!isLoading && data && data.length > 0

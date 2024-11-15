@@ -138,9 +138,11 @@ function Register() {
               >
                 <>Sign Up</>
               </Button>
-              <Link href="/auth/login" className="text-center">
-                <Button variant={"ghost"}>Have an account? Sign in</Button>
-              </Link>
+              <Button variant={"ghost"} asChild>
+                <Link href="/auth/login" className="text-center">
+                  Have an account? Sign in
+                </Link>
+              </Button>
             </div>
           </form>
         </div>

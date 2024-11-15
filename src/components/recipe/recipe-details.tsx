@@ -91,12 +91,14 @@ const RecipeDetails = ({
         </div>
       ) : null}
       {author && displayName && (
-        <Link href={`/profile/${author.id}`}>
+        <p>
           Author:
-          <Button className="px-2" variant={"link"}>
-            {displayName}
-          </Button>
-        </Link>
+          <span>
+            <Button className="px-2" variant={"link"} asChild>
+              <Link href={`/profile/${author.id}`}>{displayName}</Link>
+            </Button>
+          </span>
+        </p>
       )}
     </div>
   );
