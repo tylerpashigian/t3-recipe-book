@@ -30,6 +30,9 @@ const Hero = () => {
           <Button asChild>
             <Link href="recipes">Explore Recipes</Link>
           </Button>
+          <Button asChild>
+            <Link href="recipe/build">Build a Recipe</Link>
+          </Button>
         </div>
       </div>
     </section>

@@ -51,7 +51,9 @@ export const recipesRouter = createTRPCRouter({
       z.object({
         max: z.number().optional(),
         query: z.string().optional(),
+        // these should just be ids?
         categories: z.string().array().optional(),
+        ingredients: z.string().array().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -65,6 +67,15 @@ export const recipesRouter = createTRPCRouter({
                 categories: {
                   some: { id: { in: input.categories, mode: "insensitive" } },
                 },
+              }
+            : {}),
+          ...(input.ingredients?.length
+            ? {
+                AND: input.ingredients.map((ingredient) => ({
+                  ingredients: {
+                    some: { name: { equals: ingredient, mode: "insensitive" } },
+                  },
+                })),
               }
             : {}),
         },
