@@ -90,7 +90,7 @@ const IngredientForm = ({
                               label: toFirstLetterUppercase(
                                 subfield.state.value,
                               ),
-                              value: subfield.state.value.toLowerCase(),
+                              value: subfield.state.value?.toLowerCase(),
                             },
                           ]
                         : []
@@ -137,7 +137,12 @@ const IngredientForm = ({
                         quantity === quantityIncrement ? "default" : "outline"
                       }
                       className="m-1 hover:cursor-pointer"
-                      onClick={() => setQuantityIncrement(quantity)}
+                      onClick={() => {
+                        subfield.handleChange((prev) => {
+                          return !prev || prev === 0 ? quantity : prev;
+                        });
+                        setQuantityIncrement(quantity);
+                      }}
                     >
                       <p>{formatFraction(quantity)}</p>
                     </Badge>
