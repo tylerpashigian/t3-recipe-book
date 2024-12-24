@@ -1,7 +1,13 @@
-import { Dialog, DialogContent, DialogPortal } from "~/components/UI/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogPortal,
+} from "~/components/UI/dialog";
 import {
   Drawer,
   DrawerContent,
+  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
 } from "~/components/UI/drawer";
@@ -10,16 +16,15 @@ import { useMediaQuery } from "usehooks-ts";
 const IngredientPopover = ({
   isOpen,
   setIsOpen,
-  i,
   children,
 }: {
   isOpen: boolean;
   setIsOpen: () => void;
-  i: number;
   children: JSX.Element;
 }) => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   // const springTransition = { duration: 0.7, type: "spring", bounce: 0 };
+
   return isDesktop ? (
     <Dialog open={isOpen} onOpenChange={setIsOpen} modal={true}>
       <DialogPortal forceMount>
@@ -29,9 +34,9 @@ const IngredientPopover = ({
           exit={{ opacity: 0 }}
           className="absolute inset-0 bg-black/50"
         ></motion.div> */}
+        <DialogDescription>Ingredient modal</DialogDescription>
         <DialogContent className="border-none bg-transparent p-0 duration-0">
           <div
-            key={`modal-key-${i}`}
             // layoutId={`modal-${i}`}
             // transition={springTransition}
             className="flex flex-col gap-2 rounded-lg border bg-white p-8 shadow-lg dark:bg-slate-950 sm:rounded-lg"
@@ -44,6 +49,7 @@ const IngredientPopover = ({
     </Dialog>
   ) : (
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
+      <DrawerDescription>Ingredient Drawer</DrawerDescription>
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>Edit Ingredient</DrawerTitle>

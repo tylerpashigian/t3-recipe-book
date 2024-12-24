@@ -49,6 +49,7 @@ const RecipeForm = ({
   } = recipe ?? {};
 
   const [ingredientIndex, setIngredientIndex] = useState<number | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   const form = useForm<Partial<Recipe>>({
     defaultValues: {
@@ -130,6 +131,7 @@ const RecipeForm = ({
           );
 
           if (index !== undefined) setIngredientIndex(index);
+          setIsOpen(true);
         }}
       >
         Add Ingredient
@@ -137,16 +139,22 @@ const RecipeForm = ({
     );
   };
 
-  const togglePopoverHandler = () => {
-    if (ingredientIndex !== null) {
-      form.state.values.ingredients?.[ingredientIndex]?.name === ""
-        ? deleteIngredient(
-            form.state.values.ingredients?.[ingredientIndex]?.ingredientId ??
-              null,
-          )
-        : null;
-      setIngredientIndex(null);
-    }
+  const togglePopoverHandler = async () => {
+    const removeEmptyIngredient = (): Promise<void> => {
+      return new Promise((resolve) => {
+        if (ingredientIndex !== null) {
+          form.state.values.ingredients?.[ingredientIndex]?.name === ""
+            ? deleteIngredient(
+                form.state.values.ingredients?.[ingredientIndex]
+                  ?.ingredientId ?? null,
+              )
+            : null;
+          setIngredientIndex(null);
+        }
+        resolve();
+      });
+    };
+    removeEmptyIngredient().then(() => setIsOpen((prev) => !prev));
   };
 
   return (
@@ -281,6 +289,7 @@ const RecipeForm = ({
                           e.preventDefault();
                           e.stopPropagation();
                           setIngredientIndex(i);
+                          setIsOpen(true);
                         }}
                       >
                         <MdOutlineEdit />
@@ -299,22 +308,19 @@ const RecipeForm = ({
                   // </AnimatePresence>
                 );
               })}
-              {ingredientIndex !== null ? (
-                <IngredientPopover
-                  isOpen={ingredientIndex !== null}
-                  setIsOpen={togglePopoverHandler}
-                  i={ingredientIndex}
+              <IngredientPopover
+                isOpen={isOpen}
+                setIsOpen={togglePopoverHandler}
+                key={ingredientIndex}
+              >
+                <IngredientForm
+                  allIngredients={allIngredients}
                   key={ingredientIndex}
-                >
-                  <IngredientForm
-                    allIngredients={allIngredients}
-                    key={ingredientIndex}
-                    i={ingredientIndex}
-                    form={form}
-                    onEditIngredient={togglePopoverHandler}
-                  />
-                </IngredientPopover>
-              ) : null}
+                  i={ingredientIndex}
+                  form={form}
+                  onEditIngredient={togglePopoverHandler}
+                />
+              </IngredientPopover>
             </>
           );
         }}
