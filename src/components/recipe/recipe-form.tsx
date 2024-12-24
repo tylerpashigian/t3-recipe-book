@@ -139,7 +139,7 @@ const RecipeForm = ({
     );
   };
 
-  const togglePopoverHandler = async () => {
+  const togglePopoverHandler = () => {
     const removeEmptyIngredient = (): Promise<void> => {
       return new Promise((resolve) => {
         if (ingredientIndex !== null) {
@@ -154,7 +154,9 @@ const RecipeForm = ({
         resolve();
       });
     };
-    removeEmptyIngredient().then(() => setIsOpen((prev) => !prev));
+    void removeEmptyIngredient()
+      .then(() => setIsOpen((prev) => !prev))
+      .catch();
   };
 
   return (

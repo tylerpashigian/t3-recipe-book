@@ -34,7 +34,9 @@ const IngredientPopover = ({
           exit={{ opacity: 0 }}
           className="absolute inset-0 bg-black/50"
         ></motion.div> */}
-        <DialogDescription>Ingredient modal</DialogDescription>
+        <DialogDescription className="hidden">
+          Ingredient modal
+        </DialogDescription>
         <DialogContent className="border-none bg-transparent p-0 duration-0">
           <div
             // layoutId={`modal-${i}`}
@@ -49,10 +51,12 @@ const IngredientPopover = ({
     </Dialog>
   ) : (
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
-      <DrawerDescription>Ingredient Drawer</DrawerDescription>
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>Edit Ingredient</DrawerTitle>
+          <DrawerDescription className="hidden">
+            Ingredient Drawer
+          </DrawerDescription>
         </DrawerHeader>
         <div className="p-4">{children}</div>
       </DrawerContent>
