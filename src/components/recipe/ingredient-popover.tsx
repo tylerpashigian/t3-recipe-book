@@ -26,7 +26,7 @@ const IngredientPopover = ({
 }) => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
-  const onOpenChange = async (open: boolean) => {
+  const onOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (!open) {
       onCancel();
