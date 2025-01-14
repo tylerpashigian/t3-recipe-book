@@ -16,33 +16,34 @@ import { useMediaQuery } from "usehooks-ts";
 const IngredientPopover = ({
   isOpen,
   setIsOpen,
+  onCancel,
   children,
 }: {
   isOpen: boolean;
-  setIsOpen: () => void;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onCancel: () => void;
   children: JSX.Element;
 }) => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  // const springTransition = { duration: 0.7, type: "spring", bounce: 0 };
+
+  const onOpenChange = async (open: boolean) => {
+    setIsOpen(open);
+    if (!open) {
+      onCancel();
+    }
+  };
 
   return isDesktop ? (
-    <Dialog open={isOpen} onOpenChange={setIsOpen} modal={true}>
-      <DialogPortal forceMount>
-        {/* <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-black/50"
-        ></motion.div> */}
-        <DialogDescription className="hidden">
-          Ingredient modal
-        </DialogDescription>
-        <DialogContent className="border-none bg-transparent p-0 duration-0">
-          <div
-            // layoutId={`modal-${i}`}
-            // transition={springTransition}
-            className="flex flex-col gap-2 rounded-lg border bg-white p-8 shadow-lg dark:bg-slate-950 sm:rounded-lg"
-          >
+    <Dialog open={isOpen} onOpenChange={onOpenChange} modal={true}>
+      <DialogPortal>
+        <DialogContent
+          className="border-none bg-transparent p-0 duration-0"
+          onClose={undefined}
+        >
+          <div className="flex flex-col gap-2 rounded-lg border bg-white p-8 shadow-lg dark:bg-slate-950 sm:rounded-lg">
+            <DialogDescription className="hidden">
+              Ingredient modal
+            </DialogDescription>
             <p>Edit Ingredient</p>
             {children}
           </div>
@@ -50,7 +51,7 @@ const IngredientPopover = ({
       </DialogPortal>
     </Dialog>
   ) : (
-    <Drawer open={isOpen} onOpenChange={setIsOpen}>
+    <Drawer open={isOpen} onOpenChange={onOpenChange}>
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>Edit Ingredient</DrawerTitle>

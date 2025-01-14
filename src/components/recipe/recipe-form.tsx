@@ -64,6 +64,8 @@ const RecipeForm = ({
     },
   });
 
+  type SingleIngredient = Recipe["ingredients"][number];
+
   const deleteIngredient = (id: string | null) => {
     if (!id) return;
     const index = (form.getFieldValue("ingredients") ?? []).findIndex(
@@ -90,6 +92,11 @@ const RecipeForm = ({
     } catch (error) {}
   };
 
+  const [isCreatingIngredient, setIsCreatingIngredient] = useState(false);
+  const [tempIngredient, setTempIngredient] = useState<
+    SingleIngredient | undefined
+  >(undefined);
+
   const isCreating = recipe === undefined;
   const buttonText = isCreating ? "Submit" : "Update";
 
@@ -114,6 +121,8 @@ const RecipeForm = ({
         variant={"ghost"}
         onClick={(e) => {
           e.preventDefault();
+          setIsCreatingIngredient(true);
+
           const ingredientId = uuidv4();
           field.pushValue({
             // Temp id to manage local state
@@ -139,24 +148,31 @@ const RecipeForm = ({
     );
   };
 
-  const togglePopoverHandler = () => {
-    const removeEmptyIngredient = (): Promise<void> => {
-      return new Promise((resolve) => {
-        if (ingredientIndex !== null) {
-          form.state.values.ingredients?.[ingredientIndex]?.name === ""
-            ? deleteIngredient(
-                form.state.values.ingredients?.[ingredientIndex]
-                  ?.ingredientId ?? null,
-              )
-            : null;
+  // TODO figure out how to handle this without recreating the whole array
+  const handleIngredientCancel = (index: number) => {
+    const updatedIngredients = [...(form.state.values.ingredients ?? [])];
+    if (tempIngredient) {
+      // form.setFieldValue(`ingredients[${index}]`, tempValue);
+      updatedIngredients[index] = tempIngredient;
+      form.setFieldValue("ingredients", updatedIngredients);
+      setIsCreatingIngredient(false);
+    }
+  };
+
+  const onCancelIngredient = () => {
+    // Is there a better way to do this?
+    setTimeout(() => {
+      isCreatingIngredient
+        ? ingredientIndex !== null &&
+          deleteIngredient(
+            form.state.values.ingredients?.[ingredientIndex]?.ingredientId ??
+              null,
+          )
+        : ingredientIndex !== null && handleIngredientCancel(ingredientIndex);
+      setIsCreatingIngredient(false);
           setIngredientIndex(null);
-        }
-        resolve();
-      });
-    };
-    void removeEmptyIngredient()
-      .then(() => setIsOpen((prev) => !prev))
-      .catch();
+      setTempIngredient(undefined);
+    }, 100);
   };
 
   return (
@@ -290,6 +306,7 @@ const RecipeForm = ({
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
+                          setTempIngredient(ingredient);
                           setIngredientIndex(i);
                           setIsOpen(true);
                         }}
@@ -312,7 +329,8 @@ const RecipeForm = ({
               })}
               <IngredientPopover
                 isOpen={isOpen}
-                setIsOpen={togglePopoverHandler}
+                setIsOpen={setIsOpen}
+                onCancel={onCancelIngredient}
                 key={ingredientIndex}
               >
                 <IngredientForm
@@ -320,7 +338,10 @@ const RecipeForm = ({
                   key={ingredientIndex}
                   i={ingredientIndex}
                   form={form}
-                  onEditIngredient={togglePopoverHandler}
+                  onEditIngredient={() => {
+                    setIsOpen((prev) => !prev);
+                    setIsCreatingIngredient(false);
+                  }}
                 />
               </IngredientPopover>
             </>
