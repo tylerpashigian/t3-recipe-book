@@ -36,10 +36,7 @@ const IngredientPopover = ({
   return isDesktop ? (
     <Dialog open={isOpen} onOpenChange={onOpenChange} modal={true}>
       <DialogPortal>
-        <DialogContent
-          className="border-none bg-transparent p-0 duration-0"
-          onClose={undefined}
-        >
+        <DialogContent className="border-none bg-transparent p-0 duration-0">
           <div className="flex flex-col gap-2 rounded-lg border bg-white p-8 shadow-lg dark:bg-slate-950 sm:rounded-lg">
             <DialogDescription className="hidden">
               Ingredient modal
