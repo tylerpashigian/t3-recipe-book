@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
@@ -58,6 +58,7 @@ const RecipeForm = ({
       instructions: instructions ?? "",
       categories: [...(recipe?.categories ?? [])],
       ingredients: [...(recipeIngredients ?? [])],
+      steps: [...(recipe?.steps ?? [])],
     },
     onSubmit: async ({ value }) => {
       await onSubmitHandler(value);
@@ -84,6 +85,7 @@ const RecipeForm = ({
       instructions: value.instructions,
       ingredients: value.ingredients,
       categories: value.categories,
+      steps: value.steps,
     };
 
     try {
@@ -170,7 +172,7 @@ const RecipeForm = ({
           )
         : ingredientIndex !== null && handleIngredientCancel(ingredientIndex);
       setIsCreatingIngredient(false);
-          setIngredientIndex(null);
+      setIngredientIndex(null);
       setTempIngredient(undefined);
     }, 100);
   };
@@ -241,8 +243,7 @@ const RecipeForm = ({
                 <label htmlFor={field.name} className="font-bold">
                   Recipe Description
                 </label>
-                <Input
-                  type="text"
+                <Textarea
                   id={field.name}
                   name={field.name}
                   className="mt-2 w-full px-4 py-3 text-black"
@@ -253,23 +254,99 @@ const RecipeForm = ({
             )}
           </form.Field>
         </div>
-        <div>
-          <form.Field name="instructions">
-            {(field) => (
-              <>
-                <label htmlFor={field.name} className="font-bold">
-                  Instructions
-                </label>
-                <Textarea
-                  id={field.name}
-                  name={field.name}
-                  className="mt-2 w-full rounded-xl px-4 py-3 text-black"
-                  rows={3}
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                />
-              </>
-            )}
+        <div className="">
+          <form.Field
+            name="steps"
+            mode="array"
+            validators={{
+              onChange: ({ value }) => {
+                const hasErrors = value?.some((step) => step.content === "");
+                return hasErrors ? "Empty step" : undefined;
+              },
+              onBlur: ({ value }) => {
+                const hasErrors = value?.some((step) => step.content === "");
+                return hasErrors ? "Empty step" : undefined;
+              },
+            }}
+          >
+            {(field) => {
+              return (
+                <>
+                  <label htmlFor={field.name} className="font-bold">
+                    Instructions
+                  </label>
+                  <ol className="w-full list-inside list-decimal space-y-2">
+                    {(field.state.value ?? []).map((_, i) => (
+                      <form.Field
+                        key={i}
+                        name={`steps[${i}].content`}
+                        validators={{
+                          onBlur: ({ value }) =>
+                            value === "" ? "Please enter a step" : undefined,
+                          onChange: ({ value }) =>
+                            value === "" ? "Please enter a step" : undefined,
+                        }}
+                      >
+                        {(subField) => {
+                          return (
+                            <li className="flex w-full flex-col gap-1">
+                              <div className="flex w-full items-center justify-between">
+                                <p className="text-sm">{i + 1}.</p>
+                                <Button
+                                  variant={"ghost"}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    void field.removeValue(i);
+                                  }}
+                                >
+                                  <IoClose />
+                                </Button>
+                              </div>
+                              <Textarea
+                                name={`steps[${i}]`}
+                                id={`steps[${i}]`}
+                                className={`m-0 w-full px-4 py-3 text-black ${
+                                  subField.state.meta.errors.length
+                                    ? "border-red-400"
+                                    : null
+                                }`}
+                                value={subField.state.value}
+                                onChange={(e) => {
+                                  subField.handleChange(e.target.value);
+                                  void subField.validate("blur");
+                                  void field.validate("change");
+                                }}
+                                onBlur={subField.handleBlur}
+                                placeholder="Step instructions"
+                                aria-label="Step instructions"
+                              />
+                            </li>
+                          );
+                        }}
+                      </form.Field>
+                    ))}
+                  </ol>
+                  <div className="flex justify-end">
+                    <Button
+                      disabled={field.state.meta.errors?.length > 0}
+                      variant="ghost"
+                      className="mt-2"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        field.pushValue({
+                          id: undefined,
+                          content: "",
+                          order: field.state.value?.length ?? -1,
+                        });
+                      }}
+                    >
+                      Add Step
+                    </Button>
+                  </div>
+                </>
+              );
+            }}
           </form.Field>
         </div>
       </div>
@@ -283,16 +360,11 @@ const RecipeForm = ({
               </div>
               {(field.state.value ?? []).map((ingredient: Ingredient, i) => {
                 return (
-                  // <AnimatePresence key={i}>
                   <div
                     className="flex items-center justify-between"
                     key={`ingredients[${i}].name`}
-                    // layoutId={`modal-${i}`}
-                    // animate={isDesktop}
                   >
-                    <p
-                    //  layoutId={`title-${i}`}
-                    >
+                    <p>
                       {toFirstLetterUppercase(ingredient.name)}{" "}
                       {ingredient.quantity
                         ? `(${formatFraction(ingredient.quantity)} ${
@@ -324,7 +396,6 @@ const RecipeForm = ({
                       </Button>
                     </div>
                   </div>
-                  // </AnimatePresence>
                 );
               })}
               <IngredientPopover

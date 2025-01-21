@@ -72,7 +72,6 @@ const IngredientForm = ({
                 validators={{
                   onChange: ({ value }) =>
                     value === "" ? nameError : undefined,
-                  onBlur: ({ value }) => (value === "" ? nameError : undefined),
                 }}
               >
                 {(subfield) => {
@@ -222,22 +221,16 @@ const IngredientForm = ({
               </form.Field>
             </div>
             <div className="flex w-full justify-end hover:cursor-pointer">
-              <form.Subscribe selector={(state) => [state.isDirty] as const}>
-                {([_isDirty]) => (
-                  <Button
-                    // removing until I am able to properly distinguish apply vs close of modal
-                    // disabled={!isDirty || !!nameError}
-                    disabled={!state.canSubmit}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      onEditIngredient();
-                    }}
-                  >
-                    <p>Apply</p>
-                  </Button>
-                )}
-              </form.Subscribe>
+              <Button
+                disabled={!state.values.ingredients?.[i]?.name}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onEditIngredient();
+                }}
+              >
+                <p>Apply</p>
+              </Button>
             </div>
           </div>
 

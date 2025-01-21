@@ -19,6 +19,12 @@ const CategorySchema = z.object({
   name: z.string(),
 });
 
+const InstructionSchema = z.object({
+  id: z.string().optional(),
+  content: z.string(),
+  order: z.number(),
+});
+
 const AuthorSchema = z.object({
   id: z.string(),
   name: z.string().nullable(),
@@ -38,6 +44,7 @@ const RecipeSchema = z.object({
   authorId: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
+  steps: z.array(InstructionSchema),
 });
 
 export const FullRecipeSchema = z.object({
@@ -103,7 +110,12 @@ export const recipesRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const recipe = await ctx.prisma.recipe.findFirst({
         where: { id: input.id },
-        include: { ingredients: true, categories: true, favorites: true },
+        include: {
+          ingredients: true,
+          categories: true,
+          favorites: true,
+          steps: { orderBy: { order: "asc" } },
+        },
       });
 
       if (!recipe) {
@@ -163,6 +175,10 @@ export const recipesRouter = createTRPCRouter({
           .object({ name: z.string(), id: z.string() })
           .array()
           .optional(),
+        steps: z
+          .object({ content: z.string(), order: z.number() })
+          .array()
+          .optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -195,10 +211,16 @@ export const recipesRouter = createTRPCRouter({
               };
             }),
           },
+          steps: {
+            create: input.steps?.map(({ content, order }) => {
+              return { content, order };
+            }),
+          },
         },
         include: {
           ingredients: true,
           categories: true,
+          steps: true,
         },
       });
 
@@ -254,6 +276,14 @@ export const recipesRouter = createTRPCRouter({
           .object({
             id: z.string(),
             name: z.string(),
+          })
+          .array()
+          .optional(),
+        steps: z
+          .object({
+            id: z.string().optional(),
+            content: z.string(),
+            order: z.number(),
           })
           .array()
           .optional(),
@@ -349,11 +379,34 @@ export const recipesRouter = createTRPCRouter({
             }),
             disconnect: categoriesToDelete,
           },
+          steps: {
+            // Delete steps that exist in the database but are not in the input array
+            // New ingredients don’t have an id, so they are filtered them out
+            deleteMany: {
+              NOT: input.steps
+                ?.filter((step) => step.id)
+                .map(({ id }) => ({ id })),
+            },
+
+            // Create new steps that don’t have an id
+            create: input.steps
+              ?.filter((step) => !step.id)
+              .map(({ content, order }) => ({ content, order })),
+
+            // Update existing steps, connected by id
+            updateMany: input.steps
+              ?.filter((step) => step.id)
+              .map(({ id, content, order }) => ({
+                where: { id },
+                data: { content, order },
+              })),
+          },
         },
         include: {
           favorites: true,
           ingredients: true,
           categories: true,
+          steps: true,
         },
       });
 
@@ -368,7 +421,6 @@ export const recipesRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ id: z.string(), authorId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      // TODO: Allow deleting favorited recipes
       if (ctx.session.user.id !== input.authorId)
         throw new TRPCError({ code: "UNAUTHORIZED", message: "Unauthorized" });
       await ctx.prisma.recipe.delete({

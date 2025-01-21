@@ -65,29 +65,33 @@ const RecipeDetails = ({
           <p className="w-full text-black">{recipe.description}</p>
         </div>
       ) : null}
-      {recipe.instructions ? (
+      {recipe.steps ? (
         <div>
           <p className="mb-2 font-semibold">Instructions</p>
-          <p className="w-full whitespace-pre-line text-black">
-            {recipe.instructions}
-          </p>
+          <ol className="list-inside list-decimal">
+            {recipe.steps.map((step) => (
+              <li key={step.order}>{step.content}</li>
+            ))}
+          </ol>
         </div>
       ) : null}
       {recipe.ingredients.length ? (
         <div>
           <p className="mb-2 font-semibold">Ingredients</p>
-          {recipe.ingredients.map((ingredient) => {
-            return (
-              <li key={ingredient.ingredientId}>
-                {ingredient.name}{" "}
-                {ingredient.quantity
-                  ? `(${formatFraction(ingredient.quantity)} ${
-                      ingredient.unit
-                    })`
-                  : null}
-              </li>
-            );
-          })}
+          <ul className="list-inside list-disc">
+            {recipe.ingredients.map((ingredient) => {
+              return (
+                <li key={ingredient.ingredientId} className="flex">
+                  {ingredient.name}{" "}
+                  {ingredient.quantity
+                    ? `(${formatFraction(ingredient.quantity)} ${
+                        ingredient.unit
+                      })`
+                    : null}
+                </li>
+              );
+            })}
+          </ul>
         </div>
       ) : null}
       {author && displayName && (
