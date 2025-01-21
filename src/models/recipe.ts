@@ -5,6 +5,10 @@ export type Recipe = Prisma.RecipeGetPayload<{
     ingredients: true;
     categories: { select: { id: true; name: true } };
   };
-}> & { isFavorited: boolean; favoriteCount: number };
+}> & {
+  isFavorited: boolean;
+  favoriteCount: number;
+  steps: { id?: string; content: string; order: number }[];
+};
 
 export type Category = Pick<RecipeCategory, "id" | "name">;

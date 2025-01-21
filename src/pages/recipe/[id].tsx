@@ -68,6 +68,7 @@ export default function Recipe({ id }: { id: string }) {
       id: recipeToUpdate.id,
       name: recipeToUpdate.name,
       authorId: recipeToUpdate.authorId,
+      steps: recipeToUpdate.steps,
     };
 
     const update = updateRecipe(cleanedRecipe, {

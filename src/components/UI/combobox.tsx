@@ -24,6 +24,7 @@ interface ComboboxProps {
   options: Record<"value" | "label", string>[];
   selected: Record<"value" | "label", string>[];
   onChange: (value: OptionType[]) => void;
+  onBlur?: () => void;
   isMultiSelect?: boolean;
   allowsCustomValue?: boolean;
   className?: string;
@@ -36,6 +37,7 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
       options,
       selected,
       onChange,
+      onBlur,
       isMultiSelect = true,
       allowsCustomValue = false,
       className,
@@ -136,6 +138,7 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
             <CommandInput
               value={searchValue}
               onValueChange={setSearchValue}
+              onBlur={onBlur}
               placeholder="Search ..."
             />
             <CommandList>
