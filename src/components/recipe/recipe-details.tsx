@@ -3,11 +3,11 @@ import Link from "next/link";
 
 import { useSession } from "next-auth/react";
 
-import { type Recipe } from "~/models/recipe";
-import { type Author } from "~/models/author";
+import { type Recipe, type Author } from "~/models/recipe";
 import { Button } from "../UI/button";
 import LikeButton from "~/components/UI/like-button";
 import { formatFraction } from "~/utils/conversions";
+import { toFirstLetterUppercase } from "~/utils/string";
 
 export enum DetailsPageType {
   Details,
@@ -39,7 +39,7 @@ const RecipeDetails = ({
         <div className="flex w-full flex-col items-start gap-1 lg:flex-row lg:items-center lg:gap-3">
           <h3 className="text-lg font-bold text-black">{recipe.name}</h3>
           <div className="flex items-center gap-3">
-            {!!sessionData && (
+            {!!sessionData && author && (
               <LikeButton
                 isInitiallyLiked={recipe.isFavorited}
                 onClick={(favorited: boolean) => void onFavorite(favorited)}
@@ -48,7 +48,7 @@ const RecipeDetails = ({
             <span>{recipe.favoriteCount} Favorites(s)</span>
           </div>
         </div>
-        {sessionData?.user.id === recipe.authorId && (
+        {sessionData?.user.id === author?.id && (
           <div className="grid w-full grid-cols-2 justify-center gap-2 md:flex md:w-auto md:justify-end">
             <Button onClick={pageTypeHandler}>
               <>Edit</>
@@ -81,8 +81,8 @@ const RecipeDetails = ({
           <ul className="list-inside list-disc">
             {recipe.ingredients.map((ingredient) => {
               return (
-                <li key={ingredient.ingredientId} className="flex">
-                  {ingredient.name}{" "}
+                <li key={ingredient.id} className="flex">
+                  {toFirstLetterUppercase(ingredient.name)}{" "}
                   {ingredient.quantity
                     ? `(${formatFraction(ingredient.quantity)} ${
                         ingredient.unit

@@ -5,52 +5,11 @@ import {
   publicProcedure,
   protectedProcedure,
 } from "~/server/api/trpc";
-
-const IngredientSchema = z.object({
-  name: z.string(),
-  quantity: z.number().nullable(),
-  unit: z.string().nullable(),
-  ingredientId: z.string(),
-  recipeId: z.string(),
-});
-
-const CategorySchema = z.object({
-  id: z.string(),
-  name: z.string(),
-});
-
-const InstructionSchema = z.object({
-  id: z.string().optional(),
-  content: z.string(),
-  order: z.number(),
-});
-
-const AuthorSchema = z.object({
-  id: z.string(),
-  name: z.string().nullable(),
-  profilePicture: z.string().nullable(),
-  username: z.string().nullable(),
-});
-
-const RecipeSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string(),
-  instructions: z.string(),
-  ingredients: z.array(IngredientSchema),
-  categories: z.array(CategorySchema),
-  favoriteCount: z.number(),
-  isFavorited: z.boolean(),
-  authorId: z.string(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-  steps: z.array(InstructionSchema),
-});
-
-export const FullRecipeSchema = z.object({
-  recipe: RecipeSchema,
-  author: AuthorSchema.optional(), // Optional for users that may have been deleted
-});
+import {
+  FullRecipeSchema,
+  RecipeSchemaRequest,
+  RecipeSchemaResponse,
+} from "../models/recipe";
 
 export const recipesRouter = createTRPCRouter({
   getAll: publicProcedure
@@ -158,29 +117,7 @@ export const recipesRouter = createTRPCRouter({
       return FullRecipeSchema.parse(recipeData);
     }),
   create: protectedProcedure
-    .input(
-      z.object({
-        name: z.string(),
-        description: z.string().optional(),
-        instructions: z.string().optional(),
-        ingredients: z
-          .object({
-            name: z.string(),
-            quantity: z.number().nullable(),
-            unit: z.string().nullable(),
-          })
-          .array()
-          .optional(),
-        categories: z
-          .object({ name: z.string(), id: z.string() })
-          .array()
-          .optional(),
-        steps: z
-          .object({ content: z.string(), order: z.number() })
-          .array()
-          .optional(),
-      }),
-    )
+    .input(RecipeSchemaRequest)
     .mutation(async ({ ctx, input }) => {
       const recipe = await ctx.prisma.recipe.create({
         data: {
@@ -255,44 +192,20 @@ export const recipesRouter = createTRPCRouter({
       return FullRecipeSchema.parse(recipeData);
     }),
   update: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        name: z.string(),
-        description: z.string().optional(),
-        instructions: z.string().optional(),
-        authorId: z.string(),
-        ingredients: z
-          .object({
-            name: z.string(),
-            quantity: z.number().nullable(),
-            unit: z.string().nullable(),
-            recipeId: z.string(),
-            ingredientId: z.string(),
-          })
-          .array()
-          .optional(),
-        categories: z
-          .object({
-            id: z.string(),
-            name: z.string(),
-          })
-          .array()
-          .optional(),
-        steps: z
-          .object({
-            id: z.string().optional(),
-            content: z.string(),
-            order: z.number(),
-          })
-          .array()
-          .optional(),
-      }),
-    )
+    .input(RecipeSchemaRequest)
     .mutation(async ({ ctx, input }) => {
       if (ctx.session.user.id !== input.authorId) {
         throw new TRPCError({ code: "UNAUTHORIZED", message: "Unauthorized" });
       }
+
+      if (!input.id) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Recipe ID is required",
+        });
+      }
+
+      const id = input.id;
 
       const currentRecipe = await ctx.prisma.recipe.findFirst({
         where: { id: input.id },
@@ -306,19 +219,8 @@ export const recipesRouter = createTRPCRouter({
         });
       }
 
-      const currentIngredientIds = (currentRecipe.ingredients ?? []).map(
-        (ingredient) => ingredient.ingredientId,
-      );
-
       const currentCategoryIds = (currentRecipe.categories ?? []).map(
         (category) => category.id,
-      );
-
-      const ingredientsToDelete = currentIngredientIds.filter(
-        (id) =>
-          !input.ingredients
-            ?.map((ingredient) => ingredient.ingredientId)
-            .includes(id),
       );
 
       const categoriesToDelete = currentCategoryIds
@@ -334,41 +236,38 @@ export const recipesRouter = createTRPCRouter({
           description: input.description ?? currentRecipe.description,
           instructions: input.instructions ?? currentRecipe.instructions,
           ingredients: {
+            // Delete ingredients that are NOT in the input list
             deleteMany: {
-              ingredientId: {
-                in: [...ingredientsToDelete],
-              },
+              NOT: input.ingredients
+                ?.filter((ingredient) => ingredient.ingredientId)
+                .map(({ ingredientId }) => ({
+                  ingredientId,
+                  recipeId: id,
+                })), // Ensure both keys are used
             },
-            upsert: input.ingredients?.map((ingredient) => ({
-              where: {
-                ingredientId_recipeId: {
-                  ingredientId: ingredient.ingredientId,
-                  recipeId: input.id,
-                },
-              },
-              update: {
-                name: ingredient.name,
-                quantity: ingredient.quantity,
-                unit: ingredient.unit,
+
+            // Create new ingredients that don’t have an `ingredientId` (newly added ingredients)
+            create: input.ingredients
+              ?.filter((ingredient) => !ingredient.ingredientId)
+              .map(({ name, unit, quantity }) => ({
+                name,
+                unit,
+                quantity,
                 ingredient: {
                   connectOrCreate: {
-                    where: { name: ingredient.name.toLowerCase() },
-                    create: { name: ingredient.name.toLowerCase() },
+                    where: { name: name.toLowerCase() },
+                    create: { name: name.toLowerCase() },
                   },
                 },
-              },
-              create: {
-                name: ingredient.name,
-                quantity: ingredient.quantity,
-                unit: ingredient.unit,
-                ingredient: {
-                  connectOrCreate: {
-                    where: { name: ingredient.name.toLowerCase() },
-                    create: { name: ingredient.name.toLowerCase() },
-                  },
-                },
-              },
-            })),
+              })),
+
+            // Update existing ingredients
+            updateMany: input.ingredients
+              ?.filter((ingredient) => ingredient.ingredientId)
+              .map(({ ingredientId, name, quantity, unit }) => ({
+                where: { ingredientId, recipeId: id }, // Use both `ingredientId` and `recipeId`
+                data: { name, quantity, unit },
+              })),
           },
           categories: {
             connectOrCreate: input.categories?.map(({ id, name }) => {
@@ -410,7 +309,7 @@ export const recipesRouter = createTRPCRouter({
         },
       });
 
-      return RecipeSchema.parse({
+      return RecipeSchemaResponse.parse({
         ...updatedRecipe,
         favoriteCount: updatedRecipe?.favorites.length,
         isFavorited: !!updatedRecipe?.favorites.find(

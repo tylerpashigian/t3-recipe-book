@@ -19,6 +19,7 @@ const Login = ({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
 
+  // TODO: replace with TanStack Form
   const { inputValue: username, valueHandler: usernameHandler } = useInput(
     (value: string) => value.trim() !== "",
     "",
