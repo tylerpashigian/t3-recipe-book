@@ -5,7 +5,6 @@ import { useRouter } from "next/router";
 import WithNavBar from "~/components/UI/with-nabvar";
 import { Button } from "~/components/UI/button";
 import { Input } from "~/components/UI/input";
-import { env } from "~/env.mjs";
 
 function Register() {
   const router = useRouter();
@@ -36,18 +35,13 @@ function Register() {
     };
 
     // Make call to backend to create user
-    fetch(
-      `${process.env.NODE_ENV === "production" ? "https://" : ""}${
-        env.NEXT_PUBLIC_NEXTAUTH_URL
-      }/api/auth/login`,
-      {
-        method: "POST",
-        body: JSON.stringify(userData),
-        headers: {
-          "Content-Type": "application/json",
-        },
+    fetch("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify(userData),
+      headers: {
+        "Content-Type": "application/json",
       },
-    )
+    })
       .then((res) => {
         if (res.ok) {
           void router.push("/auth/login");
