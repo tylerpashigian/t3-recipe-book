@@ -386,6 +386,7 @@ const RecipeForm = ({
                   onEditIngredient={() => {
                     setIsOpen((prev) => !prev);
                     setIsCreatingIngredient(false);
+                    setIngredientIndex(null);
                   }}
                 />
               </IngredientPopover>
