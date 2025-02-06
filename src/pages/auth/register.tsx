@@ -5,9 +5,12 @@ import { useRouter } from "next/router";
 import WithNavBar from "~/components/UI/with-nabvar";
 import { Button } from "~/components/UI/button";
 import { Input } from "~/components/UI/input";
+import toast from "react-hot-toast";
 
 function Register() {
   const router = useRouter();
+
+  // TODO: replace with TanStack Form
   const { inputValue: username, valueHandler: usernameHandler } = useInput(
     (value: string) => value.trim() !== "",
     "",
@@ -19,6 +22,7 @@ function Register() {
     valueHandler: passwordHandler,
     blurHandler: passwordBlurHandler,
   } = useInput((value: string) => value.trim().length >= 6, "");
+
   const {
     inputValue: confirmPassword,
     isInputInvalid: confirmPasswordInputIsInvalid,
@@ -44,6 +48,7 @@ function Register() {
     })
       .then((res) => {
         if (res.ok) {
+          toast.success("Account created successfully");
           void router.push("/auth/login");
         }
       })

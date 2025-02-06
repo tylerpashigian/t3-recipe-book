@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import toast from "react-hot-toast";
-import { v4 as uuidv4 } from "uuid";
 import { type FieldApi, useForm } from "@tanstack/react-form";
 import { IoClose } from "react-icons/io5";
 import { MdOutlineEdit } from "react-icons/md";
@@ -11,12 +10,22 @@ import { Button } from "../UI/button";
 import { Input } from "../UI/input";
 import { Combobox, type OptionType } from "../UI/combobox";
 import { Textarea } from "../UI/textarea";
-import { type Ingredient } from "~/models/ingredient";
-import { type Recipe, type Category } from "~/models/recipe";
-import { categoryToOption, optionToCategory } from "~/models/mappings/recipe";
+import {
+  type IngredientSummary,
+  type IngredientFormModel,
+} from "~/models/ingredient";
+import {
+  type Recipe,
+  type Category,
+  type RecipeFormModel,
+} from "~/models/recipe";
+import {
+  categoryToOption,
+  convertRecipeToRecipeForm,
+  optionToCategory,
+} from "~/models/mappings/recipe";
 import IngredientForm from "./ingredient-form";
 import IngredientPopover from "./ingredient-popover";
-import { type Ingredient as PrismaIngredient } from "@prisma/client";
 import { toFirstLetterUppercase } from "~/utils/string";
 
 export enum IngredientFormType {
@@ -26,10 +35,10 @@ export enum IngredientFormType {
 
 type Props = {
   categories?: Category[];
-  allIngredients?: PrismaIngredient[];
+  allIngredients?: IngredientSummary[];
   recipe?: Recipe;
   isLoading?: boolean;
-  onSubmit?: (recipe?: Partial<Recipe>) => Promise<void> | void;
+  onSubmit?: (recipe: RecipeFormModel) => Promise<void> | void;
   onCancel?: () => Promise<void> | void;
 };
 
@@ -41,62 +50,38 @@ const RecipeForm = ({
   onSubmit,
   onCancel,
 }: Props) => {
-  const {
-    description,
-    ingredients: recipeIngredients,
-    instructions,
-    name,
-  } = recipe ?? {};
-
   const [ingredientIndex, setIngredientIndex] = useState<number | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  const form = useForm<Partial<Recipe>>({
-    defaultValues: {
-      name: name ?? "",
-      description: description ?? "",
-      instructions: instructions ?? "",
-      categories: [...(recipe?.categories ?? [])],
-      ingredients: [...(recipeIngredients ?? [])],
-      steps: [...(recipe?.steps ?? [])],
-    },
+  const form = useForm<RecipeFormModel>({
+    defaultValues: { ...convertRecipeToRecipeForm(recipe) },
     onSubmit: async ({ value }) => {
       await onSubmitHandler(value);
     },
   });
 
-  type SingleIngredient = Recipe["ingredients"][number];
-
-  const deleteIngredient = (id: string | null) => {
-    if (!id) return;
-    const index = (form.getFieldValue("ingredients") ?? []).findIndex(
-      (ingredient) => ingredient.ingredientId === id,
-    );
+  const deleteIngredient = (index: number) => {
+    // if (!id) return;
+    // const index = (form.getFieldValue("ingredients") ?? []).findIndex(
+    //   (ingredient) => ingredient.ingredientId === id,
+    // );
     form.fieldInfo.ingredients.instance
       ?.removeValue(index)
       .catch(() => toast.error("Error deleting ingredient"));
   };
 
-  const onSubmitHandler = async (value: Partial<Recipe>) => {
-    const recipeToUpsert = {
-      ...recipe,
-      name: value.name,
-      description: value.description,
-      instructions: value.instructions,
-      ingredients: value.ingredients,
-      categories: value.categories,
-      steps: value.steps,
-    };
-
+  const onSubmitHandler = async (value: RecipeFormModel) => {
     try {
-      await onSubmit?.(recipeToUpsert);
+      await onSubmit?.(value);
       form.reset();
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const [isCreatingIngredient, setIsCreatingIngredient] = useState(false);
   const [tempIngredient, setTempIngredient] = useState<
-    SingleIngredient | undefined
+    IngredientFormModel | undefined
   >(undefined);
 
   const isCreating = recipe === undefined;
@@ -104,18 +89,11 @@ const RecipeForm = ({
 
   const addIngredientButton = (
     field: FieldApi<
-      Partial<Recipe>,
+      RecipeFormModel,
       "ingredients",
       undefined,
       undefined,
-      | {
-          ingredientId: string;
-          recipeId: string;
-          name: string;
-          quantity: number | null;
-          unit: string | null;
-        }[]
-      | undefined
+      IngredientFormModel[]
     >,
   ) => {
     return (
@@ -125,11 +103,8 @@ const RecipeForm = ({
           e.preventDefault();
           setIsCreatingIngredient(true);
 
-          const ingredientId = uuidv4();
           field.pushValue({
-            // Temp id to manage local state
-            ingredientId: ingredientId,
-            recipeId: "",
+            recipeId: recipe?.id,
             name: "",
             quantity: null,
             unit: null,
@@ -137,11 +112,12 @@ const RecipeForm = ({
           // I need to get the new index in the ingredients array here to set
           // the ingredientIndex globally which triggers the modal opening
           // How can I confirm the value has been added before searching?
-          const index = form.state.values.ingredients?.findIndex(
-            (ingredient) => ingredient.ingredientId === ingredientId,
-          );
+          // const index = form.state.values.ingredients?.findIndex(
+          //   (ingredient) => ingredient.ingredientId === ingredientId,
+          // );
 
-          if (index !== undefined) setIngredientIndex(index);
+          // if (index !== undefined) setIngredientIndex(index);
+          setIngredientIndex(field.state.value.length - 1);
           setIsOpen(true);
         }}
       >
@@ -165,11 +141,7 @@ const RecipeForm = ({
     // Is there a better way to do this?
     setTimeout(() => {
       isCreatingIngredient
-        ? ingredientIndex !== null &&
-          deleteIngredient(
-            form.state.values.ingredients?.[ingredientIndex]?.ingredientId ??
-              null,
-          )
+        ? ingredientIndex !== null && deleteIngredient(ingredientIndex)
         : ingredientIndex !== null && handleIngredientCancel(ingredientIndex);
       setIsCreatingIngredient(false);
       setIngredientIndex(null);
@@ -358,46 +330,48 @@ const RecipeForm = ({
                 <p className="font-bold">Ingredients</p>
                 {addIngredientButton(field)}
               </div>
-              {(field.state.value ?? []).map((ingredient: Ingredient, i) => {
-                return (
-                  <div
-                    className="flex items-center justify-between"
-                    key={`ingredients[${i}].name`}
-                  >
-                    <p>
-                      {toFirstLetterUppercase(ingredient.name)}{" "}
-                      {ingredient.quantity
-                        ? `(${formatFraction(ingredient.quantity)} ${
-                            ingredient.unit
-                          })`
-                        : null}
-                    </p>
-                    <div className="flex gap-2 hover:cursor-pointer">
-                      <Button
-                        variant={"ghost"}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setTempIngredient(ingredient);
-                          setIngredientIndex(i);
-                          setIsOpen(true);
-                        }}
-                      >
-                        <MdOutlineEdit />
-                      </Button>
-                      <Button
-                        variant={"ghost"}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          deleteIngredient(ingredient.ingredientId);
-                        }}
-                      >
-                        <IoClose />
-                      </Button>
+              {(field.state.value ?? []).map(
+                (ingredient: IngredientFormModel, i) => {
+                  return (
+                    <div
+                      className="flex items-center justify-between"
+                      key={`ingredients[${i}].name`}
+                    >
+                      <p>
+                        {toFirstLetterUppercase(ingredient.name)}{" "}
+                        {ingredient.quantity
+                          ? `(${formatFraction(ingredient.quantity)} ${
+                              ingredient.unit
+                            })`
+                          : null}
+                      </p>
+                      <div className="flex gap-2 hover:cursor-pointer">
+                        <Button
+                          variant={"ghost"}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setTempIngredient(ingredient);
+                            setIngredientIndex(i);
+                            setIsOpen(true);
+                          }}
+                        >
+                          <MdOutlineEdit />
+                        </Button>
+                        <Button
+                          variant={"ghost"}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            deleteIngredient(i);
+                          }}
+                        >
+                          <IoClose />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                },
+              )}
               <IngredientPopover
                 isOpen={isOpen}
                 setIsOpen={setIsOpen}

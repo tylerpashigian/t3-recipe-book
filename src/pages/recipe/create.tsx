@@ -3,37 +3,28 @@ import { useRouter } from "next/navigation";
 
 import toast from "react-hot-toast";
 
-import { api } from "~/utils/api";
+import { useRecipe } from "~/hooks/data/recipe";
 import RecipeForm from "~/components/recipe/recipe-form";
-import { type Recipe } from "~/models/recipe";
 import WithNavBar from "~/components/UI/with-nabvar";
+import { type RecipeFormModel } from "~/models/recipe";
+import { useSession } from "next-auth/react";
 
 export default function CreateRecipe() {
   const router = useRouter();
+  const { data: sessionData } = useSession();
+  const { create, isLoading, categories, allIngredients } = useRecipe();
 
-  const { data: categories } = api.recipes.getCategories.useQuery();
-  const { isLoading, mutateAsync: createRecipe } =
-    api.recipes.create.useMutation({});
-  const { data: allIngredients } = api.recipes.getIngredients.useQuery({
-    name: "",
-  });
+  const createHandler = async (recipeToCreate?: RecipeFormModel) => {
+    if (!recipeToCreate?.name || !sessionData?.user.id) return;
 
-  const onCreate = async (recipeToCreate?: Partial<Recipe>) => {
-    if (!recipeToCreate?.name) return;
+    const createRecipe = create(
+      recipeToCreate,
+      sessionData.user.id,
+      (newRecipe) =>
+        newRecipe.recipe.id && router.push(`/recipe/${newRecipe.recipe.id}`),
+    );
 
-    const cleanedRecipe = {
-      ...recipeToCreate,
-      name: recipeToCreate.name,
-    };
-
-    const create = createRecipe(cleanedRecipe, {
-      onSuccess(createdRecipe) {
-        createdRecipe?.recipe.id &&
-          router.push(`/recipe/${createdRecipe.recipe.id}`);
-      },
-    });
-
-    await toast.promise(create, {
+    await toast.promise(createRecipe, {
       error: "Failed to create",
       loading: "Creating recipe",
       success: "Recipe created",
@@ -52,7 +43,7 @@ export default function CreateRecipe() {
           <RecipeForm
             allIngredients={allIngredients}
             categories={categories}
-            onSubmit={onCreate}
+            onSubmit={createHandler}
             isLoading={isLoading}
           />
         </main>

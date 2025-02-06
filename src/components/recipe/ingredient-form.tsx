@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
-import { Button } from "../UI/button";
-import { toFirstLetterUppercase } from "../../utils/string";
-import { type Recipe } from "~/models/recipe";
+
 import { type useForm } from "@tanstack/react-form";
-import { formatFraction } from "~/utils/conversions";
 import { Minus, Plus } from "lucide-react";
+
+import { type RecipeFormModel } from "~/models/recipe";
+import { type IngredientSummary } from "~/models/ingredient";
+import { formatFraction } from "~/utils/conversions";
+import { toFirstLetterUppercase } from "../../utils/string";
 import { Badge } from "../UI/badge";
+import { Button } from "../UI/button";
 import { Combobox } from "../UI/combobox";
-import { Ingredient } from "@prisma/client";
 
 const IngredientForm = ({
   i,
@@ -16,9 +18,9 @@ const IngredientForm = ({
   allIngredients = [],
 }: {
   i: number | null;
-  form: ReturnType<typeof useForm<Partial<Recipe>>>;
+  form: ReturnType<typeof useForm<RecipeFormModel>>;
   onEditIngredient: () => void;
-  allIngredients?: Ingredient[];
+  allIngredients?: IngredientSummary[];
 }) => {
   const state = form.useStore();
   const [ingredients, setIngredients] = useState(allIngredients);
@@ -59,10 +61,8 @@ const IngredientForm = ({
     <>
       {i !== null ? (
         <div className="flex w-full items-center justify-between gap-2">
-          {/* <AnimatePresence> */}
           <div
             key={`ingredients[${i}].name`}
-            // layoutId={`modal-${i}`}
             className="flex w-full flex-col items-center justify-between gap-2"
           >
             <div className="flex flex-col gap-2">
@@ -233,19 +233,6 @@ const IngredientForm = ({
               </Button>
             </div>
           </div>
-
-          {/* {isEditing && (
-          <IngredientPopover isOpen={isEditing} setIsOpen={setIsEditing} i={i}>
-            <IngredientForm
-              ingredient={ingredient}
-              i={0}
-              form={form}
-              onDelete={() => {}}
-              onEditIngredient={() => {}}
-            />
-          </IngredientPopover>
-        )} */}
-          {/* </AnimatePresence> */}
         </div>
       ) : null}
     </>

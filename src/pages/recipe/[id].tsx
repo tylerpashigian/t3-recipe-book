@@ -12,38 +12,25 @@ import RecipeDetails, {
   DetailsPageType,
 } from "~/components/recipe/recipe-details";
 import RecipeForm from "~/components/recipe/recipe-form";
-import { api } from "~/utils/api";
 import prisma from "~/utils/prisma";
-import { type Recipe } from "~/models/recipe";
+import { type RecipeFormModel, type Recipe } from "~/models/recipe";
 import { appRouter } from "~/server/api/root";
-import { getQueryKey } from "@trpc/react-query";
-import { useQueryClient } from "@tanstack/react-query";
-import { inferRouterOutputs } from "@trpc/server";
-import { RecipesRouter } from "~/server/api/routers/recipes";
-
-type GetDetailsOutput = inferRouterOutputs<RecipesRouter>["getDetails"];
+import { useRecipe } from "~/hooks/data/recipe";
 
 export default function Recipe({ id }: { id: string }) {
   const router = useRouter();
 
   const [pageType, setPageType] = useState(DetailsPageType.Details);
 
-  const queryClient = useQueryClient();
-
-  const { data, isLoading, refetch } = api.recipes.getDetails.useQuery({
-    id: id,
-  });
-
-  const { data: categories } = api.recipes.getCategories.useQuery();
-  const { data: allIngredients } = api.recipes.getIngredients.useQuery({
-    name: "",
-  });
-  const { isLoading: isUpdating, mutateAsync: updateRecipe } =
-    api.recipes.update.useMutation({});
-  const { mutateAsync: deleteRecipe } = api.recipes.delete.useMutation({});
-  const { mutateAsync: favoriteRecipe } = api.recipes.favorite.useMutation({});
-
-  const recipe: Recipe | undefined | null = data?.recipe;
+  const {
+    recipe,
+    isLoading,
+    update,
+    delete: deleteRecipe,
+    favorite,
+    categories,
+    allIngredients,
+  } = useRecipe(id);
 
   const pageTypeHandler = () => {
     setPageType((prevType) =>
@@ -53,41 +40,18 @@ export default function Recipe({ id }: { id: string }) {
     );
   };
 
-  const onUpdate = async (recipeToUpdate?: Partial<Recipe>) => {
-    if (
-      !recipeToUpdate?.id ||
-      !recipeToUpdate?.name ||
-      !recipeToUpdate?.authorId
-    ) {
+  const onUpdate = async (recipeToUpdate: RecipeFormModel) => {
+    if (!recipeToUpdate?.id || !recipeToUpdate?.name || !recipe?.author.id) {
       setPageType(DetailsPageType.Details);
       return;
     }
 
-    const cleanedRecipe = {
-      ...recipeToUpdate,
-      id: recipeToUpdate.id,
-      name: recipeToUpdate.name,
-      authorId: recipeToUpdate.authorId,
-      steps: recipeToUpdate.steps,
-    };
-
-    const update = updateRecipe(cleanedRecipe, {
-      onSuccess(updated) {
-        setPageType(DetailsPageType.Details);
-        const key = getQueryKey(api.recipes.getDetails, { id }, "query");
-        queryClient.setQueryData<GetDetailsOutput | undefined>(key, (prev) => {
-          return {
-            author: prev?.author,
-            recipe: {
-              ...updated,
-            },
-          };
-        });
-        window.scrollTo({ top: 0 });
-      },
+    const updateRecipe = update(recipeToUpdate, recipe.author.id, () => {
+      setPageType(DetailsPageType.Details);
+      window.scrollTo({ top: 0 });
     });
 
-    await toast.promise(update, {
+    await toast.promise(updateRecipe, {
       error: "Failed to update",
       loading: "Updating recipe",
       success: "Updated recipe",
@@ -98,21 +62,14 @@ export default function Recipe({ id }: { id: string }) {
     setPageType(DetailsPageType.Details);
   };
 
-  const onFavorite = async (favorited: boolean) => {
+  const favoriteHandler = async (favorited: boolean) => {
     if (!recipe) return;
-    const favorite = favoriteRecipe(
-      {
-        id: recipe.id,
-        authorId: recipe.authorId,
-        isFavorited: favorited,
-      },
-      {
-        async onSuccess() {
-          await refetch();
-        },
-      },
+    const favoriteAsync = favorite(
+      recipe.recipe.id,
+      recipe.author.id,
+      favorited,
     );
-    await toast.promise(favorite, {
+    await toast.promise(favoriteAsync, {
       error: "Failed to update",
       loading: "Updating recipe",
       success: "Updated recipe",
@@ -120,16 +77,16 @@ export default function Recipe({ id }: { id: string }) {
   };
 
   const deleteHandler = async () => {
-    if (!data?.recipe?.id || !data?.author?.id) {
+    if (!recipe?.recipe?.id || !recipe?.author?.id) {
       toast.error("Invalid recipe");
       return;
     }
+
     const asyncDelete = deleteRecipe(
-      { id: data.recipe.id, authorId: data.author.id },
-      {
-        async onSuccess() {
-          await router.push("/");
-        },
+      recipe.recipe.id,
+      recipe.author.id,
+      async () => {
+        await router.push("/");
       },
     );
 
@@ -156,20 +113,20 @@ export default function Recipe({ id }: { id: string }) {
                   <>
                     {pageType === DetailsPageType.Details && (
                       <RecipeDetails
-                        author={data?.author}
-                        recipe={recipe}
+                        author={recipe.author}
+                        recipe={recipe.recipe}
                         pageTypeHandler={pageTypeHandler}
                         onDelete={deleteHandler}
-                        onFavorite={onFavorite}
+                        onFavorite={favoriteHandler}
                       />
                     )}
                     {pageType === DetailsPageType.Edit && (
                       <RecipeForm
                         allIngredients={allIngredients}
                         categories={categories}
-                        recipe={recipe}
-                        isLoading={isLoading || isUpdating}
-                        onSubmit={(recipe) => onUpdate(recipe)}
+                        recipe={recipe.recipe}
+                        isLoading={isLoading}
+                        onSubmit={onUpdate}
                         onCancel={cancelHandler}
                       />
                     )}
@@ -191,6 +148,7 @@ export async function getStaticPaths({}: GetStaticPropsContext) {
     transformer: superjson,
   });
 
+  // Can we avoid using trpc here?
   const recipes = await helpers.recipes.getAll.fetch({ max: 10 });
   const paths = recipes.map((recipe) => ({ params: { id: recipe.id } }));
 
@@ -208,6 +166,8 @@ export async function getStaticProps(
     ctx: { session: null, prisma },
     transformer: superjson,
   });
+
+  // Can we avoid using trpc here?
   const id = context.params?.id ?? "";
   await helpers.recipes.getDetails.prefetch({ id });
 
