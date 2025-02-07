@@ -207,34 +207,12 @@ export const recipesRouter = createTRPCRouter({
 
       const id = input.id;
 
-      const currentRecipe = await ctx.prisma.recipe.findFirst({
-        where: { id: input.id },
-        include: { ingredients: true, categories: true },
-      });
-
-      if (!currentRecipe) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Recipe not found",
-        });
-      }
-
-      const currentCategoryIds = (currentRecipe.categories ?? []).map(
-        (category) => category.id,
-      );
-
-      const categoriesToDelete = currentCategoryIds
-        .filter(
-          (id) => !input.categories?.some((category) => category.id === id),
-        )
-        .map((id) => ({ id }));
-
       const updatedRecipe = await ctx.prisma.recipe.update({
         where: { id: input.id },
         data: {
           name: input.name,
-          description: input.description ?? currentRecipe.description,
-          instructions: input.instructions ?? currentRecipe.instructions,
+          description: input.description,
+          instructions: input.instructions,
           ingredients: {
             // Delete ingredients that are NOT in the input list
             deleteMany: {
@@ -270,13 +248,11 @@ export const recipesRouter = createTRPCRouter({
               })),
           },
           categories: {
-            connectOrCreate: input.categories?.map(({ id, name }) => {
-              return {
-                where: { id },
-                create: { id, name },
-              };
-            }),
-            disconnect: categoriesToDelete,
+            connectOrCreate: input.categories?.map(({ id, name }) => ({
+              where: { id },
+              create: { id, name },
+            })),
+            set: input.categories?.map(({ id }) => ({ id })) ?? [],
           },
           steps: {
             // Delete steps that exist in the database but are not in the input array
