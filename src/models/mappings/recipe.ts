@@ -83,7 +83,6 @@ export const convertRecipeFormToRecipeRequest = (
         data.id ?? undefined,
       ),
     ),
-    instructions: "",
     steps: data.steps.map((step) => ({
       content: step.content,
       order: step.order,

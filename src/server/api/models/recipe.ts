@@ -28,7 +28,6 @@ const AuthorSchema = z.object({
 const BaseRecipeSchema = z.object({
   name: z.string(),
   description: z.string(),
-  instructions: z.string(),
   categories: z.array(CategorySchema),
   steps: z.array(InstructionSchema),
 });
@@ -43,7 +42,6 @@ export const RecipeSchemaResponse = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string(),
-  instructions: z.string(),
   ingredients: z.array(IngredientSchemaResponse),
   categories: z.array(CategorySchema),
   favoriteCount: z.number(),

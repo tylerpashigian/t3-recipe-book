@@ -7,8 +7,7 @@ generator client {
 
 datasource db {
   provider          = "postgresql"
-  url               = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl         = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+  url               = env("DATABASE_URL")
   shadowDatabaseUrl = env("POSTGRES_SHADOW_URL")
 }
 
@@ -68,10 +67,9 @@ model Recipe {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  name         String
-  description  String
-  instructions String
-  authorId     String
+  name        String
+  description String
+  authorId    String
 
   ingredients IngredientInRecipe[]
   categories  RecipeCategory[]

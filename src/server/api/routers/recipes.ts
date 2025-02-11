@@ -124,7 +124,6 @@ export const recipesRouter = createTRPCRouter({
           authorId: ctx.session.user.id,
           name: input.name,
           description: input.description ?? "",
-          instructions: input.instructions ?? "",
           ingredients: {
             create: input.ingredients?.map(({ name, quantity, unit }) => {
               return {
@@ -212,7 +211,6 @@ export const recipesRouter = createTRPCRouter({
         data: {
           name: input.name,
           description: input.description,
-          instructions: input.instructions,
           ingredients: {
             // Delete ingredients that are NOT in the input list
             deleteMany: {
