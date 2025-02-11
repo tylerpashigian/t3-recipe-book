@@ -67,10 +67,9 @@ model Recipe {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  name         String
-  description  String
-  instructions String
-  authorId     String
+  name        String
+  description String
+  authorId    String
 
   ingredients IngredientInRecipe[]
   categories  RecipeCategory[]
