@@ -52,6 +52,19 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
       onChange(selected.filter((i) => i.value !== item.value));
     };
 
+    const availableOptions = React.useMemo(() => {
+      const newOptions =
+        searchValue !== "" &&
+        allowsCustomValue &&
+        !options.some((option) => option.value === searchValue.toLowerCase())
+          ? [
+              ...options,
+              { label: searchValue, value: searchValue.toLowerCase() },
+            ]
+          : options;
+      return newOptions;
+    }, [options, searchValue, allowsCustomValue]);
+
     // on delete key press, remove last selected item
     React.useEffect(() => {
       const handleKeyDown = (e: KeyboardEvent) => {
@@ -163,7 +176,7 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
                 )}
               </CommandEmpty>
               <CommandGroup className="max-h-64 overflow-auto">
-                {options.map((option) => (
+                {availableOptions.map((option) => (
                   <CommandItem
                     key={option.value}
                     onSelect={() => {
