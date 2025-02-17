@@ -11,6 +11,9 @@ export type Recipe = {
   description: string;
   ingredients: Ingredient[];
   steps: Step[];
+  servings?: number | null;
+  prepTime?: number | null;
+  cookTime?: number | null;
   categories: Category[];
   isFavorited: boolean;
   favoriteCount: number;
@@ -21,6 +24,9 @@ export type RecipeFormModel = {
   name: string;
   categories: Category[];
   description: string;
+  servings?: number | null;
+  prepTime?: number | null;
+  cookTime?: number | null;
   steps: StepFormModel[];
   ingredients: IngredientFormModel[];
 };

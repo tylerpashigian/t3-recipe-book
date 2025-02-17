@@ -59,13 +59,33 @@ const RecipeDetails = ({
           </div>
         )}
       </div>
+      <div className="flex gap-3">
+        {recipe.servings ? (
+          <div>
+            <p className="mb-2 font-semibold">Servings</p>
+            <p className="w-full text-black">{recipe.servings}</p>
+          </div>
+        ) : null}
+        {recipe.prepTime ? (
+          <div>
+            <p className="mb-2 font-semibold">Prep Time</p>
+            <p className="w-full text-black">{recipe.prepTime}</p>
+          </div>
+        ) : null}
+        {recipe.cookTime ? (
+          <div>
+            <p className="mb-2 font-semibold">Cook Time</p>
+            <p className="w-full text-black">{recipe.cookTime}</p>
+          </div>
+        ) : null}
+      </div>
       {recipe.description ? (
         <div>
           <p className="mb-2 font-semibold">Recipe Description</p>
           <p className="w-full text-black">{recipe.description}</p>
         </div>
       ) : null}
-      {recipe.steps ? (
+      {recipe.steps.length ? (
         <div>
           <p className="mb-2 font-semibold">Instructions</p>
           <ol className="list-inside list-decimal">

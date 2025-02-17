@@ -5,7 +5,7 @@ import {
   IngredientSchemaRequest,
   IngredientSchemaResponse,
 } from "./ingredient";
-import { RecipesRouter } from "../routers/recipes";
+import { type RecipesRouter } from "../routers/recipes";
 
 const CategorySchema = z.object({
   id: z.string(),
@@ -30,6 +30,9 @@ const BaseRecipeSchema = z.object({
   description: z.string(),
   categories: z.array(CategorySchema),
   steps: z.array(InstructionSchema),
+  servings: z.number().optional().nullable(),
+  prepTime: z.number().optional().nullable(),
+  cookTime: z.number().optional().nullable(),
 });
 
 export const RecipeSchemaRequest = BaseRecipeSchema.extend({
@@ -38,7 +41,7 @@ export const RecipeSchemaRequest = BaseRecipeSchema.extend({
   authorId: z.string(),
 });
 
-export const RecipeSchemaResponse = z.object({
+export const RecipeSchemaResponse = BaseRecipeSchema.extend({
   id: z.string(),
   name: z.string(),
   description: z.string(),

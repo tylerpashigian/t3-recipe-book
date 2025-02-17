@@ -31,6 +31,9 @@ export const convertRecipeSchemaToRecipe = (
         content: step.content,
         order: step.order,
       })),
+      servings: data.recipe.servings,
+      prepTime: data.recipe.prepTime,
+      cookTime: data.recipe.cookTime,
       categories: data.recipe.categories,
       isFavorited: data.recipe.isFavorited,
       favoriteCount: data.recipe.favoriteCount,
@@ -59,6 +62,9 @@ export const convertRecipeToRecipeForm = (
         unit: ingredient.unit ?? "",
         recipeId: data.id,
       })) ?? [],
+    servings: data?.servings,
+    prepTime: data?.prepTime,
+    cookTime: data?.cookTime,
     steps:
       data?.steps.map((step) => ({
         id: step.id,
@@ -83,6 +89,9 @@ export const convertRecipeFormToRecipeRequest = (
         data.id ?? undefined,
       ),
     ),
+    servings: data.servings,
+    prepTime: data.prepTime,
+    cookTime: data.cookTime,
     steps: data.steps.map((step) => ({
       content: step.content,
       order: step.order,
