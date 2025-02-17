@@ -156,7 +156,7 @@ const RecipeForm = ({
         event.stopPropagation();
         void form.handleSubmit();
       }}
-      className="w-full space-y-2 md:w-1/2"
+      className="w-full space-y-2 md:w-3/5"
     >
       <div className="flex flex-col space-y-2">
         <div>
@@ -223,6 +223,74 @@ const RecipeForm = ({
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
               </>
+            )}
+          </form.Field>
+        </div>
+        <div className="flex flex-col gap-2 md:flex-row md:gap-3">
+          <form.Field name="servings">
+            {(field) => (
+              <div className="flex-1">
+                <label htmlFor={field.name} className="font-bold">
+                  Servings
+                </label>
+                <Input
+                  type="number"
+                  id={field.name}
+                  name={field.name}
+                  placeholder="Servings"
+                  className="mt-2 w-full px-4 py-3 text-black"
+                  value={field.state.value ?? ""}
+                  onChange={(e) => {
+                    const newValue =
+                      e.target.value === "" ? null : Number(e.target.value);
+                    field.handleChange(newValue);
+                  }}
+                />
+              </div>
+            )}
+          </form.Field>
+          <form.Field name="prepTime">
+            {(field) => (
+              <div className="flex-1">
+                <label htmlFor={field.name} className="font-bold">
+                  Prep time (min)
+                </label>
+                <Input
+                  type="number"
+                  id={field.name}
+                  name={field.name}
+                  placeholder="Prep time"
+                  className="mt-2 w-full px-4 py-3 text-black"
+                  value={field.state.value ?? ""}
+                  onChange={(e) => {
+                    const newValue =
+                      e.target.value === "" ? null : Number(e.target.value);
+                    field.handleChange(newValue);
+                  }}
+                />
+              </div>
+            )}
+          </form.Field>
+          <form.Field name="cookTime">
+            {(field) => (
+              <div className="flex-1">
+                <label htmlFor={field.name} className="font-bold">
+                  Cook time (min)
+                </label>
+                <Input
+                  type="number"
+                  id={field.name}
+                  name={field.name}
+                  placeholder="Cook time"
+                  className="mt-2 w-full px-4 py-3 text-black"
+                  value={field.state.value ?? ""}
+                  onChange={(e) => {
+                    const newValue =
+                      e.target.value === "" ? null : Number(e.target.value);
+                    field.handleChange(newValue);
+                  }}
+                />
+              </div>
             )}
           </form.Field>
         </div>

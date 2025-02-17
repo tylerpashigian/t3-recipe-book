@@ -70,6 +70,9 @@ model Recipe {
   name        String
   description String
   authorId    String
+  servings    Int?
+  prepTime    Int?
+  cookTime    Int?
 
   ingredients IngredientInRecipe[]
   categories  RecipeCategory[]

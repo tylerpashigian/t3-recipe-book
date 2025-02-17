@@ -147,6 +147,9 @@ export const recipesRouter = createTRPCRouter({
               };
             }),
           },
+          servings: input.servings,
+          prepTime: input.prepTime,
+          cookTime: input.cookTime,
           steps: {
             create: input.steps?.map(({ content, order }) => {
               return { content, order };
@@ -211,6 +214,9 @@ export const recipesRouter = createTRPCRouter({
         data: {
           name: input.name,
           description: input.description,
+          servings: input.servings,
+          prepTime: input.prepTime,
+          cookTime: input.cookTime,
           ingredients: {
             // Delete ingredients that are NOT in the input list
             deleteMany: {
