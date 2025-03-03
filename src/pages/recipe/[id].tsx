@@ -12,7 +12,7 @@ import RecipeDetails, {
   DetailsPageType,
 } from "~/components/recipe/recipe-details";
 import RecipeForm from "~/components/recipe/recipe-form";
-import prisma from "~/utils/prisma";
+import { prisma } from "~/server/db";
 import { type RecipeFormModel, type Recipe } from "~/models/recipe";
 import { appRouter } from "~/server/api/root";
 import { useRecipe } from "~/hooks/data/recipe";

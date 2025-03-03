@@ -1,7 +1,7 @@
 import React from "react";
 
 import superjson from "superjson";
-import prisma from "../../utils/prisma";
+import { prisma } from "~/server/db";
 import { createServerSideHelpers } from "@trpc/react-query/server";
 import { type User, type Recipe } from "@prisma/client";
 

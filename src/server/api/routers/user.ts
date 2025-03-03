@@ -14,6 +14,15 @@ export const userRouter = createTRPCRouter({
         where: { authorId: input.id },
       });
 
-      return { user, recipes };
+      const isoStringRecipes = recipes.map((recipe) => {
+        const { createdAt, updatedAt, ...rest } = recipe;
+        return {
+          ...rest,
+          createdAt: createdAt.toISOString(),
+          updatedAt: updatedAt.toISOString(),
+        };
+      });
+
+      return { user, recipes: isoStringRecipes };
     }),
 });

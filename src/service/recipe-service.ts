@@ -84,12 +84,12 @@ export const useRecipeService = (id?: string): RecipeServiceType => {
       },
     );
 
-  const { isLoading: isUpdating, mutateAsync: update } =
+  const { isPending: isUpdating, mutateAsync: update } =
     api.recipes.update.useMutation({});
-  const { isLoading: isCreating, mutateAsync: create } =
+  const { isPending: isCreating, mutateAsync: create } =
     api.recipes.create.useMutation({});
 
-  const { isLoading: isDeleting, mutateAsync: deleteRecipe } =
+  const { isPending: isDeleting, mutateAsync: deleteRecipe } =
     api.recipes.delete.useMutation({});
   const { mutateAsync: favorite } = api.recipes.favorite.useMutation({});
 

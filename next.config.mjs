@@ -17,14 +17,15 @@ const config = {
     ],
   },
   experimental: {
-    swcPlugins: [
-      [
-        "next-superjson-plugin",
-        {
-          excluded: [],
-        },
-      ],
-    ],
+    // Can this be removed?
+    // swcPlugins: [
+    //   [
+    //     "next-superjson-plugin",
+    //     {
+    //       excluded: [],
+    //     },
+    //   ],
+    // ],
   },
   reactStrictMode: true,
 
