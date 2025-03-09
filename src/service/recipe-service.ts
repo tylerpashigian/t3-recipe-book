@@ -7,7 +7,7 @@ import {
   type FullRecipe,
   type RecipeFormModel,
 } from "~/models/recipe";
-import { api } from "~/utils/api";
+import { api } from "~/trpc/react";
 import {
   type QueryObserverResult,
   type RefetchOptions,
