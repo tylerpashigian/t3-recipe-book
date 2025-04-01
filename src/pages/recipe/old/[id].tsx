@@ -85,9 +85,9 @@ export default function Recipe({ id }: { id: string }) {
     const asyncDelete = deleteRecipe(
       recipe.recipe.id,
       recipe.author.id,
-      async () => {
+      void (async () => {
         await router.push("/");
-      },
+      })(),
     );
 
     await toast.promise(asyncDelete, {

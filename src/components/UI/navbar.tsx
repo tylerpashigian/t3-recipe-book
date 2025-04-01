@@ -37,7 +37,7 @@ export const AuthShowcase = ({ setIsDrawerOpen, session }: Props) => {
       </p>
       {!!session ? (
         <Button size={"full"} onClick={() => setIsDrawerOpen(false)} asChild>
-          <Link href={`/profile/${session?.user.id}`}>
+          <Link href={`/user/${session?.user.id}`}>
             <>View Profile</>
           </Link>
         </Button>

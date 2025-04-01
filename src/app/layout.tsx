@@ -1,6 +1,7 @@
 import { Toaster } from "react-hot-toast";
 
 import NavbarWrapper from "~/components/UI/navbar-wrapper";
+import ToastWrapper from "./ToastWrapper";
 import { TRPCReactProvider } from "~/trpc/react";
 import "~/styles/globals.css";
 
@@ -20,7 +21,7 @@ export default function RootLayout({
       <body>
         <NavbarWrapper />
         <TRPCReactProvider>{children}</TRPCReactProvider>
-        <Toaster position="bottom-right" />
+        <ToastWrapper />
       </body>
     </html>
   );

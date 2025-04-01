@@ -54,7 +54,10 @@ const Recipes = () => {
               <>
                 {!isLoading && data && data.length > 0
                   ? data.map((recipe) => (
-                      <Link href={`/recipe/${recipe.id}`} key={recipe.id}>
+                      <Link
+                        href={`/recipe/${recipe.id}`}
+                        key={`${recipe.id}-new`}
+                      >
                         <Button variant={"link"}>{recipe.name}</Button>
                       </Link>
                     ))

@@ -57,7 +57,7 @@ type RecipeServiceType = {
     deleteRecipe: (
       recipeId: string,
       authorId: string,
-      onSuccess?: () => Promise<void>,
+      onSuccess?: () => void,
     ) => Promise<void>;
   };
   categories: {
@@ -161,7 +161,7 @@ export const useRecipeService = (id?: string): RecipeServiceType => {
   const deleteRecipeHandler = async (
     recipeId: string,
     authorId: string,
-    onSuccess?: () => Promise<void>,
+    onSuccess?: () => void,
   ) => {
     return await deleteRecipe(
       { id: recipeId, authorId: authorId },
