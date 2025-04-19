@@ -20,6 +20,8 @@ import {
 
 export type OptionType = Record<"value" | "label", string>;
 
+export type NewOptionType = OptionType & { isNew?: boolean };
+
 interface ComboboxProps {
   options: Record<"value" | "label", string>[];
   selected: Record<"value" | "label", string>[];
@@ -51,6 +53,34 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
     const handleUnselect = (item: Record<"value" | "label", string>) => {
       onChange(selected.filter((i) => i.value !== item.value));
     };
+
+    function searchArray(
+      query: string,
+      items: NewOptionType[],
+    ): NewOptionType[] {
+      const lowerQuery = query.toLowerCase();
+
+      return items.filter((item) =>
+        item.label.toLowerCase().includes(lowerQuery),
+      );
+    }
+
+    const availableOptions: NewOptionType[] = React.useMemo(() => {
+      const customOption =
+        searchValue !== "" &&
+        allowsCustomValue &&
+        !options.some((option) => option.value === searchValue.toLowerCase())
+          ? {
+              label: searchValue,
+              value: searchValue.toLowerCase(),
+              isNew: true,
+            }
+          : null;
+
+      const newOptions = customOption ? [...options, customOption] : options;
+      const filteredItems = searchArray(searchValue, newOptions);
+      return filteredItems;
+    }, [options, searchValue, allowsCustomValue]);
 
     // on delete key press, remove last selected item
     React.useEffect(() => {
@@ -133,8 +163,12 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
             </>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0">
-          <Command className={className}>
+        <PopoverContent
+          className="w-full p-0"
+          // acounting for iPhone safe area - using max value for largest devices
+          collisionPadding={{ top: 59, bottom: 37 }}
+        >
+          <Command className={className} shouldFilter={false}>
             <CommandInput
               value={searchValue}
               onValueChange={setSearchValue}
@@ -163,7 +197,7 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
                 )}
               </CommandEmpty>
               <CommandGroup className="max-h-64 overflow-auto">
-                {options.map((option) => (
+                {availableOptions.map((option) => (
                   <CommandItem
                     key={option.value}
                     onSelect={() => {
@@ -173,8 +207,11 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
                             ? selected.filter(
                                 (item) => item.value !== option.value,
                               )
-                            : [...selected, option]
-                          : [option],
+                            : [
+                                ...selected,
+                                { value: option.value, label: option.label },
+                              ]
+                          : [{ value: option.value, label: option.label }],
                       );
                       !isMultiSelect && setOpen(false);
                     }}
@@ -187,7 +224,7 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
                           : "opacity-0",
                       )}
                     />
-                    {option.label}
+                    {option.isNew ? `Create: ${option.label}` : option.label}
                   </CommandItem>
                 ))}
               </CommandGroup>
