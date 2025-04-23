@@ -9,6 +9,7 @@ import RecipeDetails, {
 import RecipeForm from "~/components/recipe/recipe-form";
 import { type FullRecipe, type RecipeFormModel } from "~/models/recipe";
 import { useRecipe } from "~/hooks/data/recipe";
+import { revalidateRecipePath } from "~/app/actions/recipe";
 
 export default function RecipePage({
   initialRecipe,
@@ -54,12 +55,15 @@ export default function RecipePage({
       loading: "Updating recipe",
       success: "Updated recipe",
     });
+
+    await revalidateRecipePath(recipeToUpdate.id);
   };
 
   const cancelHandler = () => setPageType(DetailsPageType.Details);
 
   const favoriteHandler = async (favorited: boolean) => {
     if (!recipe) return;
+
     await toast.promise(
       favorite(recipe.recipe.id, recipe.author.id, favorited),
       {
@@ -68,6 +72,8 @@ export default function RecipePage({
         success: "Updated recipe",
       },
     );
+
+    await revalidateRecipePath(recipe.recipe.id);
   };
 
   const deleteHandler = async () => {
