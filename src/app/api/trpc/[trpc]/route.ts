@@ -1,3 +1,5 @@
+// This file replaces [trpc].ts in the pages directory.
+
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { type NextRequest } from "next/server";
 

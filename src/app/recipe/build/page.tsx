@@ -1,3 +1,5 @@
+"use client";
+
 import { useForm } from "@tanstack/react-form";
 import React from "react";
 import { api } from "~/trpc/react";

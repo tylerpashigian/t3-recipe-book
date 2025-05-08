@@ -1,11 +1,14 @@
-import { getServerSession } from "next-auth";
+import { useSession } from "next-auth/react";
+// import { getServerSession } from "next-auth";
 
 import Navbar from "./navbar";
-import { authOptions } from "~/server/auth/config";
+// import { authOptions } from "~/server/auth/config";
 
-export default async function NavbarWrapper() {
-  const sessionPromise = getServerSession(authOptions);
-  const session = await sessionPromise;
+export default function NavbarWrapper() {
+  // const sessionPromise = getServerSession(authOptions);
+  // const session = await sessionPromise;
 
-  return <Navbar session={session} />;
+  const session = useSession();
+
+  return <Navbar session={session.data} />;
 }
