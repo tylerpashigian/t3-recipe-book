@@ -8,8 +8,16 @@ import { httpBatchLink, loggerLink } from "@trpc/client";
 import { createTRPCNext } from "@trpc/next";
 import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
 import superjson from "superjson";
+import { z } from "zod";
 
 import { type AppRouter } from "~/server/api/root";
+
+export async function parseRequestBody<T>(
+  req: Request,
+  schema: z.ZodSchema<T>,
+): Promise<T> {
+  return schema.parse(await req.json());
+}
 
 const getBaseUrl = () => {
   if (typeof window !== "undefined") return ""; // browser should use relative url
