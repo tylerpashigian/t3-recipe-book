@@ -7,7 +7,7 @@ import {
   type FullRecipe,
   type RecipeFormModel,
 } from "~/models/recipe";
-import { api } from "~/utils/api";
+import { api } from "~/trpc/react";
 import {
   type QueryObserverResult,
   type RefetchOptions,
@@ -57,7 +57,7 @@ type RecipeServiceType = {
     deleteRecipe: (
       recipeId: string,
       authorId: string,
-      onSuccess?: () => Promise<void>,
+      onSuccess?: () => void,
     ) => Promise<void>;
   };
   categories: {
@@ -84,12 +84,12 @@ export const useRecipeService = (id?: string): RecipeServiceType => {
       },
     );
 
-  const { isLoading: isUpdating, mutateAsync: update } =
+  const { isPending: isUpdating, mutateAsync: update } =
     api.recipes.update.useMutation({});
-  const { isLoading: isCreating, mutateAsync: create } =
+  const { isPending: isCreating, mutateAsync: create } =
     api.recipes.create.useMutation({});
 
-  const { isLoading: isDeleting, mutateAsync: deleteRecipe } =
+  const { isPending: isDeleting, mutateAsync: deleteRecipe } =
     api.recipes.delete.useMutation({});
   const { mutateAsync: favorite } = api.recipes.favorite.useMutation({});
 
@@ -161,7 +161,7 @@ export const useRecipeService = (id?: string): RecipeServiceType => {
   const deleteRecipeHandler = async (
     recipeId: string,
     authorId: string,
-    onSuccess?: () => Promise<void>,
+    onSuccess?: () => void,
   ) => {
     return await deleteRecipe(
       { id: recipeId, authorId: authorId },

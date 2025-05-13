@@ -1,6 +1,8 @@
+"use client";
+
 import { useForm } from "@tanstack/react-form";
 import React from "react";
-import { api } from "~/utils/api";
+import { api } from "~/trpc/react";
 import { Button } from "~/components/UI/button";
 import { Combobox, type OptionType } from "~/components/UI/combobox";
 import WithNavBar from "~/components/UI/with-nabvar";
@@ -14,6 +16,7 @@ const BuildRecipe = () => {
     },
   });
 
+  // TODO: convert to service layer
   const { data: allIngredients } = api.recipes.getIngredients.useQuery({
     name: "",
   });

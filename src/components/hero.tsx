@@ -1,9 +1,12 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "./UI/button";
 
 const Hero = () => {
-  const [navHeight, setNavHeight] = useState(0);
+  // Default height of the navbar to 56px (40px for button and 8px for py)
+  const [navHeight, setNavHeight] = useState(56);
 
   useEffect(() => {
     const navBar = document.querySelector("header");

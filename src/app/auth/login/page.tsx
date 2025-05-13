@@ -1,23 +1,43 @@
-import { type FormEvent } from "react";
-import type {
-  GetServerSidePropsContext,
-  InferGetServerSidePropsType,
-} from "next";
-import { useRouter } from "next/router";
+"use client";
 
-import { getCsrfToken, getProviders, signIn } from "next-auth/react";
+import { useEffect, useState, type FormEvent } from "react";
+
+import { useRouter } from "next/navigation";
+
+import {
+  ClientSafeProvider,
+  getCsrfToken,
+  getProviders,
+  LiteralUnion,
+  signIn,
+} from "next-auth/react";
 import toast from "react-hot-toast";
 
 import Separator from "~/components/UI/separator";
 import WithNavBar from "~/components/UI/with-nabvar";
-import useInput from "../../hooks/useInput";
+import useInput from "../../../hooks/useInput";
 import { Button } from "~/components/UI/button";
 import { Input } from "~/components/UI/input";
+import { BuiltInProviderType } from "next-auth/providers";
 
-const Login = ({
-  providers,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+const Login = () => {
   const router = useRouter();
+
+  const [providers, setProviders] = useState<
+    | Record<LiteralUnion<BuiltInProviderType, string>, ClientSafeProvider>
+    | never[]
+  >([]);
+
+  useEffect(() => {
+    const fetchProviders = async () => {
+      const res = await getProviders();
+      if (res) {
+        setProviders(res);
+      }
+    };
+
+    fetchProviders().catch((error) => console.log(error));
+  }, []);
 
   // TODO: replace with TanStack Form
   const { inputValue: username, valueHandler: usernameHandler } = useInput(
@@ -43,7 +63,7 @@ const Login = ({
       redirect: false,
     })
       .then((res) => {
-        if (res?.ok) {
+        if (res?.ok && !res?.error) {
           void router.push("/");
         } else {
           toast.error("Failed to login! Check your input and try again.");
@@ -132,14 +152,5 @@ const Login = ({
     </WithNavBar>
   );
 };
-
-export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const csrfToken = await getCsrfToken(context);
-  const providers = await getProviders();
-
-  return {
-    props: { csrfToken, providers: providers ?? [] },
-  };
-}
 
 export default Login;

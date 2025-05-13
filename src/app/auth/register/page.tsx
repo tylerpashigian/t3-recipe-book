@@ -1,7 +1,9 @@
+"use client";
+
 import React, { type FormEvent } from "react";
-import useInput from "../../hooks/useInput";
+import useInput from "../../../hooks/useInput";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import WithNavBar from "~/components/UI/with-nabvar";
 import { Button } from "~/components/UI/button";
 import { Input } from "~/components/UI/input";

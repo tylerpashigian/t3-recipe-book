@@ -1,10 +1,12 @@
+"use client";
+
 import Head from "next/head";
 import WithNavBar from "~/components/UI/with-nabvar";
 
 import Link from "next/link";
 import React, { useState } from "react";
 
-import { api } from "~/utils/api";
+import { api } from "~/trpc/react";
 import { Input } from "~/components/UI/input";
 import { Combobox, type OptionType } from "~/components/UI/combobox";
 import { categoryToOption } from "~/models/mappings/recipe";
@@ -54,7 +56,10 @@ const Recipes = () => {
               <>
                 {!isLoading && data && data.length > 0
                   ? data.map((recipe) => (
-                      <Link href={`/recipe/${recipe.id}`} key={recipe.id}>
+                      <Link
+                        href={`/recipe/${recipe.id}`}
+                        key={`${recipe.id}-new`}
+                      >
                         <Button variant={"link"}>{recipe.name}</Button>
                       </Link>
                     ))

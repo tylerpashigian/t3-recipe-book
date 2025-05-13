@@ -119,7 +119,7 @@ const RecipeDetails = ({
           Author:
           <span>
             <Button className="px-2" variant={"link"} asChild>
-              <Link href={`/profile/${author.id}`}>{displayName}</Link>
+              <Link href={`/user/${author.id}`}>{displayName}</Link>
             </Button>
           </span>
         </p>
