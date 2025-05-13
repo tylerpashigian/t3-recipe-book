@@ -1,4 +1,4 @@
-// components/ToasterProvider.tsx
+// needed to persist toast notifications across server page navigations
 "use client";
 
 import { Toaster } from "react-hot-toast";

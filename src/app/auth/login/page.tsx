@@ -63,7 +63,7 @@ const Login = () => {
       redirect: false,
     })
       .then((res) => {
-        if (res?.ok) {
+        if (res?.ok && !res?.error) {
           void router.push("/");
         } else {
           toast.error("Failed to login! Check your input and try again.");
@@ -152,14 +152,5 @@ const Login = () => {
     </WithNavBar>
   );
 };
-
-// export async function getServerSideProps(context: GetServerSidePropsContext) {
-//   const csrfToken = await getCsrfToken(context);
-//   const providers = await getProviders();
-
-//   return {
-//     props: { csrfToken, providers: providers ?? [] },
-//   };
-// }
 
 export default Login;

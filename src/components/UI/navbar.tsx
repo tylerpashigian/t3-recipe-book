@@ -43,7 +43,7 @@ export const AuthShowcase = ({ setIsDrawerOpen, session }: Props) => {
         </Button>
       ) : (
         <Button size={"full"} asChild>
-          <Link href={"/auth/register"}>
+          <Link href={"/auth/register"} onClick={() => setIsDrawerOpen(false)}>
             <>Create</>
           </Link>
         </Button>
