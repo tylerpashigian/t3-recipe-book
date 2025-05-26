@@ -27,7 +27,9 @@ export const recipesRouter = createTRPCRouter({
       return await ctx.prisma.recipe.findMany({
         take: input.max,
         where: {
-          name: { contains: input.query, mode: "insensitive" },
+          ...(input.query
+            ? { name: { contains: input.query, mode: "insensitive" } }
+            : {}),
           ...(input.categories?.length
             ? {
                 categories: {
