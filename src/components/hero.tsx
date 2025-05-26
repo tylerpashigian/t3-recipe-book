@@ -1,27 +1,36 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { Button } from "./UI/button";
+import { Badge } from "./UI/badge";
 
 const Hero = () => {
   return (
-    <section className="flex h-[100dvh] w-full items-center bg-[#FAFAF7] px-6 py-20">
-      <div className="container grid h-full items-center justify-center gap-4 px-4 lg:gap-8">
-        <div className="flex flex-col items-center justify-center space-y-4 text-center">
-          <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-            Find and Share Delicious Recipes
-          </h1>
-          <p className="max-w-[600px] text-gray-500 dark:text-gray-400 md:text-xl">
-            Save your favorites, swap with friends, and dive into a world of
-            recipes!
-          </p>
-
-          <Button asChild>
-            <Link href="recipes">Explore Recipes</Link>
+    <section className="bg-forked-background flex h-[100dvh] w-full items-center px-6 py-20">
+      <div className="mx-auto max-w-6xl space-y-6 text-center">
+        <Badge variant="accent">Your Personal Recipe Collection</Badge>
+        <h1 className="text-5xl font-bold tracking-tight text-foreground md:text-6xl">
+          Organize Your Recipes
+          <br />
+          <span className="text-forked-primary">Like Never Before</span>
+        </h1>
+        <p className="text-forked-secondary-foreground mx-auto mb-2 max-w-2xl leading-relaxed md:text-xl">
+          Create, edit, and organize your favorite recipes with our beautiful
+          and intuitive recipe management platform. From family traditions to
+          new discoveries, keep them all in one place.
+        </p>
+        <div className="inline-grid w-auto grid-cols-1 gap-4 sm:w-auto sm:grid-cols-2">
+          <Button asChild size="lg" className="w-full">
+            <Link href="/recipes">Browse Recipes</Link>
           </Button>
-          <Button asChild>
-            <Link href="recipe/build">Build a Recipe</Link>
+          <Button
+            asChild
+            size="lg"
+            variant="primary-outline"
+            className="w-full "
+          >
+            <Link href="/recipe/build">✨ Pantry Magic</Link>
           </Button>
         </div>
       </div>

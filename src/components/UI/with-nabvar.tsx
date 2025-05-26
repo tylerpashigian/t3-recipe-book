@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const WithNavBar = ({ children, classes }: any) => {
-  const [navHeight, setNavHeight] = useState(0);
+  const [navHeight, setNavHeight] = useState(57);
 
   useEffect(() => {
     const navBar = document.querySelector("header");
