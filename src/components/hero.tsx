@@ -5,21 +5,8 @@ import Link from "next/link";
 import { Button } from "./UI/button";
 
 const Hero = () => {
-  // Default height of the navbar to 56px (40px for button and 8px for py)
-  const [navHeight, setNavHeight] = useState(56);
-
-  useEffect(() => {
-    const navBar = document.querySelector("header");
-    if (navBar) {
-      setNavHeight(navBar.offsetHeight);
-    }
-  }, []);
-
   return (
-    <section
-      style={{ height: `calc(100dvh - ${navHeight}px)` }}
-      className={"w-full items-center"}
-    >
+    <section className="flex h-[100dvh] w-full items-center bg-[#FAFAF7] px-6 py-20">
       <div className="container grid h-full items-center justify-center gap-4 px-4 lg:gap-8">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">

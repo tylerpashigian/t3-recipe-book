@@ -5,7 +5,7 @@
  * @see https://v0.dev/t/plBYy1Gcqzx
  */
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { signIn, signOut } from "next-auth/react";
 import { type Session } from "next-auth";
 
@@ -20,6 +20,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "./sheet";
+import { cn } from "~/lib/utils";
 
 type Props = {
   setIsDrawerOpen: (isOpen: boolean) => void;
@@ -60,10 +61,37 @@ export const AuthShowcase = ({ setIsDrawerOpen, session }: Props) => {
 
 const Navbar = ({ session }: { session: Session | null }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 10;
+      if (isScrolled !== scrolled) {
+        setScrolled(isScrolled);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [scrolled]);
 
   return (
-    <>
-      <header className="sticky top-0 z-10 flex items-center justify-between bg-white px-4 py-2 shadow-md dark:bg-gray-800">
+    <div
+      className={cn(
+        "fixed left-0 right-0 top-0 z-50 transition-all duration-300 ease-in-out",
+        scrolled ? "mt-4 px-4 sm:px-6 lg:px-8" : "mt-0 px-0",
+      )}
+    >
+      <header
+        className={cn(
+          "flex w-full justify-between border-b p-2 transition-all duration-300 ease-in-out",
+          scrolled
+            ? "mx-auto rounded-xl border bg-background/70 shadow-lg backdrop-blur-sm"
+            : "w-full rounded-none border-b bg-background",
+        )}
+      >
         <NavbarStatic />
         <div className="flex gap-2">
           {!!session && (
@@ -98,7 +126,7 @@ const Navbar = ({ session }: { session: Session | null }) => {
           </Sheet>
         </div>
       </header>
-    </>
+    </div>
   );
 };
 
