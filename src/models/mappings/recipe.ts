@@ -4,6 +4,7 @@ import {
   type Recipe,
   type RecipeFormModel,
   type Category,
+  RecipeSummary,
 } from "../recipe";
 
 import {
@@ -11,9 +12,25 @@ import {
   convertIngredientSchemaToIngredient,
 } from "./ingredient";
 import {
+  RecipeSummarySchema,
   type FullRecipeSchemaType,
   type RecipeSchemaRequestType,
 } from "~/server/api/models/recipe";
+
+export const convertRecipeSummarySchemaToRecipeSummary = (
+  data: RecipeSummarySchema,
+): RecipeSummary => {
+  return {
+    id: data.id,
+    name: data.name,
+    description: data.description,
+    servings: data.servings,
+    prepTime: data.prepTime,
+    cookTime: data.cookTime,
+    categories: data.categories,
+    favoriteCount: data._count.favorites,
+  };
+};
 
 export const convertRecipeSchemaToRecipe = (
   data: FullRecipeSchemaType,

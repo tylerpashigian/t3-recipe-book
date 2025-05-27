@@ -11,6 +11,9 @@ import { Input } from "~/components/UI/input";
 import { Combobox, type OptionType } from "~/components/UI/combobox";
 import { categoryToOption } from "~/models/mappings/recipe";
 import { Button } from "~/components/UI/button";
+import { RecipeSummary } from "~/models/recipe";
+import { useRecipes } from "~/hooks/data/recipes";
+import { useRecipe } from "~/hooks/data/recipe";
 
 const Recipes = () => {
   const [query, setQuery] = useState("");
@@ -18,11 +21,13 @@ const Recipes = () => {
     [],
   );
 
-  const { data: categories } = api.recipes.getCategories.useQuery();
-  const { data, isLoading } = api.recipes.getAll.useQuery({
+  const { isLoading: isRecipeLoading, categories } = useRecipe();
+  const { recipes, isLoading: isRecipesLoading } = useRecipes({
     query,
     categories: selectedCategories.map((category) => category.value),
   });
+
+  const isLoading = isRecipeLoading || isRecipesLoading;
 
   return (
     <>
@@ -38,9 +43,9 @@ const Recipes = () => {
               <p className="text-2xl">
                 {isLoading && "Loading..."}
                 {!isLoading &&
-                  data &&
-                  data?.length > 0 &&
-                  `${data.length} recipe(s)`}
+                  recipes &&
+                  recipes?.length > 0 &&
+                  `${recipes.length} recipe(s)`}
               </p>
               <Input
                 onChange={(query) => setQuery(query.target.value)}
@@ -54,8 +59,8 @@ const Recipes = () => {
                 placeholder="Select a Category..."
               />
               <>
-                {!isLoading && data && data.length > 0
-                  ? data.map((recipe) => (
+                {!isLoading && recipes && recipes.length > 0
+                  ? recipes.map((recipe) => (
                       <Link
                         href={`/recipe/${recipe.id}`}
                         key={`${recipe.id}-new`}
@@ -64,7 +69,9 @@ const Recipes = () => {
                       </Link>
                     ))
                   : null}
-                {!isLoading && (!data || data.length === 0) && <p>No data</p>}
+                {!isLoading && (!recipes || recipes.length === 0) && (
+                  <p>No data</p>
+                )}
               </>
             </div>
           </div>

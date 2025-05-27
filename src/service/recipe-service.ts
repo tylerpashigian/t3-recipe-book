@@ -1,8 +1,10 @@
 import {
   convertRecipeFormToRecipeRequest,
   convertRecipeSchemaToRecipe,
+  convertRecipeSummarySchemaToRecipeSummary,
 } from "~/models/mappings/recipe";
 import {
+  RecipeSummary,
   type Category,
   type FullRecipe,
   type RecipeFormModel,
@@ -18,6 +20,7 @@ import { getQueryKey } from "@trpc/react-query";
 import { convertIngredientSchemaToIngredientSummary } from "~/models/mappings/ingredient";
 import { type IngredientSummary } from "~/models/ingredient";
 import {
+  RecipeSummarySchema,
   type FullRecipeSchemaType,
   type GetDetailsOutput,
   type RecipeSchemaResponseType,
@@ -68,9 +71,16 @@ type RecipeServiceType = {
     allIngredients: IngredientSummary[];
     isLoadingIngredients: boolean;
   };
+  recipes: {
+    recipes: RecipeSummary[];
+    isLoading: boolean;
+  };
 };
 
-export const useRecipeService = (id?: string): RecipeServiceType => {
+export const useRecipeService = (
+  id?: string,
+  query?: { query?: string; categories?: string[] },
+): RecipeServiceType => {
   const queryClient = useQueryClient();
 
   const { data, isInitialLoading, isLoading, refetch } =
@@ -83,6 +93,12 @@ export const useRecipeService = (id?: string): RecipeServiceType => {
         enabled: !!id,
       },
     );
+
+  const { data: recipes, isLoading: isLoadingRecipes } =
+    api.recipes.getAll.useQuery({
+      query: query?.query,
+      categories: query?.categories,
+    });
 
   const { isPending: isUpdating, mutateAsync: update } =
     api.recipes.update.useMutation({});
@@ -205,6 +221,12 @@ export const useRecipeService = (id?: string): RecipeServiceType => {
     ingredients: {
       allIngredients: allIngredientsData,
       isLoadingIngredients,
+    },
+    recipes: {
+      recipes: recipes
+        ? recipes.map(convertRecipeSummarySchemaToRecipeSummary)
+        : [],
+      isLoading: isLoadingRecipes,
     },
   };
 };

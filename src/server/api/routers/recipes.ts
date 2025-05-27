@@ -9,6 +9,7 @@ import {
   FullRecipeSchema,
   RecipeSchemaRequest,
   RecipeSchemaResponse,
+  RecipeSummarySchema,
 } from "../models/recipe";
 
 export const recipesRouter = createTRPCRouter({
@@ -24,7 +25,7 @@ export const recipesRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       // TODO: implement pagination as we scale
-      return await ctx.prisma.recipe.findMany({
+      const recipes = await ctx.prisma.recipe.findMany({
         take: input.max,
         where: {
           ...(input.query
@@ -41,15 +42,27 @@ export const recipesRouter = createTRPCRouter({
             ? {
                 AND: input.ingredients.map((ingredient) => ({
                   ingredients: {
-                    some: { name: { equals: ingredient, mode: "insensitive" } },
+                    some: {
+                      name: { equals: ingredient, mode: "insensitive" },
+                    },
                   },
                 })),
               }
             : {}),
         },
         orderBy: { favorites: { _count: "desc" } },
-        select: { id: true, name: true },
+        select: {
+          id: true,
+          name: true,
+          categories: true,
+          description: true,
+          prepTime: true,
+          cookTime: true,
+          servings: true,
+          _count: { select: { favorites: true } },
+        },
       });
+      return recipes.map((recipe) => RecipeSummarySchema.parse(recipe));
     }),
   getCategories: publicProcedure.query(async ({ ctx }) => {
     // TODO: implement pagination as we scale
