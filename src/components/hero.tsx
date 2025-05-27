@@ -10,12 +10,12 @@ const Hero = () => {
     <section className="bg-forked-background flex h-[100dvh] w-full items-center px-6 py-20">
       <div className="mx-auto max-w-6xl space-y-6 text-center">
         <Badge variant="accent">Your Personal Recipe Collection</Badge>
-        <h1 className="text-5xl font-bold tracking-tight text-foreground md:text-6xl">
+        <h1 className="text-4xl font-bold tracking-tight text-foreground md:text-5xl">
           Organize Your Recipes
           <br />
           <span className="text-forked-primary">Like Never Before</span>
         </h1>
-        <p className="text-forked-secondary-foreground mx-auto mb-2 max-w-2xl leading-relaxed md:text-xl">
+        <p className="text-forked-secondary-foreground mx-auto mb-2 max-w-xl leading-relaxed md:text-lg">
           Create, edit, and organize your favorite recipes with our beautiful
           and intuitive recipe management platform. From family traditions to
           new discoveries, keep them all in one place.

@@ -60,6 +60,7 @@ export const FullRecipeSchema = z.object({
   author: AuthorSchema.optional(), // Optional for users that may have been deleted
 });
 
+// TODO: add author to the response
 export const RecipeSummarySchema = z.object({
   id: z.string(),
   name: z.string(),

@@ -36,6 +36,9 @@ const config = {
           secondary: {
             foreground: "hsl(var(--forked-secondary-foreground))",
           },
+          neutral: {
+            DEFAULT: "hsl(var(--forked-neutral))",
+          },
           accent: {
             DEFAULT: "hsl(var(--forked-accent))",
             foreground: "hsl(var(--primary-foreground))",

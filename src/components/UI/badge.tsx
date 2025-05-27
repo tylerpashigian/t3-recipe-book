@@ -16,6 +16,8 @@ const badgeVariants = cva(
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         accent:
           "border-forked-accent/20 bg-forked-accent/10 text-forked-accent hover:bg-forked-accent/10",
+        subtle:
+          "border-forked-primary/20 bg-forked-primary/10 text-forked-primary hover:bg-forked-primary/10",
         outline: "text-foreground",
       },
     },

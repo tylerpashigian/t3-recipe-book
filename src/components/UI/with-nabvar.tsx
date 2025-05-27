@@ -15,9 +15,9 @@ const WithNavBar = ({ children, classes }: any) => {
 
   return (
     <div
-      className={`absolute top-0 min-h-[calc(100dvh)] w-full justify-center ${classes}`}
+      className={`absolute top-0 min-h-[100svh] w-full w-full justify-center ${classes}`}
       style={{
-        paddingTop: `${navHeight}px`,
+        paddingTop: `calc(${navHeight}px + env(safe-area-inset-top))`,
       }}
     >
       {children}

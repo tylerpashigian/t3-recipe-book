@@ -166,7 +166,8 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
         <PopoverContent
           className="w-full p-0"
           // acounting for iPhone safe area - using max value for largest devices
-          collisionPadding={{ top: 59, bottom: 37 }}
+          // TODO: find a better way to handle this
+          collisionPadding={{ top: 2000, bottom: 37 }}
         >
           <Command className={className} shouldFilter={false}>
             <CommandInput
