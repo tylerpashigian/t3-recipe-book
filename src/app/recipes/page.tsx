@@ -48,8 +48,8 @@ const Recipes = () => {
               </div>
             </div>
 
-            <div className="mb-8 flex flex-col gap-4 sm:flex-row">
-              <div className="relative flex-1">
+            <div className="mb-8 flex flex-col items-start gap-4 sm:flex-row">
+              <div className="relative w-full flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
                 <Input
                   placeholder="Search recipes..."
@@ -67,20 +67,28 @@ const Recipes = () => {
               />
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <>
               {isLoading ? (
-                Array.from({ length: 6 }).map((_, index) => (
-                  <Skeleton key={index} />
-                ))
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {Array.from({ length: 6 }).map((_, index) => (
+                    <Skeleton key={index} />
+                  ))}
+                </div>
               ) : recipes.length > 0 ? (
-                recipes.map((recipe) => (
-                  <RecipeCard key={`${recipe.id}`} recipe={recipe} />
-                ))
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {recipes.map((recipe) => (
+                    <RecipeCard key={`${recipe.id}`} recipe={recipe} />
+                  ))}
+                </div>
               ) : (
                 // TODO: Add empty state component
-                <p>No data</p>
+                <div className="flex w-full items-center justify-center pt-10">
+                  <p className="text-md text-forked-secondary-foreground md:text-xl">
+                    No recipes found, try changing your search
+                  </p>
+                </div>
               )}
-            </div>
+            </>
           </div>
         </main>
       </WithNavBar>

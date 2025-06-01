@@ -96,11 +96,10 @@ export default function RecipePage({
   };
 
   return (
-    <WithNavBar>
+    <WithNavBar classes="bg-forked-neutral">
       <main className="flex w-full flex-col">
-        <div className="container flex w-full flex-col items-center justify-center gap-12 py-8 md:py-16">
+        <div className="mx-auto w-full max-w-6xl p-4 md:px-6 md:py-8">
           <div className="flex w-full flex-col items-center gap-2">
-            {/* TODO: add loading or error state */}
             {recipe && (
               <>
                 {pageType === DetailsPageType.Details && (

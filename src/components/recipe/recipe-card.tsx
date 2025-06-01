@@ -60,7 +60,6 @@ export const RecipeCard = ({ recipe }: { recipe: RecipeSummary }) => {
               </div>
             ) : null}
           </div>
-          {/* <span className="text-xs">by {recipe.author}</span> */}
         </div>
 
         <Button asChild className="w-full">
