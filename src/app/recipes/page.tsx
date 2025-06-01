@@ -10,8 +10,8 @@ import { useRecipe } from "~/hooks/data/recipe";
 import WithNavBar from "~/components/UI/with-nabvar";
 import { Input } from "~/components/UI/input";
 import { Combobox, type OptionType } from "~/components/UI/combobox";
-import { RecipeCard, Skeleton } from "~/components/recipe/recipe-card";
 import { categoryToOption } from "~/models/mappings/recipe";
+import RecipeTable from "~/components/recipe/recipe-table";
 
 const Recipes = () => {
   const [query, setQuery] = useState("");
@@ -31,7 +31,7 @@ const Recipes = () => {
     <>
       <Head>
         <title>Recipes</title>
-        <meta name="description" />
+        <meta name="Search all recipes" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <WithNavBar classes="bg-forked-neutral">
@@ -67,28 +67,7 @@ const Recipes = () => {
               />
             </div>
 
-            <>
-              {isLoading ? (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {Array.from({ length: 6 }).map((_, index) => (
-                    <Skeleton key={index} />
-                  ))}
-                </div>
-              ) : recipes.length > 0 ? (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {recipes.map((recipe) => (
-                    <RecipeCard key={`${recipe.id}`} recipe={recipe} />
-                  ))}
-                </div>
-              ) : (
-                // TODO: Add empty state component
-                <div className="flex w-full items-center justify-center pt-10">
-                  <p className="text-md text-forked-secondary-foreground md:text-xl">
-                    No recipes found, try changing your search
-                  </p>
-                </div>
-              )}
-            </>
+            <RecipeTable isLoading={isLoading} recipes={recipes} />
           </div>
         </main>
       </WithNavBar>

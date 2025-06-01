@@ -1,13 +1,16 @@
 "use client";
 
-import { useForm } from "@tanstack/react-form";
 import React from "react";
-import { api } from "~/trpc/react";
-import { Button } from "~/components/UI/button";
+
+import Head from "next/head";
+import { useForm } from "@tanstack/react-form";
+
 import { Combobox, type OptionType } from "~/components/UI/combobox";
 import WithNavBar from "~/components/UI/with-nabvar";
+import RecipeTable from "~/components/recipe/recipe-table";
 import { toFirstLetterUppercase } from "~/utils/string";
-import Link from "next/link";
+import { useRecipes } from "~/hooks/data/recipes";
+import { useRecipe } from "~/hooks/data/recipe";
 
 const BuildRecipe = () => {
   const form = useForm<{ selectedIngredients: OptionType[] }>({
@@ -16,40 +19,45 @@ const BuildRecipe = () => {
     },
   });
 
-  // TODO: convert to service layer
-  const { data: allIngredients } = api.recipes.getIngredients.useQuery({
-    name: "",
-  });
-
   const selectedIngredients = form.useStore(
     (state) => state.values.selectedIngredients,
   );
 
-  const { data, isLoading } = api.recipes.getAll.useQuery({
+  const { allIngredients } = useRecipe();
+  const { recipes, isLoading: isRecipesLoading } = useRecipes({
     query: "",
     ingredients: selectedIngredients?.map((ingredient) => ingredient.value),
   });
 
   return (
-    <WithNavBar>
-      <main className="flex flex-col">
-        <div className="container flex flex-col items-center justify-center gap-4 py-8 md:py-16">
-          <div className="space-y-2 text-center">
-            <h1 className="text-3xl font-bold">Build a Recipe</h1>
-            <p className="text-zinc-500 dark:text-zinc-400">
-              Enter the ingredients you have at home and let us find a recipe
-              for you
-            </p>
-          </div>
-          <div>
-            <form
-              onSubmit={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-              }}
-              className="bg-white"
-            >
-              <div className="space-y-4">
+    <>
+      <Head>
+        <title>Build Recipes</title>
+        <meta name="Building recipes from your ingredients" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <WithNavBar classes="bg-forked-neutral">
+        <main className="flex w-full flex-col">
+          <div className="mx-auto w-full max-w-6xl px-6 py-8">
+            <div className="mb-8 flex items-center justify-between">
+              <div>
+                <h1 className="mb-2 text-3xl font-bold text-foreground">
+                  Possible Recipes
+                </h1>
+                <p className="text-forked-secondary-foreground">
+                  Enter the ingredients you have at home and let us find a
+                  recipe for you{" "}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-8">
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }}
+              >
                 <form.Field name="selectedIngredients">
                   {(field) => (
                     <>
@@ -68,21 +76,14 @@ const BuildRecipe = () => {
                     </>
                   )}
                 </form.Field>
-              </div>
-            </form>
-            <div className="flex flex-col items-center gap-2">
-              {!isLoading && selectedIngredients.length && data?.length
-                ? data.map((recipe) => (
-                    <Link href={`/recipe/${recipe.id}`} key={recipe.id}>
-                      <Button variant={"link"}>{recipe.name}</Button>
-                    </Link>
-                  ))
-                : null}
+              </form>
+
+              <RecipeTable isLoading={isRecipesLoading} recipes={recipes} />
             </div>
           </div>
-        </div>
-      </main>
-    </WithNavBar>
+        </main>
+      </WithNavBar>
+    </>
   );
 };
 

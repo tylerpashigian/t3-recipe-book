@@ -79,7 +79,7 @@ type RecipeServiceType = {
 
 export const useRecipeService = (
   id?: string,
-  query?: { query?: string; categories?: string[] },
+  query?: { query?: string; categories?: string[]; ingredients?: string[] },
 ): RecipeServiceType => {
   const queryClient = useQueryClient();
 
@@ -98,6 +98,7 @@ export const useRecipeService = (
     api.recipes.getAll.useQuery({
       query: query?.query,
       categories: query?.categories,
+      ingredients: query?.ingredients,
     });
 
   const { isPending: isUpdating, mutateAsync: update } =
