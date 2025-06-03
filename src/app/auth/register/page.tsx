@@ -1,13 +1,16 @@
 "use client";
 
 import React, { type FormEvent } from "react";
-import useInput from "../../../hooks/useInput";
+
+import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+import useInput from "../../../hooks/useInput";
 import WithNavBar from "~/components/UI/with-nabvar";
 import { Button } from "~/components/UI/button";
 import { Input } from "~/components/UI/input";
-import toast from "react-hot-toast";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/UI/card";
 
 function Register() {
   const router = useRouter();
@@ -60,98 +63,112 @@ function Register() {
   };
 
   return (
-    <WithNavBar>
-      <main className="flex flex-col">
-        <div className="container flex flex-col items-center justify-center gap-12 py-8 md:py-16">
-          <div className="space-y-2 text-center">
-            <h1 className="text-3xl font-bold">Create Account</h1>
-            <p className="text-zinc-500 dark:text-zinc-400">
-              Enter your username and password to create your account
+    <WithNavBar classes="bg-forked-neutral">
+      <main className="mx-auto flex max-w-6xl items-center justify-center px-6 py-8">
+        <div className="w-full max-w-md">
+          <div className="mb-8 flex flex-col items-center text-center">
+            <Link
+              href="/"
+              className="flex items-center gap-1 text-lg font-semibold"
+            >
+              <img src="/forked-logo.png" alt="Logo" className="h-8 w-8" />
+              <span>Forked</span>
+            </Link>
+            <p className="mt-2 text-forked-secondary-foreground">
+              Create your account to start cooking
             </p>
           </div>
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-6 bg-white px-8 pb-8 pt-6"
-          >
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label
-                  className="mb-1 block text-sm font-bold text-gray-700"
-                  htmlFor="username"
-                >
-                  Username
-                </label>
-                <Input
-                  className="mt-2 w-full px-4 py-3 text-black"
-                  id="username"
-                  placeholder="username"
-                  required
-                  type="username"
-                  value={username}
-                  onChange={usernameHandler}
-                />
-              </div>
-              <div className="space-y-2">
-                <label
-                  className="mb-1 block text-sm font-bold text-gray-700"
-                  htmlFor="password"
-                >
-                  Password
-                </label>
-                <Input
-                  className="mt-2 w-full px-4 py-3 text-black"
-                  id="password"
-                  required
-                  type="password"
-                  placeholder="password"
-                  value={password}
-                  onChange={passwordHandler}
-                  onBlur={passwordBlurHandler}
-                />
-              </div>
-              {passwordInputIsInvalid && (
-                <p className="text-red-500">
-                  Password must be at least 6 characters
-                </p>
-              )}
-              <div className="space-y-2">
-                <label
-                  className="mb-1 block text-sm font-bold text-gray-700"
-                  htmlFor="confirmPassword"
-                >
-                  Confirm Password
-                </label>
-                <Input
-                  className="mt-2 w-full px-4 py-3 text-black"
-                  id="confirmPassword"
-                  required
-                  type="password"
-                  placeholder="password"
-                  value={confirmPassword}
-                  onChange={confirmPasswordHandler}
-                  onBlur={confirmPasswordBlurHandler}
-                />
-              </div>
-              {confirmPasswordInputIsInvalid && (
-                <p className="text-red-500">Password do not match!</p>
-              )}
-            </div>
-            <div className="grid grid-cols-1 items-center justify-between gap-2 md:grid-cols-2">
-              <Button
-                type="submit"
-                disabled={
-                  confirmPasswordInputIsInvalid || passwordInputIsInvalid
-                }
-              >
-                <>Sign Up</>
-              </Button>
-              <Button variant={"ghost"} asChild>
-                <Link href="/auth/login" className="text-center">
-                  Have an account? Sign in
-                </Link>
-              </Button>
-            </div>
-          </form>
+          <Card className="border border-border bg-forked-background shadow-lg">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl text-foreground">
+                Sign Up
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                <div>
+                  <label
+                    className="mb-1 block text-sm font-bold text-gray-700"
+                    htmlFor="username"
+                  >
+                    Username
+                  </label>
+                  <Input
+                    className="mt-2 w-full px-4 py-3 text-black"
+                    id="username"
+                    placeholder="username"
+                    required
+                    type="username"
+                    value={username}
+                    onChange={usernameHandler}
+                  />
+                </div>
+
+                <div>
+                  <label
+                    className="mb-1 block text-sm font-bold text-gray-700"
+                    htmlFor="password"
+                  >
+                    Password
+                  </label>
+                  <Input
+                    className="mt-2 w-full px-4 py-3 text-black"
+                    id="password"
+                    required
+                    type="password"
+                    placeholder="password"
+                    value={password}
+                    onChange={passwordHandler}
+                    onBlur={passwordBlurHandler}
+                  />
+                  {passwordInputIsInvalid && (
+                    <p className="pt-2 text-red-500">
+                      Password must be at least 6 characters
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    className="mb-1 block text-sm font-bold text-gray-700"
+                    htmlFor="confirm-password"
+                  >
+                    Confirm Password
+                  </label>
+                  <Input
+                    className="mt-2 w-full px-4 py-3 text-black"
+                    id="confirmPassword"
+                    required
+                    type="password"
+                    placeholder="password"
+                    value={confirmPassword}
+                    onChange={confirmPasswordHandler}
+                    onBlur={confirmPasswordBlurHandler}
+                  />
+                  {confirmPasswordInputIsInvalid && (
+                    <p className="pt-2 text-red-500">Password do not match!</p>
+                  )}
+                </div>
+                <div className="mt-2 flex flex-col gap-4">
+                  <Button
+                    type="submit"
+                    size={"full"}
+                    disabled={
+                      // Disable button if inputs are invalid while typing
+                      confirmPasswordInputIsInvalid || passwordInputIsInvalid
+                    }
+                  >
+                    Create
+                  </Button>
+                  <Button variant={"ghost"} asChild>
+                    <Link href="/auth/login" className="text-center">
+                      Have an account? Sign in
+                    </Link>
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       </main>
     </WithNavBar>

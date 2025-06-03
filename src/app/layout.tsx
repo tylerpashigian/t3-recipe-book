@@ -20,11 +20,6 @@ export default function RootLayout({
           name="viewport"
           content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"
         />
-        <script
-          crossOrigin="anonymous"
-          src="//unpkg.com/react-scan/dist/auto.global.js"
-          async
-        />
       </head>
       <body>
         {/* TODO: is there a better way to give access to client auth context

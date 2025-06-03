@@ -15,11 +15,11 @@ import { Button } from "./button";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "./sheet";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/UI/avatar";
 import { cn } from "~/lib/utils";
 
 type Props = {
@@ -33,28 +33,71 @@ export const AuthShowcase = ({ setIsDrawerOpen, session }: Props) => {
 
   return (
     <div className="flex min-w-[20vw] flex-col items-start space-y-3">
-      <p className="text-center text-lg font-bold text-black">
-        {displayName && <span>Logged in as {displayName}</span>}
-      </p>
-      {!!session ? (
-        <Button size={"full"} onClick={() => setIsDrawerOpen(false)} asChild>
-          <Link href={`/user/${session?.user.id}`}>
-            <>View Profile</>
-          </Link>
-        </Button>
-      ) : (
-        <Button size={"full"} asChild>
-          <Link href={"/auth/register"} onClick={() => setIsDrawerOpen(false)}>
-            <>Create</>
-          </Link>
-        </Button>
-      )}
-      <Button
-        size={"full"}
-        onClick={session ? () => void signOut() : () => void signIn()}
-      >
-        <>{session ? "Sign out" : "Sign in"}</>
-      </Button>
+      <div className="flex w-full flex-col items-center space-y-3 pt-4">
+        {!!session ? (
+          <>
+            <div className="flex flex-col items-center md:items-center">
+              <Avatar className="h-24 w-24 border-4 border-white dark:border-gray-900">
+                <AvatarImage
+                  alt="User Avatar"
+                  src={session.user?.image ?? ""}
+                />
+                <AvatarFallback>
+                  <FaUser />
+                </AvatarFallback>
+              </Avatar>
+              {displayName ? (
+                <h3 className="font-semibold text-foreground">{displayName}</h3>
+              ) : null}
+              {session.user.email ? (
+                <p className="text-sm text-forked-secondary-foreground">
+                  {session.user.email}
+                </p>
+              ) : null}
+            </div>
+            <Button
+              size={"full"}
+              onClick={() => setIsDrawerOpen(false)}
+              asChild
+            >
+              <Link href={`/user/${session?.user.id}`}>View Profile</Link>
+            </Button>
+            <Button
+              size={"full"}
+              onClick={() => void signOut()}
+              variant={"ghost"}
+            >
+              <>{"Sign out"}</>
+            </Button>
+          </>
+        ) : (
+          <>
+            <div className="text-center">
+              <h3 className="mb-2 text-lg font-semibold text-foreground">
+                Join the Forked Community
+              </h3>
+              <p
+                className="text-sm text-forked-secondary-foreground md:max-w-xs"
+                id="problem-text"
+              >
+                Create an account to save your favorite recipes, share your
+                culinary creations, and connect with fellow food lovers.
+              </p>
+            </div>
+            <Button size={"full"} onClick={() => void signIn()}>
+              <>{"Sign in"}</>
+            </Button>
+            <Button size={"full"} asChild>
+              <Link
+                href={"/auth/register"}
+                onClick={() => setIsDrawerOpen(false)}
+              >
+                <>Create</>
+              </Link>
+            </Button>
+          </>
+        )}
+      </div>
     </div>
   );
 };
@@ -114,14 +157,18 @@ const Navbar = ({ session }: { session: Session | null }) => {
             </SheetTrigger>
             <SheetContent>
               <SheetHeader>
-                <SheetTitle>Profile</SheetTitle>
+                <SheetTitle>
+                  <div className="flex items-center gap-1 text-lg font-semibold">
+                    <img
+                      src="/forked-logo.png"
+                      alt="Logo"
+                      className="h-6 w-6"
+                    />
+                    <span>Forked</span>
+                  </div>
+                </SheetTitle>
               </SheetHeader>
-              <SheetDescription>
-                {/* Fixes hydration error, not sure why this is necessary though */}
-                <div>
-                  <AuthShowcase setIsDrawerOpen={setIsOpen} session={session} />
-                </div>
-              </SheetDescription>
+              <AuthShowcase setIsDrawerOpen={setIsOpen} session={session} />
             </SheetContent>
           </Sheet>
         </div>
