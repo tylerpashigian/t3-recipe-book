@@ -28,6 +28,23 @@ const config = {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
         },
+        forked: {
+          primary: {
+            DEFAULT: "hsl(var(--forked-primary))",
+            foreground: "hsl(var(--primary-foreground))",
+          },
+          secondary: {
+            foreground: "hsl(var(--forked-secondary-foreground))",
+          },
+          neutral: {
+            DEFAULT: "hsl(var(--forked-neutral))",
+          },
+          accent: {
+            DEFAULT: "hsl(var(--forked-accent))",
+            foreground: "hsl(var(--primary-foreground))",
+          },
+          background: "hsl(var(--forked-background))",
+        },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",

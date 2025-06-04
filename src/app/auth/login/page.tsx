@@ -2,23 +2,24 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import {
   ClientSafeProvider,
-  getCsrfToken,
   getProviders,
   LiteralUnion,
   signIn,
 } from "next-auth/react";
 import toast from "react-hot-toast";
+import { BuiltInProviderType } from "next-auth/providers";
 
+import useInput from "../../../hooks/useInput";
 import Separator from "~/components/UI/separator";
 import WithNavBar from "~/components/UI/with-nabvar";
-import useInput from "../../../hooks/useInput";
 import { Button } from "~/components/UI/button";
 import { Input } from "~/components/UI/input";
-import { BuiltInProviderType } from "next-auth/providers";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/UI/card";
 
 const Login = () => {
   const router = useRouter();
@@ -75,20 +76,63 @@ const Login = () => {
       });
   };
 
+  const has3rdPartyProviders = Object.values(providers).some(
+    (provider) => provider.name !== "credentials",
+  );
+
   return (
-    <WithNavBar>
-      <main className="flex flex-col">
-        <div className="container flex flex-col items-center justify-center gap-12 py-8 md:py-16">
-          <div className="space-y-2 text-center">
-            <h1 className="text-3xl font-bold">Login</h1>
-            <p className="text-zinc-500 dark:text-zinc-400">
-              Enter your username and password to login to your account
+    <WithNavBar classes="bg-forked-neutral">
+      <main className="mx-auto flex max-w-6xl items-center justify-center px-6 py-8">
+        <div className="w-full max-w-md">
+          <div className="mb-8 flex flex-col items-center text-center">
+            <Link
+              href="/"
+              className="flex items-center gap-1 text-lg font-semibold"
+            >
+              <img src="/forked-logo.png" alt="Logo" className="h-8 w-8" />
+              <span>Forked</span>
+            </Link>
+            <p className="mt-2 text-forked-secondary-foreground">
+              Welcome back to your recipe collection
             </p>
           </div>
-          <div>
-            <form onSubmit={handleSubmit} className="bg-white px-8 pb-8 pt-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
+
+          <Card className="border border-border bg-forked-background shadow-lg">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl text-foreground">
+                Sign In
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {has3rdPartyProviders ? (
+                <>
+                  {Object.values(providers).map((provider) => (
+                    <div key={provider.name} className="">
+                      {provider.name !== "credentials" ? (
+                        <Button
+                          variant={"outline"}
+                          size={"full"}
+                          onClick={() =>
+                            void signIn(provider.id, { callbackUrl: "/" })
+                          }
+                        >
+                          Sign in with {provider.name}
+                        </Button>
+                      ) : null}
+                    </div>
+                  ))}
+
+                  <div className="relative">
+                    <Separator />
+                    <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-forked-background px-2 text-sm">
+                      or
+                    </span>
+                  </div>
+                </>
+              ) : null}
+
+              <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                <div>
                   <label
                     className="mb-1 block text-sm font-bold text-gray-700"
                     htmlFor="username"
@@ -105,7 +149,8 @@ const Login = () => {
                     onChange={usernameHandler}
                   />
                 </div>
-                <div className="space-y-2">
+
+                <div>
                   <label
                     className="mb-1 block text-sm font-bold text-gray-700"
                     htmlFor="password"
@@ -122,31 +167,13 @@ const Login = () => {
                     onChange={passwordHandler}
                   />
                 </div>
-                <Button type="submit" size={"full"}>
-                  <>Login</>
+
+                <Button type="submit" size={"full"} className="mt-2">
+                  Sign In
                 </Button>
-              </div>
-            </form>
-            <Separator />
-            <div className="flex w-full justify-center space-y-4 pt-6">
-              {Object.values(providers).map((provider) => (
-                <div key={provider.name} className="">
-                  {provider.name !== "credentials" ? (
-                    <>
-                      <Button
-                        variant={"outline"}
-                        onClick={() =>
-                          void signIn(provider.id, { callbackUrl: "/" })
-                        }
-                      >
-                        Sign in with {provider.name}
-                      </Button>
-                    </>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-          </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       </main>
     </WithNavBar>

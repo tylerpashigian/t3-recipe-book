@@ -5,6 +5,17 @@ export type FullRecipe = {
   author: Author;
 };
 
+export type RecipeSummary = {
+  id: string;
+  name: string;
+  description: string;
+  servings?: number | null;
+  prepTime?: number | null;
+  cookTime?: number | null;
+  categories: Category[];
+  favoriteCount: number;
+};
+
 export type Recipe = {
   id: string;
   name: string;

@@ -60,7 +60,22 @@ export const FullRecipeSchema = z.object({
   author: AuthorSchema.optional(), // Optional for users that may have been deleted
 });
 
+// TODO: add author to the response
+export const RecipeSummarySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  categories: z.array(CategorySchema),
+  servings: z.number().optional().nullable(),
+  prepTime: z.number().optional().nullable(),
+  cookTime: z.number().optional().nullable(),
+  _count: z.object({
+    favorites: z.number(),
+  }),
+});
+
 export type GetDetailsOutput = inferRouterOutputs<RecipesRouter>["getDetails"];
+export type RecipeSummarySchema = z.infer<typeof RecipeSummarySchema>;
 export type FullRecipeSchemaType = z.infer<typeof FullRecipeSchema>;
 export type RecipeSchemaRequestType = z.infer<typeof RecipeSchemaRequest>;
 export type RecipeSchemaResponseType = z.infer<typeof RecipeSchemaResponse>;

@@ -10,6 +10,7 @@ import RecipeForm from "~/components/recipe/recipe-form";
 import { type FullRecipe, type RecipeFormModel } from "~/models/recipe";
 import { useRecipe } from "~/hooks/data/recipe";
 import { revalidateRecipePath } from "~/app/actions/recipe";
+import WithNavBar from "~/components/UI/with-nabvar";
 
 export default function RecipePage({
   initialRecipe,
@@ -95,35 +96,36 @@ export default function RecipePage({
   };
 
   return (
-    <main className="flex w-full flex-col">
-      <div className="container flex w-full flex-col items-center justify-center gap-12 py-8 md:py-16">
-        <div className="flex w-full flex-col items-center gap-2">
-          {/* TODO: add loading or error state */}
-          {recipe && (
-            <>
-              {pageType === DetailsPageType.Details && (
-                <RecipeDetails
-                  author={recipe.author}
-                  recipe={recipe.recipe}
-                  pageTypeHandler={pageTypeHandler}
-                  onDelete={deleteHandler}
-                  onFavorite={favoriteHandler}
-                />
-              )}
-              {pageType === DetailsPageType.Edit && (
-                <RecipeForm
-                  allIngredients={allIngredients}
-                  categories={categories}
-                  recipe={recipe.recipe}
-                  isLoading={isLoading}
-                  onSubmit={onUpdate}
-                  onCancel={cancelHandler}
-                />
-              )}
-            </>
-          )}
+    <WithNavBar classes="bg-forked-neutral">
+      <main className="flex w-full flex-col">
+        <div className="mx-auto w-full max-w-6xl p-4 md:px-6 md:py-8">
+          <div className="flex w-full flex-col items-center gap-2">
+            {recipe && (
+              <>
+                {pageType === DetailsPageType.Details && (
+                  <RecipeDetails
+                    author={recipe.author}
+                    recipe={recipe.recipe}
+                    pageTypeHandler={pageTypeHandler}
+                    onDelete={deleteHandler}
+                    onFavorite={favoriteHandler}
+                  />
+                )}
+                {pageType === DetailsPageType.Edit && (
+                  <RecipeForm
+                    allIngredients={allIngredients}
+                    categories={categories}
+                    recipe={recipe.recipe}
+                    isLoading={isLoading}
+                    onSubmit={onUpdate}
+                    onCancel={cancelHandler}
+                  />
+                )}
+              </>
+            )}
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </WithNavBar>
   );
 }

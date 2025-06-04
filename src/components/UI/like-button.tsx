@@ -20,6 +20,7 @@ const LikeButton = ({
     setLiked(isInitiallyLiked);
   }, [isInitiallyLiked]);
 
+  // Why is this being triggered twice on dev builds?
   const handleClick = (event: React.FormEvent) => {
     event.preventDefault();
     setLiked((prev) => {
@@ -40,7 +41,7 @@ const LikeButton = ({
       >
         <IoHeart
           className={`h-6 w-6 fill-current ${
-            isLiked ? "text-red-500" : "text-gray-300"
+            isLiked ? "text-destructive" : "text-gray-300"
           }`}
         />
       </button>

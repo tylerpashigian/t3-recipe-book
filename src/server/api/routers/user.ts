@@ -12,6 +12,7 @@ export const userRouter = createTRPCRouter({
 
       const recipes = await ctx.prisma.recipe.findMany({
         where: { authorId: input.id },
+        include: { _count: { select: { favorites: true } }, categories: true },
       });
 
       const isoStringRecipes = recipes.map((recipe) => {
