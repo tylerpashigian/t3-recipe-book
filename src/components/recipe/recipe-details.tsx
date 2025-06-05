@@ -61,7 +61,7 @@ const RecipeDetails = ({
                   <span>{recipe.favoriteCount} Favorites(s)</span>
                 </div>
               </div>
-              {sessionData?.user.id === author?.id ? (
+              {!!sessionData && sessionData?.user.id === author?.id ? (
                 <div className="flex gap-2">
                   <Button onClick={pageTypeHandler}>Edit</Button>
                   <Button
