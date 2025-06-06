@@ -1,5 +1,7 @@
 "use client";
 
+import { Analytics } from "@vercel/analytics/next";
+
 import NavbarWrapper from "~/components/UI/navbar-wrapper";
 import ToastWrapper from "./ToastWrapper";
 import { TRPCReactProvider } from "~/trpc/react";
@@ -25,6 +27,7 @@ export default function RootLayout({
         {/* TODO: is there a better way to give access to client auth context
         without wrapping the whole app? */}
         <SessionProvider>
+          <Analytics />
           <NavbarWrapper />
           <TRPCReactProvider>{children}</TRPCReactProvider>
           <ToastWrapper />
