@@ -80,6 +80,8 @@ model Recipe {
   steps       RecipeInstructions[]
 
   @@index([authorId])
+  @@index([name])
+  @@index([createdAt])
 }
 
 model RecipeCategory {
