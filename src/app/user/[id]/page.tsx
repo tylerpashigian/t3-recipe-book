@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 const Profile = async ({ params }: Props) => {
   // TODO: find a way to reuse this with client components
   const { id } = await params;
-  const { user, recipes } = await api.user.getUser({ id: id });
+  const { user, recipes, favorites } = await api.user.getUser({ id: id });
 
   if (!user) {
     toast.error("User not found");
@@ -70,6 +70,14 @@ const Profile = async ({ params }: Props) => {
                       Recipes
                     </div>
                   </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-foreground">
+                      {favorites.length}
+                    </div>
+                    <div className="text-sm text-forked-secondary-foreground">
+                      Favorites
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -84,11 +92,32 @@ const Profile = async ({ params }: Props) => {
                   {recipes.length}
                 </span>
               </TabsTrigger>
+              <TabsTrigger value="favorites">
+                Favorites
+                <span className="ml-2 text-gray-500 dark:text-gray-400">
+                  {favorites.length}
+                </span>
+              </TabsTrigger>
             </TabsList>
             <TabsContent value="recipes">
               <RecipeTable
                 isLoading={false}
                 recipes={recipes.map((recipe) => ({
+                  id: recipe.id,
+                  name: recipe.name,
+                  description: recipe.description,
+                  categories: recipe.categories,
+                  favoriteCount: recipe._count.favorites,
+                  servings: recipe.servings,
+                  prepTime: recipe.prepTime,
+                  cookTime: recipe.cookTime,
+                }))}
+              />
+            </TabsContent>
+            <TabsContent value="favorites">
+              <RecipeTable
+                isLoading={false}
+                recipes={favorites.map((recipe) => ({
                   id: recipe.id,
                   name: recipe.name,
                   description: recipe.description,
