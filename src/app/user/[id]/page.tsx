@@ -53,11 +53,6 @@ const Profile = async ({ params }: Props) => {
                         {displayName}
                       </h1>
                     ) : null}
-                    {user?.email ? (
-                      <p className="text-forked-secondary-foreground">
-                        {user?.email}
-                      </p>
-                    ) : null}
                   </div>
                 </div>
 

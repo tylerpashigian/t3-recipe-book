@@ -1,18 +1,24 @@
-import withAuth from "next-auth/middleware";
+import { withAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
 
 export default withAuth(
-  // `withAuth` augments your `Request` with the user's token.
-  function middleware(_req) {
-    // console.log(req.nextauth.token);
+  function middleware(req) {
+    if (!req.nextauth.token) {
+      return NextResponse.redirect(new URL("/auth/login", req.url));
+    }
+
+    return NextResponse.next();
   },
   {
     secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
-      authorized: ({}) => {
-        // TODO: find better way to handle middleware on only protected pages
-        // return !!token;
-        return true;
+      authorized: ({ token }) => {
+        return !!token;
       },
     },
   },
 );
+
+export const config = {
+  matcher: ["/recipe/create"],
+};
