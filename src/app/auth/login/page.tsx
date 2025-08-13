@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -13,16 +13,27 @@ import {
 } from "next-auth/react";
 import toast from "react-hot-toast";
 import { BuiltInProviderType } from "next-auth/providers";
+import { useForm } from "@tanstack/react-form";
 
-import useInput from "../../../hooks/useInput";
 import Separator from "~/components/UI/separator";
 import WithNavBar from "~/components/UI/with-nabvar";
 import { Button } from "~/components/UI/button";
 import { Input } from "~/components/UI/input";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/UI/card";
+import { AuthFormModel } from "~/models/user";
 
 const Login = () => {
   const router = useRouter();
+
+  const form = useForm<AuthFormModel>({
+    defaultValues: {
+      username: "",
+      password: "",
+    },
+    onSubmit: ({ value }) => {
+      handleSubmit(value);
+    },
+  });
 
   const [providers, setProviders] = useState<
     | Record<LiteralUnion<BuiltInProviderType, string>, ClientSafeProvider>
@@ -40,26 +51,15 @@ const Login = () => {
     fetchProviders().catch((error) => console.log(error));
   }, []);
 
-  // TODO: replace with TanStack Form
-  const { inputValue: username, valueHandler: usernameHandler } = useInput(
-    (value: string) => value.trim() !== "",
-    "",
-  );
-
-  const { inputValue: password, valueHandler: passwordHandler } = useInput(
-    (value: string) => value.trim() !== "",
-    "",
-  );
-
+  // TODO: there is probably a better way to do this
   const callbackUrl = `http${
     process.env.NODE_ENV === "production" ? "s" : ""
   }://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSubmit = (value: AuthFormModel) => {
     signIn("credentials", {
-      username,
-      password,
+      username: value.username,
+      password: value.password,
       callbackUrl,
       redirect: false,
     })
@@ -131,46 +131,93 @@ const Login = () => {
                 </>
               ) : null}
 
-              <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                <div>
-                  <label
-                    className="mb-1 block text-sm font-bold text-gray-700"
-                    htmlFor="username"
-                  >
-                    Username
-                  </label>
-                  <Input
-                    className="mt-2 w-full px-4 py-3 text-black"
-                    id="username"
-                    placeholder="username"
-                    required
-                    type="username"
-                    value={username}
-                    onChange={usernameHandler}
-                  />
-                </div>
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  void form.handleSubmit();
+                }}
+                className="flex flex-col gap-4"
+              >
+                <form.Field
+                  name="username"
+                  validators={{
+                    onChange: ({ value }) =>
+                      value === "" ? "Please enter a username" : undefined,
+                  }}
+                >
+                  {(field) => (
+                    <div>
+                      <label
+                        className="mb-1 block text-sm font-bold text-gray-700"
+                        htmlFor="username"
+                      >
+                        Username
+                      </label>
+                      <Input
+                        className="mt-2 w-full px-4 py-3 text-black"
+                        id="username"
+                        placeholder="username"
+                        required
+                        type="username"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                      />
+                    </div>
+                  )}
+                </form.Field>
 
-                <div>
-                  <label
-                    className="mb-1 block text-sm font-bold text-gray-700"
-                    htmlFor="password"
-                  >
-                    Password
-                  </label>
-                  <Input
-                    className="mt-2 w-full px-4 py-3 text-black"
-                    id="password"
-                    required
-                    type="password"
-                    placeholder="password"
-                    value={password}
-                    onChange={passwordHandler}
-                  />
-                </div>
+                <form.Field
+                  name="password"
+                  validators={{
+                    onChange: ({ value }) =>
+                      value === "" ? "Please enter a password" : undefined,
+                  }}
+                >
+                  {(field) => (
+                    <div>
+                      <label
+                        className="mb-1 block text-sm font-bold text-gray-700"
+                        htmlFor="password"
+                      >
+                        Password
+                      </label>
+                      <Input
+                        className="mt-2 w-full px-4 py-3 text-black"
+                        id="password"
+                        required
+                        type="password"
+                        placeholder="password"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                      />
+                    </div>
+                  )}
+                </form.Field>
 
-                <Button type="submit" size={"full"} className="mt-2">
-                  Sign In
-                </Button>
+                <form.Subscribe
+                  selector={(state) =>
+                    [
+                      state.canSubmit,
+                      state.isSubmitting,
+                      state.isTouched,
+                    ] as const
+                  }
+                >
+                  {([canSubmit, isSubmitting, isTouched]) => {
+                    const isDisabled = !canSubmit || isSubmitting || !isTouched;
+                    return (
+                      <Button
+                        type="submit"
+                        size={"full"}
+                        className="mt-2"
+                        disabled={isDisabled}
+                      >
+                        Sign In
+                      </Button>
+                    );
+                  }}
+                </form.Subscribe>
               </form>
             </CardContent>
           </Card>
