@@ -5,38 +5,37 @@ name: Prisma Prod Migration
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
       - "prisma/schema.prisma"
       - "prisma/migrations/**"
 
 jobs:
   migrate-prod:
-
     runs-on: ubuntu-latest
 
     # One-at-a-time for your prod migrations on any branch (you only use main)
     concurrency:
       group: "db-migrate-production"
       cancel-in-progress: false
-      
+
     environment: production
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v4
-      with:
-        version: "8.15.5"
-    - name: Use Node.js 22
-      uses: actions/setup-node@v4
-      with:
-        node-version: 22
-        cache: 'pnpm'
-    # This also generates the Prisma types
-    - name: Install Dependencies
-      run: pnpm install --frozen-lockfile
-    - name: Prisma migrate
-      env:
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      run: pnpm prisma migrate deploy --schema prisma/schema.prisma
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: "8.15.5"
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+      # This also generates the Prisma types
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Prisma migrate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: pnpm prisma migrate deploy --schema prisma/schema.prisma
