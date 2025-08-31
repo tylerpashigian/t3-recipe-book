@@ -24,18 +24,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: "8.15.5"
     - name: Use Node.js 22
       uses: actions/setup-node@v4
       with:
         node-version: 22
         cache: 'pnpm'
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v4
-      with:
-        version: "8.15.5"
     # This also generates the Prisma types
     - name: Install Dependencies
-      run: pnpm i 
+      run: pnpm install --frozen-lockfile
     - name: Prisma migrate
       env:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
