@@ -6,6 +6,9 @@ name: Prisma Prod Migration
 on:
   push:
     branches: ["main"]
+    paths:
+      - "prisma/schema.prisma"
+      - "prisma/migrations/**"
 
 jobs:
   migrate-prod:
