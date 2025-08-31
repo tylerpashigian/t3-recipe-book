@@ -232,6 +232,10 @@ export const recipesRouter = createTRPCRouter({
           servings: input.servings,
           prepTime: input.prepTime,
           cookTime: input.cookTime,
+          calories: input.calories,
+          protein: input.protein,
+          carbs: input.carbs,
+          fat: input.fat,
           ingredients: {
             // Delete ingredients that are NOT in the input list
             deleteMany: {

@@ -367,6 +367,112 @@ const RecipeForm = ({
           </CardContent>
         </Card>
 
+        <Card className="border border-border bg-forked-background">
+          <CardHeader>
+            <CardTitle className="text-text-foreground">
+              Nutrition Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex w-full flex-col gap-4 md:flex-row md:gap-3">
+            <div className="flex-1">
+              <form.Field name="calories">
+                {(field) => (
+                  <div className="flex-1">
+                    <label htmlFor={field.name} className="font-bold">
+                      Calories (kcal)
+                    </label>
+                    <Input
+                      type="number"
+                      id={field.name}
+                      name={field.name}
+                      placeholder="Calories (kcal)"
+                      className="mt-2 w-full px-4 py-3 text-black"
+                      value={field.state.value ?? ""}
+                      onChange={(e) => {
+                        const newValue =
+                          e.target.value === "" ? null : Number(e.target.value);
+                        field.handleChange(newValue);
+                      }}
+                    />
+                  </div>
+                )}
+              </form.Field>
+            </div>
+            <div className="flex-1">
+              <form.Field name="protein">
+                {(field) => (
+                  <div className="flex-1">
+                    <label htmlFor={field.name} className="font-bold">
+                      Protein (g)
+                    </label>
+                    <Input
+                      type="number"
+                      id={field.name}
+                      name={field.name}
+                      placeholder="Protein (g)"
+                      className="mt-2 w-full px-4 py-3 text-black"
+                      value={field.state.value ?? ""}
+                      onChange={(e) => {
+                        const newValue =
+                          e.target.value === "" ? null : Number(e.target.value);
+                        field.handleChange(newValue);
+                      }}
+                    />
+                  </div>
+                )}
+              </form.Field>
+            </div>
+            <div className="flex-1">
+              <form.Field name="carbs">
+                {(field) => (
+                  <div className="flex-1">
+                    <label htmlFor={field.name} className="font-bold">
+                      Carbs (g)
+                    </label>
+                    <Input
+                      type="number"
+                      id={field.name}
+                      name={field.name}
+                      placeholder="Carbs (g)"
+                      className="mt-2 w-full px-4 py-3 text-black"
+                      value={field.state.value ?? ""}
+                      onChange={(e) => {
+                        const newValue =
+                          e.target.value === "" ? null : Number(e.target.value);
+                        field.handleChange(newValue);
+                      }}
+                    />
+                  </div>
+                )}
+              </form.Field>
+            </div>
+            <div className="flex-1">
+              <form.Field name="fat">
+                {(field) => (
+                  <div className="flex-1">
+                    <label htmlFor={field.name} className="font-bold">
+                      Fat (g)
+                    </label>
+                    <Input
+                      type="number"
+                      id={field.name}
+                      name={field.name}
+                      placeholder="Fat (g)"
+                      className="mt-2 w-full px-4 py-3 text-black"
+                      value={field.state.value ?? ""}
+                      onChange={(e) => {
+                        const newValue =
+                          e.target.value === "" ? null : Number(e.target.value);
+                        field.handleChange(newValue);
+                      }}
+                    />
+                  </div>
+                )}
+              </form.Field>
+            </div>{" "}
+          </CardContent>
+        </Card>
+
         {/* Main Content Grid */}
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Ingredients */}

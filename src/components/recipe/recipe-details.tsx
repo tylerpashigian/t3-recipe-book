@@ -39,6 +39,9 @@ const RecipeDetails = ({
 
   const hasMetadata = recipe.prepTime ?? recipe.cookTime ?? recipe.servings;
 
+  const hasNutritionInfo =
+    recipe.calories ?? recipe.protein ?? recipe.carbs ?? recipe.fat;
+
   return (
     <div className="mx-auto w-full space-y-8 p-4 md:p-6">
       <div className="flex w-full items-start justify-between">
@@ -113,6 +116,32 @@ const RecipeDetails = ({
               ) : null}
             </div>
           ) : null}
+
+          {hasNutritionInfo ? (
+            <div className="grid grid-cols-2 gap-4 md:flex md:flex-wrap">
+              {recipe.calories ? (
+                <p className="text-sm font-medium text-forked-secondary-foreground">
+                  Calories: {recipe.calories} (kcal)
+                </p>
+              ) : null}
+              {recipe.protein ? (
+                <p className="text-sm font-medium text-forked-secondary-foreground">
+                  Protein: {recipe.protein} (g)
+                </p>
+              ) : null}
+              {recipe.carbs ? (
+                <p className="text-sm font-medium text-forked-secondary-foreground">
+                  Carbs: {recipe.carbs} (g)
+                </p>
+              ) : null}
+              {recipe.fat ? (
+                <p className="text-sm font-medium text-forked-secondary-foreground">
+                  Fat: {recipe.fat} (g)
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
           {recipe.description ? (
             <p className="max-w-3xl text-lg leading-relaxed text-forked-secondary-foreground">
               {recipe.description}

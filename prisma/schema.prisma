@@ -73,6 +73,11 @@ model Recipe {
   servings    Int?
   prepTime    Int?
   cookTime    Int?
+  calories    Int?
+  protein     Int?
+  carbs       Int?
+  fat         Int?
+  fiber       Int?
 
   ingredients IngredientInRecipe[]
   categories  RecipeCategory[]
