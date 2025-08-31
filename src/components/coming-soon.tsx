@@ -23,12 +23,6 @@ const features: Feature[] = [
     description:
       "Automatically adjust ingredient quantities for different serving sizes",
   },
-  {
-    icon: Heart,
-    title: "Nutrition Information",
-    description:
-      "Detailed nutritional facts and dietary information for each recipe",
-  },
 ];
 
 const ListItem = ({ feature }: { feature: Feature }) => {

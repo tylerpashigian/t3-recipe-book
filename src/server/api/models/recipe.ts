@@ -39,6 +39,10 @@ export const RecipeSchemaRequest = BaseRecipeSchema.extend({
   id: z.string().optional(),
   ingredients: z.array(IngredientSchemaRequest),
   authorId: z.string(),
+  calories: z.number().optional().nullable(),
+  protein: z.number().optional().nullable(),
+  carbs: z.number().optional().nullable(),
+  fat: z.number().optional().nullable(),
 });
 
 export const RecipeSchemaResponse = BaseRecipeSchema.extend({
@@ -53,6 +57,10 @@ export const RecipeSchemaResponse = BaseRecipeSchema.extend({
   updatedAt: z.date(),
   authorId: z.string().optional(),
   steps: z.array(InstructionSchema),
+  calories: z.number().optional().nullable(),
+  protein: z.number().optional().nullable(),
+  carbs: z.number().optional().nullable(),
+  fat: z.number().optional().nullable(),
 });
 
 export const FullRecipeSchema = z.object({

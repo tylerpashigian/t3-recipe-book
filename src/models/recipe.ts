@@ -25,6 +25,10 @@ export type Recipe = {
   servings?: number | null;
   prepTime?: number | null;
   cookTime?: number | null;
+  calories?: number | null;
+  protein?: number | null;
+  carbs?: number | null;
+  fat?: number | null;
   categories: Category[];
   isFavorited: boolean;
   favoriteCount: number;
@@ -38,6 +42,10 @@ export type RecipeFormModel = {
   servings?: number | null;
   prepTime?: number | null;
   cookTime?: number | null;
+  calories?: number | null;
+  protein?: number | null;
+  carbs?: number | null;
+  fat?: number | null;
   steps: StepFormModel[];
   ingredients: IngredientFormModel[];
 };

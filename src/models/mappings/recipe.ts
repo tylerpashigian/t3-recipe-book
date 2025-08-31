@@ -51,6 +51,10 @@ export const convertRecipeSchemaToRecipe = (
       servings: data.recipe.servings,
       prepTime: data.recipe.prepTime,
       cookTime: data.recipe.cookTime,
+      calories: data.recipe.calories,
+      protein: data.recipe.protein,
+      carbs: data.recipe.carbs,
+      fat: data.recipe.fat,
       categories: data.recipe.categories,
       isFavorited: data.recipe.isFavorited,
       favoriteCount: data.recipe.favoriteCount,
@@ -82,6 +86,10 @@ export const convertRecipeToRecipeForm = (
     servings: data?.servings,
     prepTime: data?.prepTime,
     cookTime: data?.cookTime,
+    calories: data?.calories,
+    protein: data?.protein,
+    carbs: data?.carbs,
+    fat: data?.fat,
     steps:
       data?.steps.map((step) => ({
         id: step.id,
@@ -115,6 +123,10 @@ export const convertRecipeFormToRecipeRequest = (
     })),
     categories: data.categories,
     authorId: authorId,
+    calories: data.calories,
+    protein: data.protein,
+    carbs: data.carbs,
+    fat: data.fat,
   };
 };
 
