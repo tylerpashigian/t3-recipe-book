@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 
 import { useSession } from "next-auth/react";
-import { Clock, Users } from "lucide-react";
+import { Calculator, Clock, Users } from "lucide-react";
 
 import LikeButton from "~/components/UI/like-button";
 import Separator from "~/components/UI/separator";
@@ -41,6 +41,10 @@ const RecipeDetails = ({
 
   const hasNutritionInfo =
     recipe.calories ?? recipe.protein ?? recipe.carbs ?? recipe.fat;
+
+  const scalingOptions = [0.5, 1, 2];
+
+  const [selectedScalingOption, setSelectedScalingOption] = useState(1);
 
   return (
     <div className="mx-auto w-full space-y-8 p-4 md:p-6">
@@ -110,7 +114,7 @@ const RecipeDetails = ({
                 <div className="flex items-center gap-2 text-forked-secondary-foreground">
                   <Users className="h-4 w-4" />
                   <span className="text-sm font-medium">
-                    {recipe.servings} servings
+                    {recipe.servings * selectedScalingOption} servings
                   </span>
                 </div>
               ) : null}
@@ -150,6 +154,33 @@ const RecipeDetails = ({
         </div>
       </div>
 
+      <Card className="border border-border bg-forked-background">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Calculator />
+            <CardTitle className="text-xl text-foreground">
+              Recipe Scaling
+            </CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-forked-secondary-foreground">Scale:</span>
+            {scalingOptions.map((option) => (
+              <Button
+                key={option}
+                onClick={() => setSelectedScalingOption(option)}
+                variant={
+                  option === selectedScalingOption ? "default" : "outline"
+                }
+              >
+                {formatFraction(option)}x
+              </Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
       <Separator />
 
       <div className="grid gap-8 lg:grid-cols-3">
@@ -170,9 +201,9 @@ const RecipeDetails = ({
                     >
                       {toFirstLetterUppercase(ingredient.name)}{" "}
                       {ingredient.quantity
-                        ? `(${formatFraction(ingredient.quantity)} ${
-                            ingredient.unit
-                          })`
+                        ? `(${formatFraction(
+                            ingredient.quantity * selectedScalingOption,
+                          )} ${ingredient.unit})`
                         : null}
                     </li>
                   ))}
