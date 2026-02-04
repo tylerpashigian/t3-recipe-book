@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Copy, Heart, Scale } from "lucide-react";
+import { Copy, Pointer } from "lucide-react";
 
 import { Section } from "~/components/UI/section";
 
@@ -18,10 +18,10 @@ const features: Feature[] = [
       "Copy ingredient lists to your clipboard for easy shopping list",
   },
   {
-    icon: Scale,
-    title: "Recipe Scaling",
+    icon: Pointer,
+    title: "Hover to View Quantities",
     description:
-      "Automatically adjust ingredient quantities for different serving sizes",
+      "Hover over (or tap on mobile) ingredients in the instruction steps to quickly see the quantity without scrolling back up",
   },
 ];
 
