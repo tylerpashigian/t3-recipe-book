@@ -8,15 +8,60 @@ import LikeButton from "~/components/UI/like-button";
 import Separator from "~/components/UI/separator";
 import { Button } from "~/components/UI/button";
 import { Badge } from "~/components/UI/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "~/components/UI/tooltip";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/UI/card";
 import { type Recipe, type Author } from "~/models/recipe";
 import { formatFraction } from "~/utils/conversions";
 import { toFirstLetterUppercase } from "~/utils/string";
 
+const ingredientStopWords = new Set([
+  "a",
+  "an",
+  "and",
+  "in",
+  "of",
+  "on",
+  "or",
+  "the",
+  "to",
+  "with",
+]);
+
+const tokenizeIngredientName = (value: string) =>
+  value
+    .toLowerCase()
+    .split(/[^a-z0-9]+/i)
+    .filter(
+      (token) => token && token.length >= 2 && !ingredientStopWords.has(token),
+    );
+
+const formatIngredientQuantity = (
+  ingredient: { quantity: number | null; unit: string | null },
+  scalingOption: number,
+) => {
+  if (ingredient.quantity === null || ingredient.quantity === undefined) {
+    return "Quantity not listed";
+  }
+
+  const quantity = formatFraction(ingredient.quantity * scalingOption);
+  return ingredient.unit ? `${quantity} ${ingredient.unit}` : quantity;
+};
+
 export enum DetailsPageType {
   Details,
   Edit,
 }
+
+type IngredientMatchEntry = {
+  name: string;
+  quantity: number | null;
+  unit: string | null;
+  normalizedName: string;
+};
 
 type Props = {
   recipe: Recipe;
@@ -45,6 +90,180 @@ const RecipeDetails = ({
   const scalingOptions = [0.5, 1, 2];
 
   const [selectedScalingOption, setSelectedScalingOption] = useState(1);
+
+  const { ingredientPhraseLookup, ingredientTokenLookup, maxPhraseTokens } =
+    React.useMemo(() => {
+      const phraseLookup = new Map<string, IngredientMatchEntry[]>();
+      const tokenLookup = new Map<string, IngredientMatchEntry[]>();
+      let maxTokens = 1;
+
+      const addLookupEntry = (
+        map: Map<string, IngredientMatchEntry[]>,
+        key: string,
+        entry: IngredientMatchEntry,
+      ) => {
+        const existing = map.get(key);
+        if (existing) {
+          if (
+            !existing.some(
+              (item) => item.name.toLowerCase() === entry.name.toLowerCase(),
+            )
+          ) {
+            existing.push(entry);
+          }
+        } else {
+          map.set(key, [entry]);
+        }
+      };
+
+      recipe.ingredients.forEach((ingredient) => {
+        const name = ingredient.name.trim();
+        if (!name) {
+          return;
+        }
+
+        const tokens = tokenizeIngredientName(name);
+        if (!tokens.length) {
+          return;
+        }
+
+        const ingredientEntry = {
+          name,
+          quantity: ingredient.quantity ?? null,
+          unit: ingredient.unit ?? null,
+          normalizedName: tokens.join(" "),
+        };
+
+        maxTokens = Math.max(maxTokens, tokens.length);
+
+        tokens.forEach((token) =>
+          addLookupEntry(tokenLookup, token, ingredientEntry),
+        );
+
+        for (let start = 0; start < tokens.length; start += 1) {
+          for (let end = start + 2; end <= tokens.length; end += 1) {
+            addLookupEntry(
+              phraseLookup,
+              tokens.slice(start, end).join(" "),
+              ingredientEntry,
+            );
+          }
+        }
+      });
+
+      return {
+        ingredientPhraseLookup: phraseLookup,
+        ingredientTokenLookup: tokenLookup,
+        maxPhraseTokens: maxTokens,
+      };
+    }, [recipe.ingredients]);
+
+  const renderInstructionContent = (content: string) => {
+    if (!ingredientPhraseLookup.size && !ingredientTokenLookup.size) {
+      return content;
+    }
+
+    const parts: React.ReactNode[] = [];
+    const wordRegex = /[A-Za-z0-9']+/g;
+    const matches = Array.from(content.matchAll(wordRegex)).map((match) => ({
+      text: match[0],
+      start: match.index ?? 0,
+      end: (match.index ?? 0) + match[0].length,
+      token: match[0].toLowerCase(),
+    }));
+
+    if (!matches.length) {
+      return content;
+    }
+
+    let lastIndex = 0;
+    let index = 0;
+
+    while (index < matches.length) {
+      const current = matches[index];
+      const startIndex = current?.start ?? 0;
+
+      if (startIndex > lastIndex) {
+        parts.push(content.slice(lastIndex, startIndex));
+      }
+
+      let matchedIngredients: IngredientMatchEntry[] | undefined;
+      let matchedLength = 0;
+
+      const maxLength = Math.min(maxPhraseTokens, matches.length - index);
+
+      for (let length = maxLength; length >= 2; length -= 1) {
+        const phrase = matches
+          .slice(index, index + length)
+          .map((match) => match.token)
+          .join(" ");
+        const phraseMatch = ingredientPhraseLookup.get(phrase);
+        if (phraseMatch) {
+          const explicitMatches = phraseMatch.filter(
+            (ingredient) => ingredient.normalizedName === phrase,
+          );
+          matchedIngredients = explicitMatches.length
+            ? explicitMatches
+            : phraseMatch;
+          matchedLength = length;
+          break;
+        }
+      }
+
+      if (!matchedIngredients && current) {
+        const tokenMatch = ingredientTokenLookup.get(current.token);
+        if (!tokenMatch) {
+          parts.push(current.text);
+          lastIndex = current.end;
+          index += 1;
+          continue;
+        }
+        matchedIngredients = tokenMatch;
+        matchedLength = 1;
+      }
+
+      const endIndex = matches[index + matchedLength - 1]?.end;
+      const matchedText = content.slice(startIndex, endIndex);
+
+      const hasMultipleMatches = (matchedIngredients?.length ?? 0) > 1;
+      const tooltipText = matchedIngredients?.length
+        ? matchedIngredients
+            .map((ingredient) => {
+              const quantityText = formatIngredientQuantity(
+                ingredient,
+                selectedScalingOption,
+              );
+              if (hasMultipleMatches) {
+                return `${toFirstLetterUppercase(
+                  ingredient.name,
+                )}: ${quantityText}`;
+              }
+              return quantityText;
+            })
+            .join("\n")
+        : [];
+
+      parts.push(
+        <Tooltip key={`${startIndex}-${matchedText}`} delayDuration={0}>
+          <TooltipTrigger asChild>
+            <span className="rounded bg-secondary-foreground/10 p-[2px]">
+              {matchedText}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>{tooltipText}</TooltipContent>
+        </Tooltip>,
+      );
+
+      lastIndex = endIndex ?? matchedIngredients?.length ?? 0;
+      index += matchedLength;
+    }
+
+    if (lastIndex < content.length) {
+      parts.push(content.slice(lastIndex));
+    }
+
+    return parts;
+  };
 
   return (
     <div className="mx-auto w-full space-y-8 p-4 md:p-6">
@@ -232,7 +451,7 @@ const RecipeDetails = ({
                       key={index}
                       className="gap-4 text-sm leading-relaxed text-forked-secondary-foreground"
                     >
-                      {instruction.content}
+                      {renderInstructionContent(instruction.content)}
                     </li>
                   ))}
                 </ol>
