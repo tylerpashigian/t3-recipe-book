@@ -9,10 +9,10 @@ import Separator from "~/components/UI/separator";
 import { Button } from "~/components/UI/button";
 import { Badge } from "~/components/UI/badge";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "~/components/UI/tooltip";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/UI/popover";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/UI/card";
 import { type Recipe, type Author } from "~/models/recipe";
 import { formatFraction } from "~/utils/conversions";
@@ -31,10 +31,15 @@ const ingredientStopWords = new Set([
   "with",
 ]);
 
-const tokenizeIngredientName = (value: string) =>
+const normalizeForMatch = (value: string) =>
   value
-    .toLowerCase()
-    .split(/[^a-z0-9]+/i)
+    .normalize("NFD")
+    .replace(/\p{M}+/gu, "")
+    .toLowerCase();
+
+const tokenizeIngredientName = (value: string) =>
+  (value.match(/[\p{L}\p{N}']+/gu) ?? [])
+    .map((token) => normalizeForMatch(token))
     .filter(
       (token) => token && token.length >= 2 && !ingredientStopWords.has(token),
     );
@@ -164,12 +169,12 @@ const RecipeDetails = ({
     }
 
     const parts: React.ReactNode[] = [];
-    const wordRegex = /[A-Za-z0-9']+/g;
+    const wordRegex = /[\p{L}\p{N}']+/gu;
     const matches = Array.from(content.matchAll(wordRegex)).map((match) => ({
       text: match[0],
       start: match.index ?? 0,
       end: (match.index ?? 0) + match[0].length,
-      token: match[0].toLowerCase(),
+      token: normalizeForMatch(match[0]),
     }));
 
     if (!matches.length) {
@@ -241,20 +246,29 @@ const RecipeDetails = ({
               return quantityText;
             })
             .join("\n")
-        : [];
+        : "";
 
       parts.push(
-        <Tooltip key={`${startIndex}-${matchedText}`} delayDuration={0}>
-          <TooltipTrigger asChild>
-            <span className="rounded bg-secondary-foreground/10 p-[2px]">
+        <Popover key={`${startIndex}-${matchedText}`}>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className="inline-flex whitespace-nowrap rounded bg-secondary-foreground/10 p-[2px] text-left"
+            >
               {matchedText}
-            </span>
-          </TooltipTrigger>
-          <TooltipContent>{tooltipText}</TooltipContent>
-        </Tooltip>,
+            </button>
+          </PopoverTrigger>
+          <PopoverContent
+            align="start"
+            className="max-w-64 w-auto whitespace-pre-line p-2 text-xs leading-relaxed"
+            sideOffset={6}
+          >
+            {tooltipText}
+          </PopoverContent>
+        </Popover>,
       );
 
-      lastIndex = endIndex ?? matchedIngredients?.length ?? 0;
+      lastIndex = endIndex ?? startIndex + matchedText.length;
       index += matchedLength;
     }
 
