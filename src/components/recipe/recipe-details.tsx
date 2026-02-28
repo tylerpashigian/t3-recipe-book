@@ -68,6 +68,17 @@ type IngredientMatchEntry = {
   normalizedName: string;
 };
 
+type InstructionTokenMatch = {
+  text: string;
+  start: number;
+  end: number;
+  token: string;
+  separatorAfter: string;
+};
+
+const isPhraseSeparator = (separator: string) =>
+  separator.length > 0 && /^[ \t]+$/.test(separator);
+
 type Props = {
   recipe: Recipe;
   author?: Author;
@@ -170,12 +181,21 @@ const RecipeDetails = ({
 
     const parts: React.ReactNode[] = [];
     const wordRegex = /[\p{L}\p{N}']+/gu;
-    const matches = Array.from(content.matchAll(wordRegex)).map((match) => ({
-      text: match[0],
-      start: match.index ?? 0,
-      end: (match.index ?? 0) + match[0].length,
-      token: normalizeForMatch(match[0]),
-    }));
+    const rawMatches = Array.from(content.matchAll(wordRegex));
+    const matches: InstructionTokenMatch[] = rawMatches.map((match, index) => {
+      const start = match.index ?? 0;
+      const end = start + match[0].length;
+      const nextStart = rawMatches[index + 1]?.index;
+
+      return {
+        text: match[0],
+        start,
+        end,
+        token: normalizeForMatch(match[0]),
+        separatorAfter:
+          nextStart === undefined ? "" : content.slice(end, nextStart),
+      };
+    });
 
     if (!matches.length) {
       return content;
@@ -198,6 +218,14 @@ const RecipeDetails = ({
       const maxLength = Math.min(maxPhraseTokens, matches.length - index);
 
       for (let length = maxLength; length >= 2; length -= 1) {
+        const separatorsAreValid = matches
+          .slice(index, index + length - 1)
+          .every((match) => isPhraseSeparator(match.separatorAfter));
+
+        if (!separatorsAreValid) {
+          continue;
+        }
+
         const phrase = matches
           .slice(index, index + length)
           .map((match) => match.token)
@@ -259,9 +287,9 @@ const RecipeDetails = ({
             </button>
           </PopoverTrigger>
           <PopoverContent
-            align="start"
+            side="top"
+            align="center"
             className="max-w-64 w-auto whitespace-pre-line p-2 text-xs leading-relaxed"
-            sideOffset={6}
           >
             {tooltipText}
           </PopoverContent>
@@ -316,7 +344,7 @@ const RecipeDetails = ({
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {recipe.categories.map((category, index) => {
+            {recipe.categories.map((category) => {
               return (
                 <Badge key={category.id} variant="accent">
                   {category.name}
