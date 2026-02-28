@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/UI/card";
 import { type Recipe, type Author } from "~/models/recipe";
 import { formatFraction } from "~/utils/conversions";
 import { toFirstLetterUppercase } from "~/utils/string";
+import { useInstructions } from "./use-instructions";
 
 export enum DetailsPageType {
   Details,
@@ -45,6 +46,11 @@ const RecipeDetails = ({
   const scalingOptions = [0.5, 1, 2];
 
   const [selectedScalingOption, setSelectedScalingOption] = useState(1);
+
+  const { renderInstructionContent } = useInstructions({
+    ingredients: recipe.ingredients,
+    scalingOption: selectedScalingOption,
+  });
 
   return (
     <div className="mx-auto w-full space-y-8 p-4 md:p-6">
@@ -83,7 +89,7 @@ const RecipeDetails = ({
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {recipe.categories.map((category, index) => {
+            {recipe.categories.map((category) => {
               return (
                 <Badge key={category.id} variant="accent">
                   {category.name}
@@ -232,7 +238,7 @@ const RecipeDetails = ({
                       key={index}
                       className="gap-4 text-sm leading-relaxed text-forked-secondary-foreground"
                     >
-                      {instruction.content}
+                      {renderInstructionContent(instruction.content)}
                     </li>
                   ))}
                 </ol>
