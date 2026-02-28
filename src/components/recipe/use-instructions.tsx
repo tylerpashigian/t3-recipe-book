@@ -116,10 +116,13 @@ export const useInstructions = ({ ingredients, scalingOption }: Props) => {
 
         maxTokens = Math.max(maxTokens, tokens.length);
 
+        // Adding all individual tokens to allow for partial matches in instructions, ex. "olive oil" would match both "olive" and "oil"
         tokens.forEach((token) =>
           addLookupEntry(tokenLookup, token, ingredientEntry),
         );
 
+        // Matches all consecutive token combinations to allow for multi-word ingredient matching in instructions
+        // Ex. "extra virgin olive oil" would match "olive oil" in instructions, but "oil" alone would still match as well
         for (let start = 0; start < tokens.length; start += 1) {
           for (let end = start + 2; end <= tokens.length; end += 1) {
             addLookupEntry(
@@ -248,7 +251,7 @@ export const useInstructions = ({ ingredients, scalingOption }: Props) => {
             <PopoverTrigger asChild>
               <button
                 type="button"
-                className="inline-flex whitespace-nowrap rounded bg-secondary-foreground/10 p-[2px] text-left"
+                className="inline-flex whitespace-nowrap rounded bg-forked-secondary-foreground/20 px-1 py-0.5 text-left leading-none"
               >
                 {matchedText}
               </button>
