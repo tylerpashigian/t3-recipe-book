@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Copy, Pointer } from "lucide-react";
+import { Copy, LayoutList } from "lucide-react";
 
 import { Section } from "~/components/UI/section";
 
@@ -12,16 +12,16 @@ type Feature = {
 
 const features: Feature[] = [
   {
+    icon: LayoutList,
+    title: "Instruction Sections",
+    description:
+      "Group instructions into sections (e.g. for different components of a recipe) for better organization and readability",
+  },
+  {
     icon: Copy,
     title: "Copy Ingredients",
     description:
       "Copy ingredient lists to your clipboard for easy shopping list",
-  },
-  {
-    icon: Pointer,
-    title: "Hover to View Quantities",
-    description:
-      "Hover over (or tap on mobile) ingredients in the instruction steps to quickly see the quantity without scrolling back up",
   },
 ];
 
