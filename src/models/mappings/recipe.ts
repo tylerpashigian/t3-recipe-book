@@ -43,10 +43,15 @@ export const convertRecipeSchemaToRecipe = (
       ingredients: data.recipe.ingredients.map(
         convertIngredientSchemaToIngredient,
       ),
-      steps: data.recipe.steps.map((step) => ({
-        id: step.id ?? "",
-        content: step.content,
-        order: step.order,
+      instructionSections: data.recipe.instructionSections.map((section) => ({
+        id: section.id ?? "",
+        name: section.name,
+        order: section.order,
+        steps: section.steps.map((step) => ({
+          id: step.id ?? "",
+          content: step.content,
+          order: step.order,
+        })),
       })),
       servings: data.recipe.servings,
       prepTime: data.recipe.prepTime,
@@ -71,6 +76,10 @@ export const convertRecipeSchemaToRecipe = (
 export const convertRecipeToRecipeForm = (
   data: Recipe | undefined,
 ): RecipeFormModel => {
+  const instructionSections = data?.instructionSections?.length
+    ? data.instructionSections
+    : [];
+
   return {
     id: data?.id,
     name: data?.name ?? "",
@@ -90,12 +99,16 @@ export const convertRecipeToRecipeForm = (
     protein: data?.protein,
     carbs: data?.carbs,
     fat: data?.fat,
-    steps:
-      data?.steps.map((step) => ({
+    instructionSections: instructionSections.map((section, sectionIndex) => ({
+      id: section.id,
+      name: section.name ?? "",
+      order: sectionIndex,
+      steps: section.steps.map((step, stepIndex) => ({
         id: step.id,
         content: step.content ?? "",
-        order: step.order,
-      })) ?? [],
+        order: stepIndex,
+      })),
+    })),
     categories: data?.categories ?? [],
   };
 };
@@ -117,10 +130,18 @@ export const convertRecipeFormToRecipeRequest = (
     servings: data.servings,
     prepTime: data.prepTime,
     cookTime: data.cookTime,
-    steps: data.steps.map((step) => ({
-      content: step.content,
-      order: step.order,
-    })),
+    instructionSections: data.instructionSections.map(
+      (section, sectionIndex) => ({
+        id: section.id == null || section.id === "" ? undefined : section.id,
+        name: section.name,
+        order: sectionIndex,
+        steps: section.steps.map((step, stepIndex) => ({
+          id: step.id == null || step.id === "" ? undefined : step.id,
+          content: step.content,
+          order: stepIndex,
+        })),
+      }),
+    ),
     categories: data.categories,
     authorId: authorId,
     calories: data.calories,

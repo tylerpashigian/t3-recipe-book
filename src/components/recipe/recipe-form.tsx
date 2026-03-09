@@ -22,6 +22,7 @@ import {
   type Recipe,
   type Category,
   type RecipeFormModel,
+  InstructionSectionFormModel,
 } from "~/models/recipe";
 import {
   categoryToOption,
@@ -152,6 +153,18 @@ const RecipeForm = ({
       setIngredientIndex(null);
       setTempIngredient(undefined);
     }, 100);
+  };
+
+  const sectionValidators = (sections: InstructionSectionFormModel[]) => {
+    const hasInvalidSection = sections.some(
+      (section) =>
+        section.steps.length === 0 ||
+        section.steps.some((step) => step.content.trim() === ""),
+    );
+
+    return hasInvalidSection
+      ? "Each section needs at least one non-empty step"
+      : undefined;
   };
 
   return (
@@ -564,17 +577,11 @@ const RecipeForm = ({
 
           <div className="lg:col-span-2">
             <form.Field
-              name="steps"
+              name="instructionSections"
               mode="array"
               validators={{
-                onChange: ({ value }) => {
-                  const hasErrors = value?.some((step) => step.content === "");
-                  return hasErrors ? "Empty step" : undefined;
-                },
-                onBlur: ({ value }) => {
-                  const hasErrors = value?.some((step) => step.content === "");
-                  return hasErrors ? "Empty step" : undefined;
-                },
+                onChange: ({ value }) => sectionValidators(value),
+                onBlur: ({ value }) => sectionValidators(value),
               }}
             >
               {(field) => (
@@ -587,13 +594,13 @@ const RecipeForm = ({
                       <Button
                         disabled={field.state.meta.errors?.length > 0}
                         variant="ghost"
-                        // className="mt-2"
                         onClick={(e) => {
                           e.preventDefault();
                           field.pushValue({
                             id: undefined,
-                            content: "",
-                            order: field.state.value?.length ?? -1,
+                            name: "",
+                            order: field.state.value?.length ?? 0,
+                            steps: [],
                           });
                         }}
                       >
@@ -601,64 +608,184 @@ const RecipeForm = ({
                       </Button>
                     </CardHeader>
                     <CardContent>
-                      <ul className="list-inside list-decimal space-y-4">
-                        {(field.state.value ?? []).map((_, i) => (
-                          <form.Field
-                            key={`steps[${i}].content`}
-                            name={`steps[${i}].content`}
-                            validators={{
-                              onBlur: ({ value }) =>
-                                value === ""
-                                  ? "Please enter a step"
-                                  : undefined,
-                              onChange: ({ value }) =>
-                                value === ""
-                                  ? "Please enter a step"
-                                  : undefined,
-                            }}
-                          >
-                            {(subField) => (
-                              <>
-                                <div key={i} className="flex gap-3">
-                                  <div className="flex flex-1 flex-col gap-2">
-                                    <div className="flex w-full items-center justify-between">
-                                      <p className="text-sm">{i + 1}.</p>
+                      <div className="space-y-6">
+                        {(field.state.value ?? []).map(
+                          (_section, sectionIndex) => (
+                            <div
+                              key={`instructionSections[${sectionIndex}]`}
+                              className="space-y-4 rounded-md border border-border p-4"
+                            >
+                              <div className="flex items-center justify-between gap-3">
+                                <form.Field
+                                  name={`instructionSections[${sectionIndex}].name`}
+                                >
+                                  {(sectionNameField) => (
+                                    <Input
+                                      type="text"
+                                      id={sectionNameField.name}
+                                      name={sectionNameField.name}
+                                      className="w-full px-4 py-3 text-black"
+                                      value={sectionNameField.state.value}
+                                      onBlur={sectionNameField.handleBlur}
+                                      onChange={(e) =>
+                                        sectionNameField.handleChange(
+                                          e.target.value,
+                                        )
+                                      }
+                                      placeholder="Section name (optional)"
+                                      aria-label="Section name"
+                                    />
+                                  )}
+                                </form.Field>
+                                <Button
+                                  variant={"ghost"}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    void field.validate("change");
+                                    void field.removeValue(sectionIndex);
+                                  }}
+                                >
+                                  <IoClose />
+                                </Button>
+                              </div>
+
+                              <form.Field
+                                name={`instructionSections[${sectionIndex}].steps`}
+                                mode="array"
+                                validators={{
+                                  onChange: ({ value }) => {
+                                    if (!value?.length)
+                                      return "Add at least one step";
+                                    if (
+                                      value.some((s) => s.content.trim() === "")
+                                    )
+                                      return "Empty step";
+                                    return undefined;
+                                  },
+                                  onBlur: ({ value }) => {
+                                    if (!value?.length)
+                                      return "Add at least one step";
+                                    if (
+                                      value.some((s) => s.content.trim() === "")
+                                    )
+                                      return "Empty step";
+                                    return undefined;
+                                  },
+                                }}
+                              >
+                                {(stepsField) => (
+                                  <div className="space-y-4">
+                                    <div className="flex justify-end">
                                       <Button
-                                        variant={"ghost"}
+                                        variant="ghost"
                                         onClick={(e) => {
                                           e.preventDefault();
-                                          e.stopPropagation();
-                                          void field.removeValue(i);
+                                          stepsField.pushValue({
+                                            id: undefined,
+                                            content: "",
+                                            order:
+                                              stepsField.state.value?.length ??
+                                              0,
+                                          });
                                         }}
                                       >
-                                        <IoClose />
+                                        <Plus className="h-4 w-4" />
                                       </Button>
                                     </div>
-                                    <Textarea
-                                      name={`steps[${i}]`}
-                                      id={`steps[${i}]`}
-                                      className={`m-0 w-full px-4 py-3 text-black ${
-                                        subField.state.meta.errors.length
-                                          ? "border-red-400"
-                                          : null
-                                      }`}
-                                      value={subField.state.value}
-                                      onChange={(e) => {
-                                        subField.handleChange(e.target.value);
-                                        void subField.validate("blur");
-                                        void field.validate("change");
-                                      }}
-                                      onBlur={subField.handleBlur}
-                                      placeholder="Step instructions"
-                                      aria-label="Step instructions"
-                                    />
+                                    <ul className="list-inside list-decimal space-y-4">
+                                      {(stepsField.state.value ?? []).map(
+                                        (_, stepIndex) => (
+                                          <form.Field
+                                            key={`instructionSections[${sectionIndex}].steps[${stepIndex}].content`}
+                                            name={`instructionSections[${sectionIndex}].steps[${stepIndex}].content`}
+                                            validators={{
+                                              onBlur: ({ value }) =>
+                                                value === ""
+                                                  ? "Please enter a step"
+                                                  : undefined,
+                                              onChange: ({ value }) =>
+                                                value === ""
+                                                  ? "Please enter a step"
+                                                  : undefined,
+                                            }}
+                                          >
+                                            {(stepField) => (
+                                              <div className="flex gap-3">
+                                                <div className="flex flex-1 flex-col gap-2">
+                                                  <div className="flex w-full items-center justify-between">
+                                                    <p className="text-sm">
+                                                      {stepIndex + 1}.
+                                                    </p>
+                                                    <Button
+                                                      variant={"ghost"}
+                                                      onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        void stepsField.removeValue(
+                                                          stepIndex,
+                                                        );
+                                                        void field.validate(
+                                                          "change",
+                                                        );
+                                                      }}
+                                                    >
+                                                      <IoClose />
+                                                    </Button>
+                                                  </div>
+                                                  <Textarea
+                                                    name={`instructionSections[${sectionIndex}].steps[${stepIndex}].content`}
+                                                    id={`instructionSections[${sectionIndex}].steps[${stepIndex}].content`}
+                                                    className={`m-0 w-full px-4 py-3 text-black ${
+                                                      stepField.state.meta
+                                                        .errors.length
+                                                        ? "border-red-400"
+                                                        : null
+                                                    }`}
+                                                    value={
+                                                      stepField.state.value
+                                                    }
+                                                    onChange={(e) => {
+                                                      stepField.handleChange(
+                                                        e.target.value,
+                                                      );
+                                                      void form.validateField(
+                                                        "instructionSections",
+                                                        "change",
+                                                      );
+
+                                                      void stepsField.validate(
+                                                        "change",
+                                                      );
+                                                    }}
+                                                    onBlur={() => {
+                                                      stepField.handleBlur();
+                                                      void form.validateField(
+                                                        "instructionSections",
+                                                        "blur",
+                                                      );
+
+                                                      void stepsField.validate(
+                                                        "blur",
+                                                      );
+                                                    }}
+                                                    placeholder="Step instructions"
+                                                    aria-label="Step instructions"
+                                                  />
+                                                </div>
+                                              </div>
+                                            )}
+                                          </form.Field>
+                                        ),
+                                      )}
+                                    </ul>
                                   </div>
-                                </div>
-                              </>
-                            )}
-                          </form.Field>
-                        ))}
-                      </ul>
+                                )}
+                              </form.Field>
+                            </div>
+                          ),
+                        )}
+                      </div>
                     </CardContent>
                   </Card>
                 </>
