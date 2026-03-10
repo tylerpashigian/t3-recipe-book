@@ -403,6 +403,13 @@ export const recipesRouter = createTRPCRouter({
             }
 
             for (const step of section.steps.filter((item) => item.id)) {
+              if (!!step.id && !existingStepIds.includes(step.id)) {
+                throw new TRPCError({
+                  code: "FORBIDDEN",
+                  message: "Invalid step id for this recipe section",
+                });
+              }
+
               await tx.recipeInstructionStep.update({
                 where: { id: step.id },
                 data: { content: step.content, order: step.order },
