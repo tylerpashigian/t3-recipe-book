@@ -12,12 +12,6 @@ type Feature = {
 
 const features: Feature[] = [
   {
-    icon: LayoutList,
-    title: "Instruction Sections",
-    description:
-      "Group instructions into sections (e.g. for different components of a recipe) for better organization and readability",
-  },
-  {
     icon: Copy,
     title: "Copy Ingredients",
     description:

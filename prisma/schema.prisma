@@ -79,10 +79,11 @@ model Recipe {
   fat         Int?
   fiber       Int?
 
-  ingredients IngredientInRecipe[]
-  categories  RecipeCategory[]
-  favorites   RecipeFavorite[]
-  steps       RecipeInstructions[]
+  ingredients         IngredientInRecipe[]
+  categories          RecipeCategory[]
+  favorites           RecipeFavorite[]
+  instructionSections RecipeInstructionSection[]
+  instructionSteps    RecipeInstructionStep[]
 
   @@index([authorId])
   @@index([name])
@@ -131,13 +132,35 @@ model RecipeFavorite {
   @@id([userId, recipeId])
 }
 
-model RecipeInstructions {
+model RecipeInstructionSection {
   id        String   @id @default(cuid())
   recipeId  String   @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Recipe  Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  content String
-  order   Int
+  name  String                  @default("")
+  order Int
+  recipe Recipe                 @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  steps RecipeInstructionStep[]
+
+  @@index([recipeId])
+  @@index([recipeId, order])
+}
+
+model RecipeInstructionStep {
+  id                   String   @id @default(cuid())
+  recipeId             String   @default(cuid())
+  instructionSectionId String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  recipe             Recipe                    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  instructionSection RecipeInstructionSection? @relation(fields: [instructionSectionId], references: [id], onDelete: Cascade)
+  content            String
+  order              Int
+
+  @@index([recipeId])
+  @@index([instructionSectionId])
+  @@index([instructionSectionId, order])
+  @@map("RecipeInstructions")
 }

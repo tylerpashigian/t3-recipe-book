@@ -29,36 +29,43 @@ const RecipePreview = () => {
       { id: "6", name: "Salt", recipeId: "1" },
       { id: "7", name: "Ripe tomatoes", recipeId: "1" },
     ],
-    steps: [
+    instructionSections: [
       {
-        id: "1",
-        content: "Combine flour, yeast, and salt in a bowl.",
+        id: "section-1",
+        name: "",
         order: 0,
-      },
-      {
-        id: "2",
-        content: "Knead the dough for 8-10 minutes until smooth.",
-        order: 1,
-      },
-      {
-        id: "3",
-        content: "Let the dough rise for 1 hour until doubled in size.",
-        order: 2,
-      },
-      {
-        id: "4",
-        content: "Preheat oven to 475°F (245°C).",
-        order: 3,
-      },
-      {
-        id: "5",
-        content: "Shape the dough into a pizza base and add toppings.",
-        order: 4,
-      },
-      {
-        id: "6",
-        content: "Bake for 10-12 minutes until crust is golden.",
-        order: 5,
+        steps: [
+          {
+            id: "1",
+            content: "Combine flour, yeast, and salt in a bowl.",
+            order: 0,
+          },
+          {
+            id: "2",
+            content: "Knead the dough for 8-10 minutes until smooth.",
+            order: 1,
+          },
+          {
+            id: "3",
+            content: "Let the dough rise for 1 hour until doubled in size.",
+            order: 2,
+          },
+          {
+            id: "4",
+            content: "Preheat oven to 475°F (245°C).",
+            order: 3,
+          },
+          {
+            id: "5",
+            content: "Shape the dough into a pizza base and add toppings.",
+            order: 4,
+          },
+          {
+            id: "6",
+            content: "Bake for 10-12 minutes until crust is golden.",
+            order: 5,
+          },
+        ],
       },
     ],
     categories: [{ id: "1", name: "Italian" }],

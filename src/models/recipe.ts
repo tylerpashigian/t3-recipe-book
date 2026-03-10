@@ -21,7 +21,7 @@ export type Recipe = {
   name: string;
   description: string;
   ingredients: Ingredient[];
-  steps: Step[];
+  instructionSections: InstructionSection[];
   servings?: number | null;
   prepTime?: number | null;
   cookTime?: number | null;
@@ -46,14 +46,21 @@ export type RecipeFormModel = {
   protein?: number | null;
   carbs?: number | null;
   fat?: number | null;
-  steps: StepFormModel[];
+  instructionSections: InstructionSectionFormModel[];
   ingredients: IngredientFormModel[];
 };
 
-type StepFormModel = {
+export type InstructionStepFormModel = {
   id?: string | null;
   content: string;
   order: number;
+};
+
+export type InstructionSectionFormModel = {
+  id?: string | null;
+  name: string;
+  order: number;
+  steps: InstructionStepFormModel[];
 };
 
 export type Category = {
@@ -61,10 +68,17 @@ export type Category = {
   name: string;
 };
 
-type Step = {
+export type InstructionStep = {
   id: string;
   content: string;
   order: number;
+};
+
+export type InstructionSection = {
+  id: string;
+  name: string;
+  order: number;
+  steps: InstructionStep[];
 };
 
 export type Author = {

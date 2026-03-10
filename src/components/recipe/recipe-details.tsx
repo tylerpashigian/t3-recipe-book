@@ -52,6 +52,21 @@ const RecipeDetails = ({
     scalingOption: selectedScalingOption,
   });
 
+  const instructionSections = recipe.instructionSections
+    .map((section) => ({
+      ...section,
+      steps: [...section.steps].sort((a, b) => a.order - b.order),
+    }))
+    .sort((a, b) => a.order - b.order);
+
+  const instructionSectionsWithSteps = instructionSections.filter(
+    (section) => section.steps.length > 0,
+  );
+
+  const showAsSingleSection =
+    instructionSectionsWithSteps.length === 1 &&
+    instructionSectionsWithSteps[0]?.name.trim() === "";
+
   return (
     <div className="mx-auto w-full space-y-8 p-4 md:p-6">
       <div className="flex w-full items-start justify-between">
@@ -231,17 +246,43 @@ const RecipeDetails = ({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {recipe.steps.length ? (
-                <ol className="list-inside list-decimal space-y-6">
-                  {recipe.steps.map((instruction, index) => (
-                    <li
-                      key={index}
-                      className="gap-4 text-sm leading-relaxed text-forked-secondary-foreground"
-                    >
-                      {renderInstructionContent(instruction.content)}
-                    </li>
-                  ))}
-                </ol>
+              {instructionSectionsWithSteps.length ? (
+                showAsSingleSection ? (
+                  <ol className="list-inside list-decimal space-y-6">
+                    {instructionSectionsWithSteps[0]?.steps.map(
+                      (instruction) => (
+                        <li
+                          key={instruction.id}
+                          className="gap-4 text-sm leading-relaxed text-forked-secondary-foreground"
+                        >
+                          {renderInstructionContent(instruction.content)}
+                        </li>
+                      ),
+                    )}
+                  </ol>
+                ) : (
+                  <div className="space-y-6">
+                    {instructionSectionsWithSteps.map((section) => (
+                      <div key={section.id} className="space-y-3">
+                        {section.name.trim() ? (
+                          <h3 className="text-sm font-semibold text-foreground">
+                            {section.name}
+                          </h3>
+                        ) : null}
+                        <ol className="list-inside list-decimal space-y-4">
+                          {section.steps.map((instruction) => (
+                            <li
+                              key={instruction.id}
+                              className="gap-4 text-sm leading-relaxed text-forked-secondary-foreground"
+                            >
+                              {renderInstructionContent(instruction.content)}
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+                    ))}
+                  </div>
+                )
               ) : (
                 <p className="text-sm text-forked-secondary-foreground">
                   No steps listed.

@@ -12,10 +12,17 @@ const CategorySchema = z.object({
   name: z.string(),
 });
 
-const InstructionSchema = z.object({
+const InstructionStepSchema = z.object({
   id: z.string().optional(),
   content: z.string(),
   order: z.number(),
+});
+
+const InstructionSectionSchema = z.object({
+  id: z.string().optional(),
+  name: z.string(),
+  order: z.number(),
+  steps: z.array(InstructionStepSchema),
 });
 
 const AuthorSchema = z.object({
@@ -29,7 +36,7 @@ const BaseRecipeSchema = z.object({
   name: z.string(),
   description: z.string(),
   categories: z.array(CategorySchema),
-  steps: z.array(InstructionSchema),
+  instructionSections: z.array(InstructionSectionSchema),
   servings: z.number().optional().nullable(),
   prepTime: z.number().optional().nullable(),
   cookTime: z.number().optional().nullable(),
@@ -56,7 +63,7 @@ export const RecipeSchemaResponse = BaseRecipeSchema.extend({
   createdAt: z.date(),
   updatedAt: z.date(),
   authorId: z.string().optional(),
-  steps: z.array(InstructionSchema),
+  instructionSections: z.array(InstructionSectionSchema),
   calories: z.number().optional().nullable(),
   protein: z.number().optional().nullable(),
   carbs: z.number().optional().nullable(),
