@@ -83,7 +83,6 @@ model Recipe {
   categories          RecipeCategory[]
   favorites           RecipeFavorite[]
   instructionSections RecipeInstructionSection[]
-  instructionSteps    RecipeInstructionStep[]
 
   @@index([authorId])
   @@index([name])
@@ -149,17 +148,14 @@ model RecipeInstructionSection {
 
 model RecipeInstructionStep {
   id                   String   @id @default(cuid())
-  recipeId             String   @default(cuid())
-  instructionSectionId String?
+  instructionSectionId String
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
-  recipe             Recipe                    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  instructionSection RecipeInstructionSection? @relation(fields: [instructionSectionId], references: [id], onDelete: Cascade)
+  instructionSection RecipeInstructionSection @relation(fields: [instructionSectionId], references: [id], onDelete: Cascade)
   content            String
   order              Int
 
-  @@index([recipeId])
   @@index([instructionSectionId])
   @@index([instructionSectionId, order])
   @@map("RecipeInstructions")

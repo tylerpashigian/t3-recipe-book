@@ -214,7 +214,6 @@ export const recipesRouter = createTRPCRouter({
               order: section.order,
               steps: {
                 create: section.steps.map(({ content, order }) => ({
-                  recipeId: createdRecipe.id,
                   content,
                   order,
                 })),
@@ -365,13 +364,15 @@ export const recipesRouter = createTRPCRouter({
 
         for (const section of instructionSections) {
           if (section.id && existingSectionIds.includes(section.id)) {
+            const sectionId = section.id;
+
             await tx.recipeInstructionSection.update({
-              where: { id: section.id },
+              where: { id: sectionId },
               data: { name: section.name, order: section.order },
             });
 
             const existingSteps = await tx.recipeInstructionStep.findMany({
-              where: { instructionSectionId: section.id },
+              where: { instructionSectionId: sectionId },
               select: { id: true },
             });
 
@@ -394,8 +395,7 @@ export const recipesRouter = createTRPCRouter({
             if (newSteps.length) {
               await tx.recipeInstructionStep.createMany({
                 data: newSteps.map((step) => ({
-                  recipeId: id,
-                  instructionSectionId: section.id,
+                  instructionSectionId: sectionId,
                   content: step.content,
                   order: step.order,
                 })),
@@ -423,7 +423,6 @@ export const recipesRouter = createTRPCRouter({
                 order: section.order,
                 steps: {
                   create: section.steps.map((step) => ({
-                    recipeId: id,
                     content: step.content,
                     order: step.order,
                   })),
