@@ -31,7 +31,7 @@ import {
 } from "~/models/mappings/recipe";
 import IngredientForm from "./ingredient-form";
 import IngredientPopover from "./ingredient-popover";
-import { formatFraction } from "~/utils/conversions";
+import { formatIngredientAmount } from "~/components/recipe/utils/ingredient-display";
 import { toFirstLetterUppercase } from "~/utils/string";
 
 export enum IngredientFormType {
@@ -507,17 +507,20 @@ const RecipeForm = ({
                         <div className="space-y-3">
                           {(field.state.value ?? []).map(
                             (ingredient: IngredientFormModel, i) => {
+                              const name = toFirstLetterUppercase(
+                                ingredient.name,
+                              );
+                              const quantityWithUnit =
+                                formatIngredientAmount(ingredient);
                               return (
                                 <div
                                   className="flex items-center justify-between"
                                   key={`ingredients[${i}].name`}
                                 >
                                   <p className="text-sm leading-relaxed text-forked-secondary-foreground">
-                                    {toFirstLetterUppercase(ingredient.name)}{" "}
-                                    {ingredient.quantity
-                                      ? `(${formatFraction(
-                                          ingredient.quantity,
-                                        )} ${ingredient.unit})`
+                                    {name}
+                                    {quantityWithUnit
+                                      ? ` (${quantityWithUnit})`
                                       : null}
                                   </p>
                                   <div className="flex gap-2 hover:cursor-pointer">

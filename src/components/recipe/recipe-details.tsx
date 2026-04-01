@@ -9,6 +9,7 @@ import Separator from "~/components/UI/separator";
 import { Button } from "~/components/UI/button";
 import { Badge } from "~/components/UI/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/UI/card";
+import { formatIngredientAmount } from "~/components/recipe/utils/ingredient-display";
 import { type Recipe, type Author } from "~/models/recipe";
 import { formatFraction } from "~/utils/conversions";
 import { toFirstLetterUppercase } from "~/utils/string";
@@ -215,19 +216,22 @@ const RecipeDetails = ({
             <CardContent>
               {recipe.ingredients.length ? (
                 <ul className="list-inside list-disc space-y-3">
-                  {recipe.ingredients.map((ingredient, index) => (
-                    <li
-                      key={index}
-                      className="items-start gap-3 text-sm leading-relaxed text-forked-secondary-foreground"
-                    >
-                      {toFirstLetterUppercase(ingredient.name)}{" "}
-                      {ingredient.quantity
-                        ? `(${formatFraction(
-                            ingredient.quantity * selectedScalingOption,
-                          )} ${ingredient.unit})`
-                        : null}
-                    </li>
-                  ))}
+                  {recipe.ingredients.map((ingredient, index) => {
+                    const name = toFirstLetterUppercase(ingredient.name);
+                    const quantityWithUnit = formatIngredientAmount(
+                      ingredient,
+                      selectedScalingOption,
+                    );
+                    return (
+                      <li
+                        key={index}
+                        className="items-start gap-3 text-sm leading-relaxed text-forked-secondary-foreground"
+                      >
+                        {name}
+                        {quantityWithUnit ? ` (${quantityWithUnit})` : null}
+                      </li>
+                    );
+                  })}
                 </ul>
               ) : (
                 <p className="text-sm text-forked-secondary-foreground">
