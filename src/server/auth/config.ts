@@ -12,6 +12,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 
 import { env } from "~/env.mjs";
 import { prisma } from "~/server/db";
+import { hashPassword } from "~/utils/conversions";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -87,32 +88,35 @@ export const authOptions: NextAuthOptions = {
         credentials: Credentials | undefined,
       ): Promise<User | null> {
         try {
-          if (!credentials) return null;
-          const userCredentials = {
-            username: credentials.username,
-            password: credentials.password,
-          };
-
-          const res = await fetch(
-            `${process.env.NODE_ENV === "production" ? "https://" : ""}${
-              env.NEXTAUTH_URL
-            }/api/auth/login`,
-            {
-              method: "POST",
-              body: JSON.stringify(userCredentials),
-              headers: {
-                "Content-Type": "application/json",
-              },
-            },
-          );
-
-          const user = (await res.json()) as User | null;
-
-          if (res.ok && user) {
-            return user;
-          } else {
+          if (
+            !credentials ||
+            typeof credentials.username !== "string" ||
+            !credentials.username ||
+            typeof credentials.password !== "string" ||
+            credentials.password.length < 6
+          ) {
             return null;
           }
+
+          const user = await prisma.user.findUnique({
+            where: { username: credentials.username },
+            select: {
+              id: true,
+              email: true,
+              image: true,
+              password: true,
+              username: true,
+            },
+          });
+
+          if (!user || user.password !== hashPassword(credentials.password)) {
+            return null;
+          }
+
+          // Do not put the password hash into the JWT/session.
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { password, username, ...publicUser } = user;
+          return { ...publicUser, username: username ?? undefined };
         } catch (e) {
           console.log("error: ", e);
           return null;
