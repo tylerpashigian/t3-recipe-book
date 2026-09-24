@@ -51,16 +51,11 @@ const Login = () => {
     fetchProviders().catch((error) => console.log(error));
   }, []);
 
-  // TODO: there is probably a better way to do this
-  const callbackUrl = `http${
-    process.env.NODE_ENV === "production" ? "s" : ""
-  }://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
-
   const handleSubmit = (value: AuthFormModel) => {
     signIn("credentials", {
       username: value.username,
       password: value.password,
-      callbackUrl,
+      callbackUrl: "/",
       redirect: false,
     })
       .then((res) => {
