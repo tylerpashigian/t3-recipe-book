@@ -5,6 +5,12 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@fontsource/dm-sans':
+    specifier: ^5.3.0
+    version: 5.3.0
+  '@fontsource/dm-serif-display':
+    specifier: ^5.3.0
+    version: 5.3.0
   '@next-auth/prisma-adapter':
     specifier: ^1.0.7
     version: 1.0.7(@prisma/client@6.19.2)(next-auth@4.23.1)
@@ -705,6 +711,14 @@ packages:
 
   /@floating-ui/utils@0.2.9:
     resolution: {integrity: sha512-MDWhGtE+eHw5JW7lq4qhc5yRLS11ERl1c7Z6Xd0a58DozHES6EnNNwUWbMiG4J9Cgj053Bhk8zvlhFYKVhULwg==}
+    dev: false
+
+  /@fontsource/dm-sans@5.3.0:
+    resolution: {integrity: sha512-lYJtMXXO28q1z+yz+z8XKd0s4hXaa9QdkETzkyD760sidCv5heI86weYA0sx0Nc4pAMAQTUuyf4gO44cYKKS9g==}
+    dev: false
+
+  /@fontsource/dm-serif-display@5.3.0:
+    resolution: {integrity: sha512-ecRclUcYeto9fB7ghkB36H4MtUoaUYFjjornWYYeLCMHzaWEDPk2kIWgZOq0mKBNRxclRSieKcFeLonlMYDTKg==}
     dev: false
 
   /@humanwhocodes/config-array@0.11.11:

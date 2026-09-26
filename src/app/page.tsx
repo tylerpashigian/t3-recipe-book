@@ -15,8 +15,8 @@ const Home = () => {
     <main>
       <Hero />
       <Features />
-      <ComingSoon />
       <RecipePreview />
+      <ComingSoon />
     </main>
   );
 };

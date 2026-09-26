@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-24T20:00:00-05:00",
+  "title": "Design System: Forked Recipe Book",
+  "extensions": {
+    "colorMeta": {
+      "background": { "role": "neutral", "displayName": "Clean Counter", "canonical": "hsl(42 38% 98%)", "tonalRamp": ["oklch(15% 0.015 80)", "oklch(27% 0.015 80)", "oklch(40% 0.015 80)", "oklch(54% 0.015 80)", "oklch(67% 0.015 80)", "oklch(80% 0.015 80)", "oklch(90% 0.015 80)", "oklch(98% 0.015 80)"] },
+      "oat-paper": { "role": "neutral", "displayName": "Oat Paper", "canonical": "hsl(42 45% 95%)", "tonalRamp": ["oklch(15% 0.025 80)", "oklch(27% 0.025 80)", "oklch(40% 0.025 80)", "oklch(54% 0.025 80)", "oklch(67% 0.025 80)", "oklch(80% 0.025 80)", "oklch(90% 0.025 80)", "oklch(96% 0.025 80)"] },
+      "herb-primary": { "role": "primary", "displayName": "Herb Ink", "canonical": "hsl(149 31% 25%)", "tonalRamp": ["oklch(15% 0.035 150)", "oklch(25% 0.05 150)", "oklch(35% 0.065 150)", "oklch(45% 0.075 150)", "oklch(55% 0.075 150)", "oklch(67% 0.06 150)", "oklch(79% 0.04 150)", "oklch(92% 0.02 150)"] },
+      "persimmon-accent": { "role": "tertiary", "displayName": "Persimmon", "canonical": "hsl(18 64% 48%)", "tonalRamp": ["oklch(15% 0.06 45)", "oklch(27% 0.1 45)", "oklch(40% 0.15 45)", "oklch(52% 0.18 45)", "oklch(63% 0.17 45)", "oklch(74% 0.14 45)", "oklch(85% 0.09 45)", "oklch(95% 0.04 45)"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "DM Serif Display", "purpose": "Hero and major landing headlines." },
+      "headline": { "displayName": "DM Serif Display", "purpose": "Section headings and page hierarchy." },
+      "title": { "displayName": "Title", "purpose": "Card and panel titles." },
+      "body": { "displayName": "DM Sans", "purpose": "Descriptions and recipe instructions." },
+      "label": { "displayName": "DM Sans", "purpose": "Controls, navigation, and supporting UI." }
+    },
+    "shadows": [
+      { "name": "card-lift", "value": "0 1px 2px 0 rgb(0 0 0 / 0.05)", "purpose": "Quiet separation for persistent content containers." },
+      { "name": "scrolled-navigation-lift", "value": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)", "purpose": "Temporary lift for navigation after scrolling." }
+    ],
+    "motion": [
+      { "name": "navigation-transition", "value": "300ms ease-in-out", "purpose": "Transition between resting and scrolled navigation states." },
+      { "name": "accordion", "value": "200ms ease-out", "purpose": "Expand and collapse accordion content." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "2xl", "value": "1400px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary action control for creating, browsing, or advancing a recipe task.",
+      "html": "<button class=\"ds-btn-primary\">Create recipe</button>",
+      "css": ".ds-btn-primary { height: 40px; padding: 8px 16px; border: 0; border-radius: 6px; background: hsl(149 31% 25%); color: hsl(42 40% 99%); font: 500 14px/20px DM Sans, ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: background-color 150ms ease; } .ds-btn-primary:hover { background: hsl(149 31% 21%); } .ds-btn-primary:focus-visible { outline: 2px solid hsl(149 31% 25%); outline-offset: 2px; } .ds-btn-primary:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary action control that keeps visual emphasis on the primary route.",
+      "html": "<button class=\"ds-btn-outline\">Pantry Magic</button>",
+      "css": ".ds-btn-outline { height: 40px; padding: 8px 16px; border: 1px solid hsl(149 31% 25%); border-radius: 6px; background: hsl(42 40% 99%); color: hsl(149 31% 25%); font: 500 14px/20px DM Sans, ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: background-color 150ms ease; } .ds-btn-outline:hover { background: hsl(145 18% 92%); } .ds-btn-outline:focus-visible { outline: 2px solid hsl(149 31% 25%); outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input-default",
+      "description": "Standard text field for recipe names, filters, and ingredient entry.",
+      "html": "<label class=\"ds-field\"><span>Recipe name</span><input class=\"ds-input\" placeholder=\"Weeknight pasta\" /></label>",
+      "css": ".ds-field { display: grid; gap: 6px; color: hsl(150 22% 15%); font: 500 14px/20px DM Sans, ui-sans-serif, system-ui, sans-serif; } .ds-input { box-sizing: border-box; width: 100%; height: 40px; padding: 8px 12px; border: 1px solid hsl(42 18% 84%); border-radius: 6px; background: hsl(42 40% 99%); color: hsl(150 22% 15%); font: 400 14px/20px DM Sans, ui-sans-serif, system-ui, sans-serif; } .ds-input::placeholder { color: hsl(150 8% 39%); } .ds-input:focus-visible { outline: 2px solid hsl(149 31% 25%); outline-offset: 2px; }"
+    },
+    {
+      "name": "Recipe Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Plain, bordered container for persistent recipe content and grouped actions.",
+      "html": "<article class=\"ds-card\"><h3>Sunday tomato sauce</h3><p>45 min · Serves 4</p></article>",
+      "css": ".ds-card { padding: 24px; border: 1px solid hsl(42 18% 84%); border-radius: 8px; background: hsl(42 40% 99%); box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); color: hsl(150 22% 15%); font-family: DM Sans, ui-sans-serif, system-ui, sans-serif; } .ds-card h3 { margin: 0 0 6px; font-size: 20px; line-height: 1.2; } .ds-card p { margin: 0; color: hsl(150 8% 39%); font-size: 14px; line-height: 20px; }"
+    },
+    {
+      "name": "Accent Badge",
+      "kind": "chip",
+      "refersTo": "badge-accent",
+      "description": "Small metadata or feature marker with the system’s rare rose accent.",
+      "html": "<span class=\"ds-badge\">Personal collection</span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; padding: 2px 10px; border: 1px solid hsl(18 64% 48% / 0.2); border-radius: 9999px; background: hsl(18 64% 48% / 0.1); color: hsl(18 64% 48%); font: 600 12px/16px DM Sans, ui-sans-serif, system-ui, sans-serif; }"
+    },
+    {
+      "name": "Scrolled Navigation",
+      "kind": "nav",
+      "refersTo": "navigation-scrolled",
+      "description": "A compact floating navigation state that appears only after page scroll.",
+      "html": "<nav class=\"ds-nav\"><strong>Forked</strong><button>Login</button></nav>",
+      "css": ".ds-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 8px; border: 1px solid hsl(42 18% 84%); border-radius: 12px; background: hsl(42 40% 99% / 0.7); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); color: hsl(150 22% 15%); backdrop-filter: blur(4px); font: 600 18px/28px DM Sans, ui-sans-serif, system-ui, sans-serif; } .ds-nav button { padding: 8px 16px; border: 0; border-radius: 6px; background: hsl(149 31% 25%); color: hsl(42 40% 99%); font: 500 14px/20px DM Sans, ui-sans-serif, system-ui, sans-serif; cursor: pointer; } .ds-nav button:hover { background: hsl(149 31% 21%); } .ds-nav button:focus-visible { outline: 2px solid hsl(149 31% 25%); outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Calm Pantry",
+    "overview": "Forked Recipe Book is a quiet personal utility, not a content marketplace. Its visual system makes recipes feel kept and useful: oat-toned surfaces, a deep herb-ink working color, a quietly expressive display face, and a deliberately small set of dependable controls. A rare persimmon accent adds a small human spark.\n\nThe interface is minimal without becoming sterile. Content gets generous space, cards stay plain, and responsive behavior preserves straightforward scanning. Illustration, when owned and introduced, should feel like a small pantry companion rather than generic food photography or decorative stock content.",
+    "keyCharacteristics": ["Oat-toned foundations with a deep herb-ink working color.", "Flat-by-default utility surfaces with soft lift only where state or grouping needs it.", "Friendly, tactile controls with rounded but compact geometry.", "DM Serif Display for memorable headings and DM Sans for effortless reading."],
+    "rules": [
+      { "name": "The One Spark Rule", "body": "Persimmon is an accent, not a competing primary color. Use it for small badges and clear highlights; Herb Ink remains the working color.", "section": "colors" },
+      { "name": "The Readable Recipe Rule", "body": "Prefer the simplest established weight and size that makes recipe content scannable; decorative type must never compete with ingredients or steps.", "section": "typography" },
+      { "name": "The Earned Lift Rule", "body": "Elevation appears to clarify hierarchy or interaction state, never to make every surface look important.", "section": "elevation" }
+    ],
+    "dos": ["Do let recipes, ingredients, and instructions remain the strongest content on any working screen.", "Do use Oat Paper for broad breathing spaces and Clean Counter for interactive surfaces.", "Do reserve Persimmon for small highlights and Herb Ink for meaningful actions.", "Do use borders and spacing before adding shadows to explain hierarchy.", "Do favor owned Notion-like illustration selectively over user-uploaded food imagery."],
+    "donts": ["Don't introduce ads, noisy promotional modules, or marketplace-style clutter.", "Don't make Persimmon the dominant background, button, or navigation color.", "Don't add user-uploaded recipe photography as a default content layer.", "Don't stack large shadows or glossy effects onto everyday cards and fields.", "Don't compress recipe instructions or ingredient lists merely to make a layout feel denser."]
+  }
+}

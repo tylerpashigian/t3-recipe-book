@@ -7,6 +7,10 @@ import ToastWrapper from "./ToastWrapper";
 import { TRPCReactProvider } from "~/trpc/react";
 import "~/styles/globals.css";
 import { SessionProvider } from "next-auth/react";
+import "@fontsource/dm-sans/400.css";
+import "@fontsource/dm-sans/500.css";
+import "@fontsource/dm-sans/700.css";
+import "@fontsource/dm-serif-display/400.css";
 
 export default function RootLayout({
   // Layouts must accept a children prop.

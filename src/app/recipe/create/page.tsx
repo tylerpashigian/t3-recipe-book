@@ -41,7 +41,7 @@ export default function CreateRecipe() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <WithNavBar classes="bg-forked-neutral">
-        <main className="mx-auto flex w-full max-w-6xl flex-col p-4 md:px-6 md:py-8">
+        <main className="mx-auto flex w-full max-w-6xl flex-col px-4 py-8 sm:px-6 md:py-12">
           <RecipeForm
             allIngredients={allIngredients}
             categories={categories}

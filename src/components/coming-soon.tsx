@@ -1,59 +1,22 @@
-import React from "react";
-
-import { Copy, LayoutList } from "lucide-react";
-
-import { Section } from "~/components/UI/section";
-
-type Feature = {
-  icon: React.ComponentType<{ className?: string }>;
-  title: string;
-  description: string;
-};
-
-const features: Feature[] = [
-  {
-    icon: Copy,
-    title: "Copy Ingredients",
-    description:
-      "Copy ingredient lists to your clipboard for easy shopping list",
-  },
-];
-
-const ListItem = ({ feature }: { feature: Feature }) => {
-  const Icon = feature.icon;
-  return (
-    <li className="flex items-start gap-3">
-      <div className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-foreground" />
-      <div>
-        <div className="mb-1 flex items-center gap-2">
-          <Icon className="text-forked-secondary h-4 w-4" />
-          <span className="font-medium text-foreground">{feature.title}</span>
-        </div>
-        <p className="text-sm text-forked-secondary-foreground">
-          {feature.description}
-        </p>
-      </div>
-    </li>
-  );
-};
+import Image from "next/image";
+import Link from "next/link";
+import { Button } from "./UI/button";
 
 const ComingSoon = () => {
   return (
-    <Section
-      heading="Coming Soon"
-      subheading="Exciting features we're working on to make your cooking experience even better"
-      classes="bg-forked-background"
-    >
-      <div className="mx-auto max-w-4xl">
-        <div className="rounded-2xl border border-border bg-forked-background p-8 shadow-lg">
-          <ul className="space-y-4">
-            {features.map((feature, index) => (
-              <ListItem key={index} feature={feature} />
-            ))}
-          </ul>
+    <section className="bg-forked-background px-6 py-20 md:py-28">
+      <div className="mx-auto grid max-w-5xl items-center gap-10 md:grid-cols-2 md:gap-14">
+        <div className="max-w-xl">
+          <h2 className="text-headline text-foreground">Ready when dinner needs an answer.</h2>
+          <p className="mt-6 max-w-xl text-base leading-7 text-forked-secondary-foreground md:text-lg">Browse the recipes you keep close, or start with the ingredients on the counter and see what is possible.</p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Button asChild size="lg" className="min-h-11 w-full whitespace-normal sm:w-auto"><Link href="/recipes">Browse my recipes</Link></Button>
+            <Button asChild size="lg" variant="primary-outline" className="min-h-11 w-full whitespace-normal sm:w-auto"><Link href="/recipe/build">Build from ingredients</Link></Button>
+          </div>
         </div>
+        <Image src="/pantry-grill.png" alt="" aria-hidden="true" width={512} height={512} className="mx-auto hidden w-full max-w-sm md:block" />
       </div>
-    </Section>
+    </section>
   );
 };
 
