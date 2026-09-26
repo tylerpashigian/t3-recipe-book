@@ -1,9 +1,6 @@
 import { Metadata } from "next";
-import ComingSoon from "~/components/coming-soon";
-import Features from "~/components/features";
 
-import Hero from "~/components/hero";
-import RecipePreview from "~/components/recipe-preview";
+import LandingPage from "~/components/landing-page";
 
 export const metadata: Metadata = {
   title: "Forked Recipe Book",
@@ -11,14 +8,7 @@ export const metadata: Metadata = {
 };
 
 const Home = () => {
-  return (
-    <main>
-      <Hero />
-      <Features />
-      <ComingSoon />
-      <RecipePreview />
-    </main>
-  );
+  return <LandingPage />;
 };
 
 export default Home;

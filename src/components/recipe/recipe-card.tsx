@@ -4,75 +4,77 @@ import Link from "next/link";
 import { IoHeart } from "react-icons/io5";
 import { Clock, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/UI/card";
-import { RecipeSummary } from "~/models/recipe";
+import type { RecipeSummary } from "~/models/recipe";
 
-import { Button } from "~/components/UI/button";
 import { Badge } from "~/components/UI/badge";
 
 export const RecipeCard = ({ recipe }: { recipe: RecipeSummary }) => {
   const totalTime = +(recipe.prepTime ?? 0) + +(recipe.cookTime ?? 0);
   return (
-    <Card
-      key={recipe.id}
-      className="bg-forked-background group flex h-full flex-col justify-between border border-border transition-shadow hover:shadow-lg"
+    <Link
+      href={`/recipe/${recipe.id}`}
+      aria-label={`Open recipe: ${recipe.name}`}
+      className="group block h-full rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
-      <CardHeader className="pb-3">
-        <div className="mb-2 flex items-start justify-between">
-          <CardTitle className="line-clamp-2 flex-1 text-lg text-foreground">
-            {recipe.name}
-          </CardTitle>
-          <div className="ml-3 flex items-center gap-2">
-            <div className="flex items-center gap-1">
-              <IoHeart className={"h-4 w-4 fill-current text-red-500"} />
-              <span className="text-sm font-medium text-foreground">
-                {recipe.favoriteCount}
-              </span>
+      <Card className="flex h-full flex-col justify-between border-border bg-forked-background transition-colors group-hover:border-forked-primary/40">
+        <CardHeader className="pb-3">
+          <div className="mb-2 flex items-start justify-between">
+            <CardTitle className="line-clamp-2 flex-1 text-xl text-foreground transition-colors group-hover:text-forked-primary">
+              {recipe.name}
+            </CardTitle>
+            <div className="ml-3 flex items-center gap-2">
+              <div className="flex items-center gap-1">
+                <IoHeart className="h-4 w-4 fill-current text-forked-accent" />
+                <span className="text-sm font-medium text-foreground">
+                  {recipe.favoriteCount}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
-        <p className="text-forked-secondary-foreground line-clamp-3 text-sm">
-          {recipe.description}
-        </p>
-      </CardHeader>
-      <CardContent className="pt-0">
-        {recipe.categories.length ? (
-          <div className="mb-4 flex flex-wrap gap-2">
-            {recipe.categories.map((category) => (
-              <Badge key={category.name} variant="subtle">
-                {category.name}
-              </Badge>
-            ))}
-          </div>
-        ) : null}
+          <p className="line-clamp-3 text-sm text-forked-secondary-foreground">
+            {recipe.description}
+          </p>
+        </CardHeader>
+        <CardContent className="pt-0">
+          {recipe.categories.length ? (
+            <div className="mb-4 flex flex-wrap gap-2">
+              {recipe.categories.map((category) => (
+                <Badge key={category.name} variant="subtle">
+                  {category.name}
+                </Badge>
+              ))}
+            </div>
+          ) : null}
 
-        <div className="text-forked-secondary-foreground mb-4 flex items-center justify-between text-sm">
-          <div className="flex items-center gap-4">
-            {totalTime > 0 ? (
-              <div className="flex items-center gap-1">
-                <Clock className="h-4 w-4" />
-                <span>{totalTime} min</span>
-              </div>
-            ) : null}
-            {recipe.servings ?? 0 > 0 ? (
-              <div className="flex items-center gap-1">
-                <Users className="h-4 w-4" />
-                <span>{recipe.servings}</span>
-              </div>
-            ) : null}
+          <div className="mb-4 flex items-center justify-between text-sm text-forked-secondary-foreground">
+            <div className="flex items-center gap-4">
+              {totalTime > 0 ? (
+                <div className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  <span>{totalTime} min</span>
+                </div>
+              ) : null}
+              {recipe.servings ?? 0 > 0 ? (
+                <div className="flex items-center gap-1">
+                  <Users className="h-4 w-4" />
+                  <span>{recipe.servings}</span>
+                </div>
+              ) : null}
+            </div>
           </div>
-        </div>
 
-        <Button asChild className="w-full">
-          <Link href={`/recipe/${recipe.id}`}>View Recipe</Link>
-        </Button>
-      </CardContent>
-    </Card>
+          <span className="min-h-11 inline-flex items-center text-sm font-bold text-forked-primary underline-offset-4 transition-colors group-hover:underline">
+            Open recipe
+          </span>
+        </CardContent>
+      </Card>
+    </Link>
   );
 };
 
 export const Skeleton = () => {
   return (
-    <Card className="bg-forked-background animate-pulse border border-border">
+    <Card className="animate-pulse border border-border bg-forked-background">
       <CardHeader className="pb-3">
         <div className="mb-2 flex items-start justify-between">
           <div className="h-6 w-3/4 rounded bg-border"></div>
