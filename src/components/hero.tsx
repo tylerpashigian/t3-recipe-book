@@ -1,41 +1,24 @@
-"use client";
-
-import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "./UI/button";
-import { Badge } from "./UI/badge";
 
-const Hero = () => {
-  return (
-    <section className="bg-forked-background flex h-[100dvh] w-full items-center px-6 py-20">
-      <div className="mx-auto max-w-6xl space-y-6 text-center">
-        <Badge variant="accent">Your Personal Recipe Collection</Badge>
-        <h1 className="text-4xl font-bold tracking-tight text-foreground md:text-5xl">
-          Organize Your Recipes
-          <br />
-          <span className="text-forked-primary">Like Never Before</span>
-        </h1>
-        <p className="text-forked-secondary-foreground mx-auto mb-2 max-w-xl leading-relaxed md:text-lg">
-          Create, edit, and organize your favorite recipes with our beautiful
-          and intuitive recipe management platform. From family traditions to
-          new discoveries, keep them all in one place.
-        </p>
-        <div className="inline-grid w-auto grid-cols-1 gap-4 sm:w-auto sm:grid-cols-2">
-          <Button asChild size="lg" className="w-full">
-            <Link href="/recipes">Browse Recipes</Link>
-          </Button>
-          <Button
-            asChild
-            size="lg"
-            variant="primary-outline"
-            className="w-full "
-          >
-            <Link href="/recipe/build">✨ Pantry Magic</Link>
-          </Button>
+const Hero = () => (
+  <section className="bg-forked-background overflow-hidden px-6 pb-16 pt-28 md:pb-24 md:pt-36">
+    <div className="mx-auto grid max-w-6xl items-center gap-10 sm:gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)] lg:gap-16">
+      <div className="max-w-2xl">
+        <h1 className="max-w-xl text-display text-foreground">Keep the recipes you actually want to make.</h1>
+        <p className="mt-7 max-w-xl text-base leading-7 text-forked-secondary-foreground md:text-lg md:leading-8">Forked is your ad-free home for weeknight staples, family favorites, and every recipe worth returning to.</p>
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Button asChild size="lg" className="min-h-11 w-full whitespace-normal sm:w-auto"><Link href="/recipes">Browse my recipes</Link></Button>
+          <Button asChild size="lg" variant="primary-outline" className="min-h-11 w-full whitespace-normal sm:w-auto"><Link href="/recipe/build">Find a recipe from my ingredients</Link></Button>
         </div>
       </div>
-    </section>
-  );
-};
+      <div className="relative mx-auto w-full max-w-xs sm:max-w-md lg:max-w-none">
+        <div className="absolute inset-x-8 bottom-5 top-12 rounded-[2rem] bg-forked-neutral" />
+        <Image src="/pantry-cook.png" alt="" aria-hidden="true" width={512} height={512} priority className="relative mx-auto w-full max-w-md drop-shadow-[0_24px_28px_rgb(53_65_54_/_0.16)]" />
+      </div>
+    </div>
+  </section>
+);
 
 export default Hero;

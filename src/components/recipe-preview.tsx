@@ -80,7 +80,7 @@ const RecipePreview = () => {
       classes="bg-forked-neutral"
     >
       <div className="flex items-center justify-center">
-        <Card className="group relative flex h-[600px] w-full flex-col justify-between overflow-hidden border border-border bg-forked-background transition-shadow">
+        <Card className="group relative flex min-h-[28rem] w-full flex-col justify-between overflow-hidden border border-border bg-forked-background transition-shadow sm:min-h-[36rem]">
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-white to-transparent"></div>
           <div className="overflow-hidden">
             <RecipeDetails

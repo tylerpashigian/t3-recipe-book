@@ -1,7 +1,6 @@
 import React from "react";
 
-import { BookOpen, Clock, Edit3, Heart, Share, Users } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/UI/card";
+import { BookOpen, Search, ShieldCheck } from "lucide-react";
 import { Section } from "~/components/UI/section";
 
 interface Feature {
@@ -13,69 +12,43 @@ interface Feature {
 const features: Feature[] = [
   {
     icon: BookOpen,
-    title: "Beautiful Recipe Views",
+    title: "Your recipes, kept together",
     description:
-      "Display your recipes with clean, modern layouts that make cooking a pleasure. Clear instructions and organized ingredients.",
+      "Keep ingredients, timings, and instructions in one calm collection.",
   },
   {
-    icon: Edit3,
-    title: "Easy Editing",
+    icon: Search,
+    title: "Cook from what you have",
     description:
-      "Switch between view and edit modes seamlessly. Add ingredients, modify instructions, and update details with intuitive forms.",
+      "Start with the ingredients already in your kitchen and find a recipe that fits.",
   },
   {
-    icon: Clock,
-    title: "Smart Organization",
+    icon: ShieldCheck,
+    title: "No ads, no noise",
     description:
-      "Track prep time, cook time, servings, and categories. Find exactly what you're looking for when you need it.",
-  },
-  {
-    icon: Share,
-    title: "Easy Sharing",
-    description:
-      "Share your favorite recipes with a simple link. No sign-up required for friends or family to view.",
-  },
-  {
-    icon: Users,
-    title: "Family Archive",
-    description:
-      "Collect recipes from different generations in one place. A digital home for your family’s culinary history.",
-  },
-  {
-    icon: Heart,
-    title: "Favorites",
-    description:
-      "Save recipes you love for quick access. Build your personal collection of go-to meals.",
+      "The recipe is the point. Nothing competes with the meal you are trying to make.",
   },
 ];
 
 const FeatureCard = ({ feature }: { feature: Feature }) => {
   const Icon = feature.icon;
   return (
-    <Card className="border border-border bg-forked-background shadow-lg transition-shadow hover:shadow-xl">
-      <CardHeader>
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-forked-accent/10">
-          <Icon className="h-6 w-6 text-forked-accent" />
-        </div>
-        <CardTitle className="text-foreground">{feature.title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-forked-secondary-foreground">
-          {feature.description}
-        </p>
-      </CardContent>
-    </Card>
+    <div className="border-t border-border pt-5">
+      <Icon className="h-5 w-5 text-forked-accent" aria-hidden="true" />
+      <h3 className="mt-5 text-lg font-semibold text-foreground">{feature.title}</h3>
+      <p className="mt-2 leading-7 text-forked-secondary-foreground">{feature.description}</p>
+    </div>
   );
 };
 
 const Features = () => {
   return (
     <Section
-      heading="Everything You Need"
-      subheading="Powerful features designed to make recipe management effortless and enjoyable"
+      heading="A collection that stays out of the way."
+      subheading="Keep what matters, cook from what you have, and leave the clutter behind."
       classes="bg-forked-neutral"
     >
-      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-10 md:grid-cols-3 md:gap-8">
         {features.map((feature, index) => (
           <FeatureCard key={index} feature={feature} />
         ))}

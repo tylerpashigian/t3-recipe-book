@@ -16,13 +16,13 @@ export const Section = ({
   children,
 }: SectionProps) => {
   return (
-    <section className={`px-6 py-20 ${classes}`}>
+    <section className={`px-6 py-16 sm:py-20 md:py-28 ${classes}`}>
       <div className="mx-auto max-w-6xl">
-        <div className="mb-16 text-center">
-          <h2 className="mb-4 text-3xl font-bold text-foreground md:text-4xl">
+        <div className="mb-12 text-center sm:mb-16">
+          <h2 className="mx-auto mb-5 max-w-3xl text-headline text-foreground">
             {heading}
           </h2>
-          <p className="mx-auto max-w-2xl text-xl text-forked-secondary-foreground">
+          <p className="mx-auto max-w-2xl text-base leading-7 text-forked-secondary-foreground sm:text-lg sm:leading-8">
             {subheading}
           </p>
         </div>
