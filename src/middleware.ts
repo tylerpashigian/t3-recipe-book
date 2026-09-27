@@ -1,24 +1,9 @@
-import { withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
+import NextAuth from "next-auth";
+import { sharedAuthConfig } from "~/server/auth/shared";
 
-export default withAuth(
-  function middleware(req) {
-    if (!req.nextauth.token) {
-      return NextResponse.redirect(new URL("/auth/login", req.url));
-    }
-
-    return NextResponse.next();
-  },
-  {
-    secret: process.env.NEXTAUTH_SECRET,
-    callbacks: {
-      authorized: ({ token }) => {
-        return !!token;
-      },
-    },
-  },
-);
+export const { auth: middleware } = NextAuth(sharedAuthConfig);
 
 export const config = {
-  matcher: ["/recipe/create"],
+  // Session renewal only. Pages and procedures enforce access independently.
+  matcher: ["/((?!api(?:/|$)|_next(?:/|$)|.*\\.[^/]+$).*)", "/api/trpc/:path*"],
 };

@@ -4,7 +4,8 @@ import { createHydrationHelpers } from "@trpc/react-query/rsc";
 import { headers } from "next/headers";
 import { cache } from "react";
 
-import { AppRouter, createCaller } from "~/server/api/root";
+import { type AppRouter, createCaller } from "~/server/api/root";
+import { prisma } from "~/server/db";
 import { createTRPCContext } from "~/server/api/trpc";
 import { createQueryClient } from "./query-client";
 
@@ -23,6 +24,14 @@ const createContext = cache(async () => {
 
 const getQueryClient = cache(createQueryClient);
 const caller = createCaller(createContext);
+
+// Static generation has no viewer. Use the same procedures without resolving
+// request headers or auth; protected procedures still reject this null session.
+export const anonymousApi = createCaller(() => ({
+  prisma,
+  session: null,
+  headers: new Headers({ "x-trpc-source": "ssg" }),
+}));
 
 export const { trpc: api, HydrateClient } = createHydrationHelpers<AppRouter>(
   caller,

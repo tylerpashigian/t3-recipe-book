@@ -9,7 +9,6 @@ import RecipeDetails, {
 import RecipeForm from "~/components/recipe/recipe-form";
 import { type FullRecipe, type RecipeFormModel } from "~/models/recipe";
 import { useRecipe } from "~/hooks/data/recipe";
-import { revalidateRecipePath } from "~/app/actions/recipe";
 import WithNavBar from "~/components/UI/with-nabvar";
 
 export default function RecipePage({
@@ -56,8 +55,6 @@ export default function RecipePage({
       loading: "Updating recipe",
       success: "Updated recipe",
     });
-
-    await revalidateRecipePath(recipeToUpdate.id);
   };
 
   const cancelHandler = () => setPageType(DetailsPageType.Details);
@@ -73,8 +70,6 @@ export default function RecipePage({
         success: "Updated recipe",
       },
     );
-
-    await revalidateRecipePath(recipe.recipe.id);
   };
 
   const deleteHandler = async () => {
@@ -104,6 +99,7 @@ export default function RecipePage({
               <>
                 {pageType === DetailsPageType.Details && (
                   <RecipeDetails
+                    isViewerStateReady={!!clientRecipe}
                     author={recipe.author}
                     recipe={recipe.recipe}
                     pageTypeHandler={pageTypeHandler}

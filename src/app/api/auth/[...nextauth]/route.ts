@@ -1,8 +1,3 @@
-import NextAuth from "next-auth";
+import { handlers } from "~/server/auth/config";
 
-import { authOptions } from "~/server/auth/config";
-
-// TODO: fix this casting to be the proper type
-const handler = NextAuth(authOptions) as (request: Request) => void;
-
-export { handler as GET, handler as POST };
+export const { GET, POST } = handlers;
