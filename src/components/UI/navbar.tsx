@@ -6,7 +6,7 @@
  */
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import { signIn, signOut } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { type Session } from "next-auth";
 
 import { FaUser } from "react-icons/fa6";
@@ -64,7 +64,7 @@ export const AuthShowcase = ({ setIsDrawerOpen, session }: Props) => {
             </Button>
             <Button
               size={"full"}
-              onClick={() => void signOut()}
+              onClick={() => void signOut({ redirectTo: "/" })}
               variant={"ghost"}
             >
               <>{"Sign out"}</>
@@ -102,7 +102,8 @@ export const AuthShowcase = ({ setIsDrawerOpen, session }: Props) => {
   );
 };
 
-const Navbar = ({ session }: { session: Session | null }) => {
+const Navbar = () => {
+  const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
