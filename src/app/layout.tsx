@@ -1,12 +1,10 @@
-"use client";
-
 import { Analytics } from "@vercel/analytics/next";
 
-import NavbarWrapper from "~/components/UI/navbar-wrapper";
+import Navbar from "~/components/UI/navbar";
+import AuthProvider from "~/components/auth-provider";
 import ToastWrapper from "./ToastWrapper";
 import { TRPCReactProvider } from "~/trpc/react";
 import "~/styles/globals.css";
-import { SessionProvider } from "next-auth/react";
 
 export default function RootLayout({
   // Layouts must accept a children prop.
@@ -21,14 +19,12 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body>
-        {/* TODO: is there a better way to give access to client auth context
-        without wrapping the whole app? */}
-        <SessionProvider>
-          <Analytics />
-          <NavbarWrapper />
+        <Analytics />
+        <AuthProvider>
+          <Navbar />
           <TRPCReactProvider>{children}</TRPCReactProvider>
-          <ToastWrapper />
-        </SessionProvider>
+        </AuthProvider>
+        <ToastWrapper />
       </body>
     </html>
   );

@@ -3,16 +3,9 @@
 import { useEffect, useState } from "react";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
-import {
-  ClientSafeProvider,
-  getProviders,
-  LiteralUnion,
-  signIn,
-} from "next-auth/react";
+import { getProviders, signIn } from "next-auth/react";
 import toast from "react-hot-toast";
-import { BuiltInProviderType } from "next-auth/providers";
 import { useForm } from "@tanstack/react-form";
 
 import Separator from "~/components/UI/separator";
@@ -21,9 +14,10 @@ import { Button } from "~/components/UI/button";
 import { Input } from "~/components/UI/input";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/UI/card";
 import { AuthFormModel } from "~/models/user";
+import { getLoginRedirectUrl } from "~/utils/login-redirect";
 
 const Login = () => {
-  const router = useRouter();
+  const getRedirectTo = () => getLoginRedirectUrl(window.location.href);
 
   const form = useForm<AuthFormModel>({
     defaultValues: {
@@ -31,14 +25,12 @@ const Login = () => {
       password: "",
     },
     onSubmit: ({ value }) => {
-      handleSubmit(value);
+      return handleSubmit(value);
     },
   });
 
-  const [providers, setProviders] = useState<
-    | Record<LiteralUnion<BuiltInProviderType, string>, ClientSafeProvider>
-    | never[]
-  >([]);
+  const [providers, setProviders] =
+    useState<Awaited<ReturnType<typeof getProviders>>>(null);
 
   useEffect(() => {
     const fetchProviders = async () => {
@@ -52,15 +44,15 @@ const Login = () => {
   }, []);
 
   const handleSubmit = (value: AuthFormModel) => {
-    signIn("credentials", {
+    return signIn("credentials", {
       username: value.username,
       password: value.password,
-      callbackUrl: "/",
+      redirectTo: getRedirectTo(),
       redirect: false,
     })
       .then((res) => {
         if (res?.ok && !res?.error) {
-          void router.push("/");
+          window.location.assign(getRedirectTo());
         } else {
           toast.error("Failed to login! Check your input and try again.");
           console.log("Failed", res);
@@ -68,10 +60,11 @@ const Login = () => {
       })
       .catch((error) => {
         console.error("Error during sign in:", error);
+        toast.error("Unable to sign in. Please try again.");
       });
   };
 
-  const has3rdPartyProviders = Object.values(providers).some(
+  const has3rdPartyProviders = Object.values(providers ?? {}).some(
     (provider) => provider.name !== "credentials",
   );
 
@@ -101,14 +94,16 @@ const Login = () => {
             <CardContent className="space-y-6">
               {has3rdPartyProviders ? (
                 <>
-                  {Object.values(providers).map((provider) => (
+                  {Object.values(providers ?? {}).map((provider) => (
                     <div key={provider.name} className="">
                       {provider.name !== "credentials" ? (
                         <Button
                           variant={"outline"}
                           size={"full"}
                           onClick={() =>
-                            void signIn(provider.id, { callbackUrl: "/" })
+                            void signIn(provider.id, {
+                              redirectTo: getRedirectTo(),
+                            })
                           }
                         >
                           Sign in with {provider.name}

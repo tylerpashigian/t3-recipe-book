@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
   createTRPCRouter,
@@ -104,61 +105,54 @@ export const recipesRouter = createTRPCRouter({
   getDetails: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      const recipe = await ctx.prisma.recipe.findFirst({
+      const recipe = await ctx.prisma.recipe.findUnique({
         where: { id: input.id },
         include: {
           ingredients: true,
           categories: true,
-          favorites: true,
+          _count: { select: { favorites: true } },
           instructionSections: {
             orderBy: { order: "asc" },
-            include: {
-              steps: {
-                orderBy: { order: "asc" },
-              },
-            },
+            include: { steps: { orderBy: { order: "asc" } } },
           },
         },
       });
-
       if (!recipe) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "No recipe found",
-        });
+        throw new TRPCError({ code: "NOT_FOUND", message: "No recipe found" });
       }
 
-      const user = await ctx.prisma.user.findFirst({
-        where: { id: recipe?.authorId },
+      const author = await ctx.prisma.user.findUnique({
+        where: { id: recipe.authorId },
+        select: { id: true, name: true, image: true, username: true },
       });
 
-      // Implementing to be typesafe. May want to allow undefined here for deleted users
-      if (!user) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "No author found for recipe",
-        });
-      }
+      const favorite = ctx.session?.user.id
+        ? await ctx.prisma.recipeFavorite.findUnique({
+            where: {
+              userId_recipeId: {
+                userId: ctx.session.user.id,
+                recipeId: input.id,
+              },
+            },
+            select: { recipeId: true },
+          })
+        : null;
 
-      const author = {
-        id: user.id,
-        name: user.name,
-        profilePicture: user.image,
-        username: user.username,
-      };
-
-      const recipeData = {
+      return FullRecipeSchema.parse({
         recipe: {
           ...recipe,
-          favoriteCount: recipe?.favorites.length,
-          isFavorited: !!recipe?.favorites.find(
-            (favorite) => favorite.userId === ctx.session?.user.id,
-          ),
+          favoriteCount: recipe._count.favorites,
+          isFavorited: !!favorite,
         },
-        author,
-      };
-
-      return FullRecipeSchema.parse(recipeData);
+        author: author
+          ? {
+              id: author.id,
+              name: author.name,
+              profilePicture: author.image,
+              username: author.username,
+            }
+          : undefined,
+      });
     }),
   create: protectedProcedure
     .input(RecipeSchemaRequest)
@@ -267,6 +261,7 @@ export const recipesRouter = createTRPCRouter({
         author,
       };
 
+      revalidatePath(`/recipe/${recipe.id}`);
       return FullRecipeSchema.parse(recipeData);
     }),
   update: protectedProcedure
@@ -446,6 +441,7 @@ export const recipesRouter = createTRPCRouter({
         });
       });
 
+      revalidatePath(`/recipe/${id}`);
       return RecipeSchemaResponse.parse({
         ...updatedRecipe,
         favoriteCount: updatedRecipe?.favorites.length,
@@ -462,6 +458,7 @@ export const recipesRouter = createTRPCRouter({
       await ctx.prisma.recipe.delete({
         where: { id: input.id },
       });
+      revalidatePath(`/recipe/${input.id}`);
       return;
     }),
   favorite: protectedProcedure

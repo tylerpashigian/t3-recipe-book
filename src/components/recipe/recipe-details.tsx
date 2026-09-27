@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
-
 import { useSession } from "next-auth/react";
+
 import { Calculator, Clock, Users } from "lucide-react";
 
 import LikeButton from "~/components/UI/like-button";
@@ -21,6 +21,7 @@ export enum DetailsPageType {
 }
 
 type Props = {
+  isViewerStateReady?: boolean;
   recipe: Recipe;
   author?: Author;
   pageTypeHandler: () => void;
@@ -29,14 +30,15 @@ type Props = {
 };
 
 const RecipeDetails = ({
+  isViewerStateReady = true,
   recipe,
   author,
   pageTypeHandler,
   onDelete,
   onFavorite,
 }: Props) => {
-  const { data: sessionData } = useSession();
-
+  const { data: session } = useSession();
+  const viewerId = session?.user.id;
   const displayName = author?.name ?? author?.username;
 
   const hasMetadata = recipe.prepTime ?? recipe.cookTime ?? recipe.servings;
@@ -79,7 +81,7 @@ const RecipeDetails = ({
                   {recipe.name}
                 </h1>
                 <div className="flex items-center gap-3">
-                  {!!sessionData && author && (
+                  {!!viewerId && author && isViewerStateReady && (
                     <LikeButton
                       isInitiallyLiked={recipe.isFavorited}
                       onClick={(favorited: boolean) =>
@@ -90,7 +92,7 @@ const RecipeDetails = ({
                   <span>{recipe.favoriteCount} Favorites(s)</span>
                 </div>
               </div>
-              {!!sessionData && sessionData?.user.id === author?.id ? (
+              {!!viewerId && viewerId === author?.id ? (
                 <div className="flex gap-2">
                   <Button onClick={pageTypeHandler}>Edit</Button>
                   <Button
