@@ -27,7 +27,7 @@ export const convertIngredientFormToIngredientRequest = (
 ) => ({
   ingredientId: ingredient.id ?? undefined,
   name: ingredient.name,
-  quantity: ingredient.quantity,
-  unit: ingredient.unit,
+  quantity: ingredient.quantity === 0 ? null : ingredient.quantity,
+  unit: ingredient.unit?.trim() ? ingredient.unit.trim() : null,
   recipeId: recipeId,
 });

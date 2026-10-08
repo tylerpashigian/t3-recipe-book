@@ -88,8 +88,9 @@ export const convertRecipeToRecipeForm = (
       data?.ingredients.map((ingredient) => ({
         id: ingredient.id,
         name: ingredient.name ?? "",
-        quantity: ingredient.quantity ?? 0,
-        unit: ingredient.unit ?? "",
+        quantity:
+          ingredient.quantity === 0 ? null : ingredient.quantity ?? null,
+        unit: ingredient.unit ?? null,
         recipeId: data.id,
       })) ?? [],
     servings: data?.servings,

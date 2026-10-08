@@ -1,4 +1,5 @@
 import React from "react";
+import pluralize from "pluralize";
 
 import {
   Popover,
@@ -6,7 +7,7 @@ import {
   PopoverTrigger,
 } from "~/components/UI/popover";
 import { type Ingredient } from "~/models/ingredient";
-import { formatFraction } from "~/utils/conversions";
+import { formatIngredientAmount } from "./utils/ingredient-display";
 import { toFirstLetterUppercase } from "~/utils/string";
 
 const ingredientStopWords = new Set([
@@ -28,6 +29,21 @@ type IngredientMatchEntry = {
   unit: string | null;
   normalizedName: string;
 };
+
+type IngredientLookup = {
+  exact: Map<string, IngredientMatchEntry[]>;
+  inflected: Map<string, IngredientMatchEntry[]>;
+};
+
+// Singularize each word so phrases such as "cherry tomatoes" also match.
+const singularizePhrase = (phrase: string) =>
+  phrase
+    .split(" ")
+    .map((token) => pluralize.singular(token))
+    .join(" ");
+
+const findIngredientMatches = (lookup: IngredientLookup, text: string) =>
+  lookup.exact.get(text) ?? lookup.inflected.get(singularizePhrase(text));
 
 type InstructionTokenMatch = {
   text: string;
@@ -54,12 +70,10 @@ const formatIngredientQuantity = (
   ingredient: { quantity: number | null; unit: string | null },
   scalingOption: number,
 ) => {
-  if (ingredient.quantity === null || ingredient.quantity === undefined) {
-    return "Quantity not listed";
-  }
-
-  const quantity = formatFraction(ingredient.quantity * scalingOption);
-  return ingredient.unit ? `${quantity} ${ingredient.unit}` : quantity;
+  return (
+    formatIngredientAmount(ingredient, scalingOption) ??
+    "Quantity not specified"
+  );
 };
 
 const isPhraseSeparator = (separator: string) =>
@@ -73,8 +87,14 @@ type Props = {
 export const useInstructions = ({ ingredients, scalingOption }: Props) => {
   const { ingredientPhraseLookup, ingredientTokenLookup, maxPhraseTokens } =
     React.useMemo(() => {
-      const phraseLookup = new Map<string, IngredientMatchEntry[]>();
-      const tokenLookup = new Map<string, IngredientMatchEntry[]>();
+      const phraseLookup: IngredientLookup = {
+        exact: new Map(),
+        inflected: new Map(),
+      };
+      const tokenLookup: IngredientLookup = {
+        exact: new Map(),
+        inflected: new Map(),
+      };
       let maxTokens = 1;
 
       const addLookupEntry = (
@@ -94,6 +114,15 @@ export const useInstructions = ({ ingredients, scalingOption }: Props) => {
         } else {
           map.set(key, [entry]);
         }
+      };
+
+      const addIngredientEntry = (
+        lookup: IngredientLookup,
+        key: string,
+        entry: IngredientMatchEntry,
+      ) => {
+        addLookupEntry(lookup.exact, key, entry);
+        addLookupEntry(lookup.inflected, singularizePhrase(key), entry);
       };
 
       ingredients.forEach((ingredient) => {
@@ -118,14 +147,14 @@ export const useInstructions = ({ ingredients, scalingOption }: Props) => {
 
         // Adding all individual tokens to allow for partial matches in instructions, ex. "olive oil" would match both "olive" and "oil"
         tokens.forEach((token) =>
-          addLookupEntry(tokenLookup, token, ingredientEntry),
+          addIngredientEntry(tokenLookup, token, ingredientEntry),
         );
 
         // Matches all consecutive token combinations to allow for multi-word ingredient matching in instructions
         // Ex. "extra virgin olive oil" would match "olive oil" in instructions, but "oil" alone would still match as well
         for (let start = 0; start < tokens.length; start += 1) {
           for (let end = start + 2; end <= tokens.length; end += 1) {
-            addLookupEntry(
+            addIngredientEntry(
               phraseLookup,
               tokens.slice(start, end).join(" "),
               ingredientEntry,
@@ -143,7 +172,10 @@ export const useInstructions = ({ ingredients, scalingOption }: Props) => {
 
   const renderInstructionContent = React.useCallback(
     (content: string) => {
-      if (!ingredientPhraseLookup.size && !ingredientTokenLookup.size) {
+      if (
+        !ingredientPhraseLookup.exact.size &&
+        !ingredientTokenLookup.exact.size
+      ) {
         return content;
       }
 
@@ -200,10 +232,16 @@ export const useInstructions = ({ ingredients, scalingOption }: Props) => {
             .slice(index, index + length)
             .map((match) => match.token)
             .join(" ");
-          const phraseMatch = ingredientPhraseLookup.get(phrase);
+          const phraseMatch = findIngredientMatches(
+            ingredientPhraseLookup,
+            phrase,
+          );
           if (phraseMatch) {
             const explicitMatches = phraseMatch.filter(
-              (ingredient) => ingredient.normalizedName === phrase,
+              (ingredient) =>
+                ingredient.normalizedName === phrase ||
+                singularizePhrase(ingredient.normalizedName) ===
+                  singularizePhrase(phrase),
             );
             matchedIngredients = explicitMatches.length
               ? explicitMatches
@@ -214,7 +252,10 @@ export const useInstructions = ({ ingredients, scalingOption }: Props) => {
         }
 
         if (!matchedIngredients && current) {
-          const tokenMatch = ingredientTokenLookup.get(current.token);
+          const tokenMatch = findIngredientMatches(
+            ingredientTokenLookup,
+            current.token,
+          );
           if (!tokenMatch) {
             parts.push(current.text);
             lastIndex = current.end;
