@@ -1,3 +1,1 @@
-UPDATE "IngredientInRecipe"
-SET "quantity" = NULL
-WHERE "quantity" = 0;
+-- This is an empty migration.
