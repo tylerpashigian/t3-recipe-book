@@ -9,7 +9,8 @@ export const formatIngredientAmount = (
   ingredient: IngredientAmount,
   scalingOption = 1,
 ) => {
-  if (ingredient.quantity === null || ingredient.quantity === undefined) {
+  // Older recipes use zero to represent an unspecified amount.
+  if (ingredient.quantity == null || ingredient.quantity === 0) {
     return null;
   }
 

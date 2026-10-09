@@ -6,6 +6,7 @@ import { Minus, Plus } from "lucide-react";
 import { type RecipeFormModel } from "~/models/recipe";
 import { type IngredientSummary } from "~/models/ingredient";
 import { formatFraction } from "~/utils/conversions";
+import { formatIngredientAmount } from "./utils/ingredient-display";
 import { toFirstLetterUppercase } from "../../utils/string";
 import { Badge } from "../UI/badge";
 import { Button } from "../UI/button";
@@ -118,14 +119,11 @@ const IngredientForm = ({
               </form.Field>
               <p>
                 <span className="font-bold">Quantity: </span>
-                {
-                  <span>
-                    {formatFraction(
-                      state.values.ingredients?.[i]?.quantity ?? 0,
-                    )}{" "}
-                    {state.values.ingredients?.[i]?.unit}
-                  </span>
-                }
+                <span>
+                  {formatIngredientAmount(
+                    state.values.ingredients?.[i] ?? {},
+                  ) ?? "Quantity not specified"}
+                </span>
               </p>
               <form.Field
                 key={`ingredients[${i}].quantity`}
@@ -157,7 +155,7 @@ const IngredientForm = ({
                       <Badge
                         variant={"destructive"}
                         className="m-1 hover:cursor-pointer"
-                        onClick={() => subfield.handleChange(0)}
+                        onClick={() => subfield.handleChange(null)}
                       >
                         <p>Clear</p>
                       </Badge>
@@ -170,7 +168,7 @@ const IngredientForm = ({
                           subfield.handleChange((prev) => {
                             const updatedValue =
                               (prev ?? 0) - (quantityIncrement ?? 0);
-                            return updatedValue >= 0 ? updatedValue : 0;
+                            return updatedValue > 0 ? updatedValue : null;
                           })
                         }
                         aria-label="Decrement"
@@ -201,6 +199,13 @@ const IngredientForm = ({
                   <div className="flex flex-col gap-2">
                     <label>Unit</label>
                     <div>
+                      <Badge
+                        variant={!subfield.state.value ? "default" : "outline"}
+                        className="m-1 hover:cursor-pointer"
+                        onClick={() => subfield.handleChange(null)}
+                      >
+                        <p>No unit</p>
+                      </Badge>
                       {ingredientUnits.map((unit, i) => (
                         <Badge
                           key={i}
