@@ -31,6 +31,7 @@ interface ComboboxProps {
   allowsCustomValue?: boolean;
   className?: string;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
@@ -43,6 +44,7 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
       isMultiSelect = true,
       allowsCustomValue = false,
       className,
+      disabled = false,
       ...props
     },
     ref,
@@ -105,7 +107,12 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
     }, [onChange, selected]);
 
     return (
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover
+        open={disabled ? false : open}
+        onOpenChange={(nextOpen) => {
+          if (!disabled) setOpen(nextOpen);
+        }}
+      >
         <PopoverTrigger asChild className={className}>
           <Button
             ref={ref}
@@ -114,8 +121,13 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
             aria-expanded={open}
             className={`group w-full justify-between ${
               selected.length > 1 ? "h-full" : "h-10"
+            } ${
+              disabled ? "disabled:cursor-default disabled:opacity-100" : ""
             }`}
-            onClick={() => setOpen(!open)}
+            disabled={disabled}
+            onClick={() => {
+              if (!disabled) setOpen(!open);
+            }}
           >
             <>
               <div className="flex flex-wrap items-center gap-1">
