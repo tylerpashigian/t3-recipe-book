@@ -18,10 +18,10 @@ import {
   type IngredientSummary,
   type IngredientFormModel,
 } from "~/models/ingredient";
-import {
-  type Recipe,
-  type Category,
-  type RecipeFormModel,
+import type {
+  Recipe,
+  Category,
+  RecipeFormModel,
   InstructionSectionFormModel,
 } from "~/models/recipe";
 import {
@@ -176,12 +176,21 @@ const RecipeForm = ({
       }}
       className="w-full space-y-2"
     >
-      <div className="mx-auto space-y-6 p-4 md:p-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-text-foreground text-3xl font-bold">
-            {isCreating ? "Create" : "Edit"} Recipe
-          </h1>
-          <div className="flex gap-2">
+      <div className="mx-auto max-w-6xl space-y-6">
+        <div className="flex flex-col gap-5 border-b border-border pb-7 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="mb-3 text-sm font-bold uppercase tracking-[0.16em] text-forked-accent">
+              Your recipe desk
+            </p>
+            <h1 className="text-headline text-foreground">
+              {isCreating ? "Add a recipe" : "Edit recipe"}
+            </h1>
+            <p className="mt-3 max-w-xl text-forked-secondary-foreground">
+              Start with the essentials, then add the details that make it
+              yours.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
             {!isCreating && (
               <Button variant={"secondary"} onClick={onCancel}>
                 <>Cancel</>
@@ -220,11 +229,16 @@ const RecipeForm = ({
 
         <Separator />
 
-        <Card className="border border-border bg-forked-background">
+        <Card className="border-border bg-forked-background">
           <CardHeader>
-            <CardTitle className="text-text-foreground">
-              Basic Information
-            </CardTitle>
+            <p className="text-sm font-bold uppercase tracking-[0.14em] text-forked-accent">
+              01 · Start here
+            </p>
+            <CardTitle className="text-foreground">The essentials</CardTitle>
+            <p className="text-sm leading-relaxed text-forked-secondary-foreground">
+              Give this recipe a name, a little context, and the timing people
+              need.
+            </p>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
@@ -243,7 +257,7 @@ const RecipeForm = ({
                     <Input
                       type="text"
                       id={field.name}
-                      className="mt-2 w-full px-4 py-3 text-black"
+                      className="mt-2 w-full px-4 py-3 text-foreground"
                       name={field.name}
                       value={field.state.value}
                       onBlur={field.handleBlur}
@@ -288,7 +302,7 @@ const RecipeForm = ({
                     <Textarea
                       id={field.name}
                       name={field.name}
-                      className="mt-2 w-full px-4 py-3 text-black"
+                      className="mt-2 w-full px-4 py-3 text-foreground"
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
                     />
@@ -310,7 +324,7 @@ const RecipeForm = ({
                         id={field.name}
                         name={field.name}
                         placeholder="Servings"
-                        className="mt-2 w-full px-4 py-3 text-black"
+                        className="mt-2 w-full px-4 py-3 text-foreground"
                         value={field.state.value ?? ""}
                         onChange={(e) => {
                           const newValue =
@@ -336,7 +350,7 @@ const RecipeForm = ({
                         id={field.name}
                         name={field.name}
                         placeholder="Prep time"
-                        className="mt-2 w-full px-4 py-3 text-black"
+                        className="mt-2 w-full px-4 py-3 text-foreground"
                         value={field.state.value ?? ""}
                         onChange={(e) => {
                           const newValue =
@@ -362,7 +376,7 @@ const RecipeForm = ({
                         id={field.name}
                         name={field.name}
                         placeholder="Cook time"
-                        className="mt-2 w-full px-4 py-3 text-black"
+                        className="mt-2 w-full px-4 py-3 text-foreground"
                         value={field.state.value ?? ""}
                         onChange={(e) => {
                           const newValue =
@@ -380,111 +394,125 @@ const RecipeForm = ({
           </CardContent>
         </Card>
 
-        <Card className="border border-border bg-forked-background">
-          <CardHeader>
-            <CardTitle className="text-text-foreground">
-              Nutrition Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex w-full flex-col gap-4 md:flex-row md:gap-3">
-            <div className="flex-1">
-              <form.Field name="calories">
-                {(field) => (
-                  <div className="flex-1">
-                    <label htmlFor={field.name} className="font-bold">
-                      Calories (kcal)
-                    </label>
-                    <Input
-                      type="number"
-                      id={field.name}
-                      name={field.name}
-                      placeholder="Calories (kcal)"
-                      className="mt-2 w-full px-4 py-3 text-black"
-                      value={field.state.value ?? ""}
-                      onChange={(e) => {
-                        const newValue =
-                          e.target.value === "" ? null : Number(e.target.value);
-                        field.handleChange(newValue);
-                      }}
-                    />
-                  </div>
-                )}
-              </form.Field>
-            </div>
-            <div className="flex-1">
-              <form.Field name="protein">
-                {(field) => (
-                  <div className="flex-1">
-                    <label htmlFor={field.name} className="font-bold">
-                      Protein (g)
-                    </label>
-                    <Input
-                      type="number"
-                      id={field.name}
-                      name={field.name}
-                      placeholder="Protein (g)"
-                      className="mt-2 w-full px-4 py-3 text-black"
-                      value={field.state.value ?? ""}
-                      onChange={(e) => {
-                        const newValue =
-                          e.target.value === "" ? null : Number(e.target.value);
-                        field.handleChange(newValue);
-                      }}
-                    />
-                  </div>
-                )}
-              </form.Field>
-            </div>
-            <div className="flex-1">
-              <form.Field name="carbs">
-                {(field) => (
-                  <div className="flex-1">
-                    <label htmlFor={field.name} className="font-bold">
-                      Carbs (g)
-                    </label>
-                    <Input
-                      type="number"
-                      id={field.name}
-                      name={field.name}
-                      placeholder="Carbs (g)"
-                      className="mt-2 w-full px-4 py-3 text-black"
-                      value={field.state.value ?? ""}
-                      onChange={(e) => {
-                        const newValue =
-                          e.target.value === "" ? null : Number(e.target.value);
-                        field.handleChange(newValue);
-                      }}
-                    />
-                  </div>
-                )}
-              </form.Field>
-            </div>
-            <div className="flex-1">
-              <form.Field name="fat">
-                {(field) => (
-                  <div className="flex-1">
-                    <label htmlFor={field.name} className="font-bold">
-                      Fat (g)
-                    </label>
-                    <Input
-                      type="number"
-                      id={field.name}
-                      name={field.name}
-                      placeholder="Fat (g)"
-                      className="mt-2 w-full px-4 py-3 text-black"
-                      value={field.state.value ?? ""}
-                      onChange={(e) => {
-                        const newValue =
-                          e.target.value === "" ? null : Number(e.target.value);
-                        field.handleChange(newValue);
-                      }}
-                    />
-                  </div>
-                )}
-              </form.Field>
-            </div>{" "}
-          </CardContent>
-        </Card>
+        <details className="group rounded-lg border border-border bg-forked-background">
+          <summary className="min-h-14 flex cursor-pointer list-none items-center justify-between gap-4 px-6 font-semibold text-foreground marker:hidden [&::-webkit-details-marker]:hidden">
+            Nutrition details
+            <span className="text-sm font-normal text-forked-secondary-foreground">
+              Optional
+            </span>
+          </summary>
+          <Card className="rounded-t-none border-x-0 border-b-0 border-t border-border bg-transparent shadow-none">
+            <CardHeader className="sr-only">
+              <CardTitle>Nutrition information</CardTitle>
+            </CardHeader>
+            <CardContent className="flex w-full flex-col gap-4 md:flex-row md:gap-3">
+              <div className="flex-1">
+                <form.Field name="calories">
+                  {(field) => (
+                    <div className="flex-1">
+                      <label htmlFor={field.name} className="font-bold">
+                        Calories (kcal)
+                      </label>
+                      <Input
+                        type="number"
+                        id={field.name}
+                        name={field.name}
+                        placeholder="Calories (kcal)"
+                        className="mt-2 w-full px-4 py-3 text-foreground"
+                        value={field.state.value ?? ""}
+                        onChange={(e) => {
+                          const newValue =
+                            e.target.value === ""
+                              ? null
+                              : Number(e.target.value);
+                          field.handleChange(newValue);
+                        }}
+                      />
+                    </div>
+                  )}
+                </form.Field>
+              </div>
+              <div className="flex-1">
+                <form.Field name="protein">
+                  {(field) => (
+                    <div className="flex-1">
+                      <label htmlFor={field.name} className="font-bold">
+                        Protein (g)
+                      </label>
+                      <Input
+                        type="number"
+                        id={field.name}
+                        name={field.name}
+                        placeholder="Protein (g)"
+                        className="mt-2 w-full px-4 py-3 text-foreground"
+                        value={field.state.value ?? ""}
+                        onChange={(e) => {
+                          const newValue =
+                            e.target.value === ""
+                              ? null
+                              : Number(e.target.value);
+                          field.handleChange(newValue);
+                        }}
+                      />
+                    </div>
+                  )}
+                </form.Field>
+              </div>
+              <div className="flex-1">
+                <form.Field name="carbs">
+                  {(field) => (
+                    <div className="flex-1">
+                      <label htmlFor={field.name} className="font-bold">
+                        Carbs (g)
+                      </label>
+                      <Input
+                        type="number"
+                        id={field.name}
+                        name={field.name}
+                        placeholder="Carbs (g)"
+                        className="mt-2 w-full px-4 py-3 text-foreground"
+                        value={field.state.value ?? ""}
+                        onChange={(e) => {
+                          const newValue =
+                            e.target.value === ""
+                              ? null
+                              : Number(e.target.value);
+                          field.handleChange(newValue);
+                        }}
+                      />
+                    </div>
+                  )}
+                </form.Field>
+              </div>
+              <div className="flex-1">
+                <form.Field name="fat">
+                  {(field) => (
+                    <div className="flex-1">
+                      <label htmlFor={field.name} className="font-bold">
+                        Fat (g)
+                      </label>
+                      <Input
+                        type="number"
+                        id={field.name}
+                        name={field.name}
+                        placeholder="Fat (g)"
+                        className="mt-2 w-full px-4 py-3 text-foreground"
+                        value={field.state.value ?? ""}
+                        onChange={(e) => {
+                          const newValue =
+                            e.target.value === ""
+                              ? null
+                              : Number(e.target.value);
+                          field.handleChange(newValue);
+                        }}
+                      />
+                    </div>
+                  )}
+                </form.Field>
+              </div>{" "}
+            </CardContent>
+          </Card>
+        </details>
 
         {/* Main Content Grid */}
         <div className="grid gap-6 lg:grid-cols-3">
@@ -494,10 +522,10 @@ const RecipeForm = ({
               {(field) => {
                 return (
                   <>
-                    <Card className="border border-border bg-forked-background">
+                    <Card className="border-border bg-forked-background">
                       <CardHeader className="flex w-full flex-row items-center justify-between">
                         <div className="flex w-full items-center justify-between">
-                          <CardTitle className="text-text-foreground text-xl">
+                          <CardTitle className="text-xl text-foreground">
                             Ingredients
                           </CardTitle>
                           {addIngredientButton(field)}
@@ -589,7 +617,7 @@ const RecipeForm = ({
             >
               {(field) => (
                 <>
-                  <Card className="border border-border bg-forked-background">
+                  <Card className="border-border bg-forked-background">
                     <CardHeader className="flex flex-row items-center justify-between">
                       <CardTitle className="text-xl text-foreground">
                         Instructions
@@ -627,7 +655,7 @@ const RecipeForm = ({
                                       type="text"
                                       id={sectionNameField.name}
                                       name={sectionNameField.name}
-                                      className="w-full px-4 py-3 text-black"
+                                      className="w-full px-4 py-3 text-foreground"
                                       value={sectionNameField.state.value}
                                       onBlur={sectionNameField.handleBlur}
                                       onChange={(e) =>
@@ -739,7 +767,7 @@ const RecipeForm = ({
                                                   <Textarea
                                                     name={`instructionSections[${sectionIndex}].steps[${stepIndex}].content`}
                                                     id={`instructionSections[${sectionIndex}].steps[${stepIndex}].content`}
-                                                    className={`m-0 w-full px-4 py-3 text-black ${
+                                                    className={`m-0 w-full px-4 py-3 text-foreground ${
                                                       stepField.state.meta
                                                         .errors.length
                                                         ? "border-red-400"
