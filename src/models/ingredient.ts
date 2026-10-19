@@ -3,6 +3,7 @@ export type Ingredient = {
   name: string;
   quantity?: number | null;
   unit?: string | null;
+  notes?: string | null;
   recipeId: string;
 };
 
@@ -16,5 +17,6 @@ export type IngredientFormModel = {
   name: string;
   quantity: number | null;
   unit: string | null;
+  notes: string | null;
   recipeId?: string | null;
 };

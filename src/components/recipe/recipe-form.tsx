@@ -114,6 +114,7 @@ const RecipeForm = ({
             name: "",
             quantity: null,
             unit: null,
+            notes: null,
           });
           // I need to get the new index in the ingredients array here to set
           // the ingredientIndex globally which triggers the modal opening
@@ -139,6 +140,8 @@ const RecipeForm = ({
       // form.setFieldValue(`ingredients[${index}]`, tempValue);
       updatedIngredients[index] = tempIngredient;
       form.setFieldValue("ingredients", updatedIngredients);
+      // Restoring the array does not rerun nested field validators.
+      void form.validateField(`ingredients[${index}].unit`, "change");
       setIsCreatingIngredient(false);
     }
   };
@@ -394,125 +397,114 @@ const RecipeForm = ({
           </CardContent>
         </Card>
 
-        <details className="group rounded-lg border border-border bg-forked-background">
-          <summary className="min-h-14 flex cursor-pointer list-none items-center justify-between gap-4 px-6 font-semibold text-foreground marker:hidden [&::-webkit-details-marker]:hidden">
-            Nutrition details
-            <span className="text-sm font-normal text-forked-secondary-foreground">
+        <Card className="border-border bg-forked-background">
+          <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0">
+            <CardTitle className="text-base font-semibold text-foreground">
+              Nutrition details
+            </CardTitle>
+            <span className="text-sm text-forked-secondary-foreground">
               Optional
             </span>
-          </summary>
-          <Card className="rounded-t-none border-x-0 border-b-0 border-t border-border bg-transparent shadow-none">
-            <CardHeader className="sr-only">
-              <CardTitle>Nutrition information</CardTitle>
-            </CardHeader>
-            <CardContent className="flex w-full flex-col gap-4 md:flex-row md:gap-3">
-              <div className="flex-1">
-                <form.Field name="calories">
-                  {(field) => (
-                    <div className="flex-1">
-                      <label htmlFor={field.name} className="font-bold">
-                        Calories (kcal)
-                      </label>
-                      <Input
-                        type="number"
-                        id={field.name}
-                        name={field.name}
-                        placeholder="Calories (kcal)"
-                        className="mt-2 w-full px-4 py-3 text-foreground"
-                        value={field.state.value ?? ""}
-                        onChange={(e) => {
-                          const newValue =
-                            e.target.value === ""
-                              ? null
-                              : Number(e.target.value);
-                          field.handleChange(newValue);
-                        }}
-                      />
-                    </div>
-                  )}
-                </form.Field>
-              </div>
-              <div className="flex-1">
-                <form.Field name="protein">
-                  {(field) => (
-                    <div className="flex-1">
-                      <label htmlFor={field.name} className="font-bold">
-                        Protein (g)
-                      </label>
-                      <Input
-                        type="number"
-                        id={field.name}
-                        name={field.name}
-                        placeholder="Protein (g)"
-                        className="mt-2 w-full px-4 py-3 text-foreground"
-                        value={field.state.value ?? ""}
-                        onChange={(e) => {
-                          const newValue =
-                            e.target.value === ""
-                              ? null
-                              : Number(e.target.value);
-                          field.handleChange(newValue);
-                        }}
-                      />
-                    </div>
-                  )}
-                </form.Field>
-              </div>
-              <div className="flex-1">
-                <form.Field name="carbs">
-                  {(field) => (
-                    <div className="flex-1">
-                      <label htmlFor={field.name} className="font-bold">
-                        Carbs (g)
-                      </label>
-                      <Input
-                        type="number"
-                        id={field.name}
-                        name={field.name}
-                        placeholder="Carbs (g)"
-                        className="mt-2 w-full px-4 py-3 text-foreground"
-                        value={field.state.value ?? ""}
-                        onChange={(e) => {
-                          const newValue =
-                            e.target.value === ""
-                              ? null
-                              : Number(e.target.value);
-                          field.handleChange(newValue);
-                        }}
-                      />
-                    </div>
-                  )}
-                </form.Field>
-              </div>
-              <div className="flex-1">
-                <form.Field name="fat">
-                  {(field) => (
-                    <div className="flex-1">
-                      <label htmlFor={field.name} className="font-bold">
-                        Fat (g)
-                      </label>
-                      <Input
-                        type="number"
-                        id={field.name}
-                        name={field.name}
-                        placeholder="Fat (g)"
-                        className="mt-2 w-full px-4 py-3 text-foreground"
-                        value={field.state.value ?? ""}
-                        onChange={(e) => {
-                          const newValue =
-                            e.target.value === ""
-                              ? null
-                              : Number(e.target.value);
-                          field.handleChange(newValue);
-                        }}
-                      />
-                    </div>
-                  )}
-                </form.Field>
-              </div>{" "}
-            </CardContent>
-          </Card>
-        </details>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="min-w-0">
+              <form.Field name="calories">
+                {(field) => (
+                  <div className="min-w-0">
+                    <label htmlFor={field.name} className="font-bold">
+                      Calories (kcal)
+                    </label>
+                    <Input
+                      type="number"
+                      id={field.name}
+                      name={field.name}
+                      placeholder="Calories (kcal)"
+                      className="mt-2 w-full px-4 py-3 text-foreground"
+                      value={field.state.value ?? ""}
+                      onChange={(e) => {
+                        const newValue =
+                          e.target.value === "" ? null : Number(e.target.value);
+                        field.handleChange(newValue);
+                      }}
+                    />
+                  </div>
+                )}
+              </form.Field>
+            </div>
+            <div className="min-w-0">
+              <form.Field name="protein">
+                {(field) => (
+                  <div className="min-w-0">
+                    <label htmlFor={field.name} className="font-bold">
+                      Protein (g)
+                    </label>
+                    <Input
+                      type="number"
+                      id={field.name}
+                      name={field.name}
+                      placeholder="Protein (g)"
+                      className="mt-2 w-full px-4 py-3 text-foreground"
+                      value={field.state.value ?? ""}
+                      onChange={(e) => {
+                        const newValue =
+                          e.target.value === "" ? null : Number(e.target.value);
+                        field.handleChange(newValue);
+                      }}
+                    />
+                  </div>
+                )}
+              </form.Field>
+            </div>
+            <div className="min-w-0">
+              <form.Field name="carbs">
+                {(field) => (
+                  <div className="min-w-0">
+                    <label htmlFor={field.name} className="font-bold">
+                      Carbs (g)
+                    </label>
+                    <Input
+                      type="number"
+                      id={field.name}
+                      name={field.name}
+                      placeholder="Carbs (g)"
+                      className="mt-2 w-full px-4 py-3 text-foreground"
+                      value={field.state.value ?? ""}
+                      onChange={(e) => {
+                        const newValue =
+                          e.target.value === "" ? null : Number(e.target.value);
+                        field.handleChange(newValue);
+                      }}
+                    />
+                  </div>
+                )}
+              </form.Field>
+            </div>
+            <div className="min-w-0">
+              <form.Field name="fat">
+                {(field) => (
+                  <div className="min-w-0">
+                    <label htmlFor={field.name} className="font-bold">
+                      Fat (g)
+                    </label>
+                    <Input
+                      type="number"
+                      id={field.name}
+                      name={field.name}
+                      placeholder="Fat (g)"
+                      className="mt-2 w-full px-4 py-3 text-foreground"
+                      value={field.state.value ?? ""}
+                      onChange={(e) => {
+                        const newValue =
+                          e.target.value === "" ? null : Number(e.target.value);
+                        field.handleChange(newValue);
+                      }}
+                    />
+                  </div>
+                )}
+              </form.Field>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Main Content Grid */}
         <div className="grid gap-6 lg:grid-cols-3">
@@ -545,13 +537,18 @@ const RecipeForm = ({
                                   className="flex items-center justify-between"
                                   key={`ingredients[${i}].name`}
                                 >
-                                  <p className="text-sm leading-relaxed text-forked-secondary-foreground">
+                                  <p className="min-w-0 break-words text-sm leading-relaxed text-forked-secondary-foreground">
                                     {name}
                                     {quantityWithUnit
                                       ? ` (${quantityWithUnit})`
                                       : null}
+                                    {ingredient.notes?.trim() ? (
+                                      <span className="block whitespace-pre-wrap text-xs text-muted-foreground">
+                                        {ingredient.notes}
+                                      </span>
+                                    ) : null}
                                   </p>
-                                  <div className="flex gap-2 hover:cursor-pointer">
+                                  <div className="flex shrink-0 gap-2 hover:cursor-pointer">
                                     <Button
                                       variant={"ghost"}
                                       onClick={(e) => {

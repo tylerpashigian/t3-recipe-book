@@ -18,6 +18,7 @@ export const convertIngredientSchemaToIngredient = (
   name: ingredient.name,
   quantity: ingredient.quantity,
   unit: ingredient.unit,
+  notes: ingredient.notes ?? null,
   recipeId: ingredient.recipeId,
 });
 
@@ -29,5 +30,6 @@ export const convertIngredientFormToIngredientRequest = (
   name: ingredient.name,
   quantity: ingredient.quantity === 0 ? null : ingredient.quantity,
   unit: ingredient.unit?.trim() ? ingredient.unit.trim() : null,
+  notes: ingredient.notes?.trim() ? ingredient.notes.trim() : null,
   recipeId: recipeId,
 });

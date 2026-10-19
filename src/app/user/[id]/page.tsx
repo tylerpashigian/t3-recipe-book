@@ -34,7 +34,7 @@ const Profile = async ({ params }: Props) => {
 
   return (
     <WithNavBar classes="bg-forked-neutral">
-      <main className="mx-auto max-w-6xl px-6 py-8">
+      <main className="mx-auto max-w-6xl p-4 py-6 md:px-6 md:py-8">
         <Card className="mb-8 border border-border bg-forked-background">
           <CardContent className="p-8">
             <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">

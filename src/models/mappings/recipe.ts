@@ -91,6 +91,7 @@ export const convertRecipeToRecipeForm = (
         quantity:
           ingredient.quantity === 0 ? null : ingredient.quantity ?? null,
         unit: ingredient.unit ?? null,
+        notes: ingredient.notes ?? null,
         recipeId: data.id,
       })) ?? [],
     servings: data?.servings,

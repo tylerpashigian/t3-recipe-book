@@ -168,19 +168,22 @@ export const recipesRouter = createTRPCRouter({
             name: input.name,
             description: input.description ?? "",
             ingredients: {
-              create: input.ingredients?.map(({ name, quantity, unit }) => {
-                return {
-                  name,
-                  quantity,
-                  unit,
-                  ingredient: {
-                    connectOrCreate: {
-                      where: { name: name.toLowerCase() },
-                      create: { name: name.toLowerCase() },
+              create: input.ingredients?.map(
+                ({ name, quantity, unit, notes }) => {
+                  return {
+                    name,
+                    quantity,
+                    unit,
+                    notes,
+                    ingredient: {
+                      connectOrCreate: {
+                        where: { name: name.toLowerCase() },
+                        create: { name: name.toLowerCase() },
+                      },
                     },
-                  },
-                };
-              }),
+                  };
+                },
+              ),
             },
             categories: {
               connectOrCreate: input.categories?.map(({ id, name }) => {
@@ -307,10 +310,11 @@ export const recipesRouter = createTRPCRouter({
               },
               create: input.ingredients
                 ?.filter((ingredient) => !ingredient.ingredientId)
-                .map(({ name, unit, quantity }) => ({
+                .map(({ name, unit, quantity, notes }) => ({
                   name,
                   unit,
                   quantity,
+                  notes,
                   ingredient: {
                     connectOrCreate: {
                       where: { name: name.toLowerCase() },
@@ -320,9 +324,9 @@ export const recipesRouter = createTRPCRouter({
                 })),
               updateMany: input.ingredients
                 ?.filter((ingredient) => ingredient.ingredientId)
-                .map(({ ingredientId, name, quantity, unit }) => ({
+                .map(({ ingredientId, name, quantity, unit, notes }) => ({
                   where: { ingredientId, recipeId: id },
-                  data: { name, quantity, unit },
+                  data: { name, quantity, unit, notes },
                 })),
             },
             categories: {
