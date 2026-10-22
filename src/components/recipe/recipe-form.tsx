@@ -175,6 +175,8 @@ const RecipeForm = ({
       onSubmit={(event) => {
         event.preventDefault();
         event.stopPropagation();
+        if (isOpen) return;
+
         void form.handleSubmit();
       }}
       className="w-full space-y-2"
@@ -219,7 +221,7 @@ const RecipeForm = ({
                       isSubmitting ||
                       !isTouched ||
                       !isDirty ||
-                      !!ingredientIndex
+                      isOpen
                     }
                   >
                     <>{isLoading ? "Loading" : buttonText}</>
