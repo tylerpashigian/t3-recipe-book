@@ -3,6 +3,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogPortal,
+  DialogTitle,
 } from "~/components/UI/dialog";
 import {
   Drawer,
@@ -37,11 +38,13 @@ const IngredientPopover = ({
     <Dialog open={isOpen} onOpenChange={onOpenChange} modal={true}>
       <DialogPortal>
         <DialogContent className="border-none bg-transparent p-0 duration-0">
-          <div className="flex flex-col gap-2 rounded-lg border bg-white p-8 shadow-lg dark:bg-slate-950 sm:rounded-lg">
+          <div className="flex max-h-[calc(100dvh-2rem)] flex-col gap-2 overflow-y-auto rounded-lg border bg-white p-8 shadow-lg dark:bg-slate-950 sm:rounded-lg">
             <DialogDescription className="hidden">
               Ingredient modal
             </DialogDescription>
-            <p>Edit Ingredient</p>
+            <DialogTitle className="text-base font-normal">
+              Edit Ingredient
+            </DialogTitle>
             {children}
           </div>
         </DialogContent>
@@ -49,14 +52,16 @@ const IngredientPopover = ({
     </Dialog>
   ) : (
     <Drawer open={isOpen} onOpenChange={onOpenChange}>
-      <DrawerContent>
-        <DrawerHeader>
+      <DrawerContent className="max-h-[calc(100dvh-1rem)]">
+        <DrawerHeader className="shrink-0">
           <DrawerTitle>Edit Ingredient</DrawerTitle>
           <DrawerDescription className="hidden">
             Ingredient Drawer
           </DrawerDescription>
         </DrawerHeader>
-        <div className="p-4">{children}</div>
+        <div className="min-h-0 overflow-y-auto overscroll-contain p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          {children}
+        </div>
       </DrawerContent>
     </Drawer>
   );

@@ -4,6 +4,12 @@ const BaseIngredientSchema = z.object({
   name: z.string(),
   quantity: z.number().nullable(),
   unit: z.string().nullable(),
+  notes: z
+    .string()
+    .trim()
+    .nullable()
+    .optional()
+    .transform((value) => (value ? value : null)),
 });
 
 export const IngredientSchemaRequest = BaseIngredientSchema.extend({

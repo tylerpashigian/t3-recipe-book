@@ -93,7 +93,7 @@ export default function RecipePage({
   return (
     <WithNavBar classes="bg-forked-neutral">
       <main className="flex w-full flex-col">
-        <div className="mx-auto w-full max-w-6xl p-4 md:px-6 md:py-8">
+        <div className="mx-auto w-full max-w-6xl p-4 py-6 md:px-6 md:py-8">
           <div className="flex w-full flex-col items-center gap-2">
             {recipe && (
               <>

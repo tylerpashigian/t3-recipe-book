@@ -80,7 +80,7 @@ const Recipes = () => {
                   placeholder="Filter by category"
                 />
               </div>
-              <div className="min-h-7 flex items-center justify-between gap-3 pt-1 text-sm">
+              <div className="min-h-7 flex items-center justify-between gap-3 pt-3 text-sm">
                 <p className="text-forked-secondary-foreground">
                   {resultLabel}
                 </p>

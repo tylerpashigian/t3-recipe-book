@@ -30,7 +30,7 @@ const RecipeTable = ({
       ))}
     </div>
   ) : (
-    <div className="min-h-72 flex w-full flex-col items-center justify-center rounded-lg border border-dashed border-border bg-forked-background px-6 text-center">
+    <div className="min-h-72 flex w-full flex-col items-center justify-center rounded-lg border border-dashed border-border bg-forked-background p-6 text-center">
       <p className="font-display text-2xl text-foreground">
         Nothing matches yet.
       </p>

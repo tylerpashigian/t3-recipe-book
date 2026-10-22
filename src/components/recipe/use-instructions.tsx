@@ -27,6 +27,7 @@ type IngredientMatchEntry = {
   name: string;
   quantity: number | null;
   unit: string | null;
+  notes: string | null;
   normalizedName: string;
 };
 
@@ -65,16 +66,6 @@ const tokenizeIngredientName = (value: string) =>
     .filter(
       (token) => token && token.length >= 2 && !ingredientStopWords.has(token),
     );
-
-const formatIngredientQuantity = (
-  ingredient: { quantity: number | null; unit: string | null },
-  scalingOption: number,
-) => {
-  return (
-    formatIngredientAmount(ingredient, scalingOption) ??
-    "Quantity not specified"
-  );
-};
 
 const isPhraseSeparator = (separator: string) =>
   separator.length > 0 && /^[ \t]+$/.test(separator);
@@ -140,6 +131,7 @@ export const useInstructions = ({ ingredients, scalingOption }: Props) => {
           name,
           quantity: ingredient.quantity ?? null,
           unit: ingredient.unit ?? null,
+          notes: ingredient.notes?.trim() ? ingredient.notes.trim() : null,
           normalizedName: tokens.join(" "),
         };
 
@@ -269,24 +261,6 @@ export const useInstructions = ({ ingredients, scalingOption }: Props) => {
         const endIndex = matches[index + matchedLength - 1]?.end;
         const matchedText = content.slice(startIndex, endIndex);
 
-        const hasMultipleMatches = (matchedIngredients?.length ?? 0) > 1;
-        const tooltipText = matchedIngredients?.length
-          ? matchedIngredients
-              .map((ingredient) => {
-                const quantityText = formatIngredientQuantity(
-                  ingredient,
-                  scalingOption,
-                );
-                if (hasMultipleMatches) {
-                  return `${toFirstLetterUppercase(
-                    ingredient.name,
-                  )}: ${quantityText}`;
-                }
-                return quantityText;
-              })
-              .join("\n")
-          : "";
-
         parts.push(
           <Popover key={`${startIndex}-${matchedText}`}>
             <PopoverTrigger asChild>
@@ -300,9 +274,38 @@ export const useInstructions = ({ ingredients, scalingOption }: Props) => {
             <PopoverContent
               side="top"
               align="center"
-              className="max-w-64 w-auto whitespace-pre-line p-2 text-xs leading-relaxed"
+              className="max-w-64 w-auto break-words p-3 text-sm leading-relaxed"
             >
-              {tooltipText}
+              <ul className="space-y-3">
+                {matchedIngredients?.map((ingredient) => {
+                  const quantity = formatIngredientAmount(
+                    ingredient,
+                    scalingOption,
+                  );
+                  return (
+                    <li key={ingredient.normalizedName} className="space-y-0.5">
+                      <p>
+                        <span className="font-medium text-foreground">
+                          {toFirstLetterUppercase(ingredient.name)}
+                        </span>
+                        {quantity ? (
+                          <span className="font-normal"> · {quantity}</span>
+                        ) : null}
+                      </p>
+                      {!quantity ? (
+                        <p className="text-xs text-muted-foreground">
+                          Quantity not specified
+                        </p>
+                      ) : null}
+                      {ingredient.notes ? (
+                        <p className="whitespace-pre-wrap text-xs text-muted-foreground">
+                          {ingredient.notes}
+                        </p>
+                      ) : null}
+                    </li>
+                  );
+                })}
+              </ul>
             </PopoverContent>
           </Popover>,
         );

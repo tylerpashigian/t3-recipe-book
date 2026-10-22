@@ -114,6 +114,7 @@ model IngredientInRecipe {
   name         String
   quantity     Float?
   unit         String?
+  notes        String?
 
   ingredient Ingredient @relation(fields: [ingredientId], references: [id])
   recipe     Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)

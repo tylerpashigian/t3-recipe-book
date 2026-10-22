@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 
 import { type useForm } from "@tanstack/react-form";
 import { Minus, Plus } from "lucide-react";
@@ -11,6 +11,8 @@ import { toFirstLetterUppercase } from "../../utils/string";
 import { Badge } from "../UI/badge";
 import { Button } from "../UI/button";
 import { Combobox } from "../UI/combobox";
+import { Input } from "../UI/input";
+import IngredientUnitField from "./ingredient-unit-field";
 
 const IngredientForm = ({
   i,
@@ -24,6 +26,9 @@ const IngredientForm = ({
   allIngredients?: IngredientSummary[];
 }) => {
   const state = form.useStore();
+  const fieldId = useId();
+  const currentUnit = i === null ? null : state.values.ingredients[i]?.unit;
+  const hasEmptyCustomUnit = currentUnit != null && !currentUnit.trim();
   const [ingredients, setIngredients] = useState(allIngredients);
   useEffect(() => {
     setIngredients(allIngredients);
@@ -35,27 +40,6 @@ const IngredientForm = ({
     number | undefined
   >(undefined);
 
-  const ingredientUnits: string[] = [
-    "cups",
-    "tbsp",
-    "tsp",
-    "liter",
-    "milliliter",
-    "fluid ounce",
-    "pint",
-    "quart",
-    "gallon",
-    "gram",
-    "kilogram",
-    "ounce",
-    "pound",
-    "cloves",
-    "dash",
-    "pinch",
-    "drop",
-    "stick",
-  ];
-
   const ingredientQuantities = [1 / 4, 1 / 3, 1 / 2, 1];
 
   return (
@@ -66,7 +50,7 @@ const IngredientForm = ({
             key={`ingredients[${i}].name`}
             className="flex w-full flex-col items-center justify-between gap-2"
           >
-            <div className="flex flex-col gap-2">
+            <div className="flex w-full min-w-0 flex-col gap-2">
               <form.Field
                 key={`ingredients[${i}].name`}
                 name={`ingredients[${i}].name`}
@@ -107,7 +91,7 @@ const IngredientForm = ({
                         }}
                         placeholder="Select an Ingredient..."
                       />
-                      {!state.canSubmit ? (
+                      {!subfield.state.value ? (
                         <p className="text-xs text-red-400">
                           Name is required, closing without a name will remove
                           ingredient
@@ -162,6 +146,7 @@ const IngredientForm = ({
                     </div>
                     <div className="flex w-full gap-2">
                       <Button
+                        type="button"
                         className="w-full"
                         disabled={!quantityIncrement}
                         onClick={() =>
@@ -176,6 +161,7 @@ const IngredientForm = ({
                         <Minus />
                       </Button>
                       <Button
+                        type="button"
                         className="w-full"
                         disabled={!quantityIncrement}
                         onClick={() =>
@@ -194,40 +180,54 @@ const IngredientForm = ({
               <form.Field
                 key={`ingredients[${i}].unit`}
                 name={`ingredients[${i}].unit`}
+                validators={{
+                  onChange: ({ value }) =>
+                    value !== null && !value.trim()
+                      ? "Please enter a custom unit"
+                      : undefined,
+                }}
               >
                 {(subfield) => (
-                  <div className="flex flex-col gap-2">
-                    <label>Unit</label>
-                    <div>
-                      <Badge
-                        variant={!subfield.state.value ? "default" : "outline"}
-                        className="m-1 hover:cursor-pointer"
-                        onClick={() => subfield.handleChange(null)}
-                      >
-                        <p>No unit</p>
-                      </Badge>
-                      {ingredientUnits.map((unit, i) => (
-                        <Badge
-                          key={i}
-                          variant={
-                            unit === subfield.state.value
-                              ? "default"
-                              : "outline"
-                          }
-                          className="m-1 hover:cursor-pointer"
-                          onClick={() => subfield.handleChange(unit)}
-                        >
-                          <p>{unit}</p>
-                        </Badge>
-                      ))}
-                    </div>
+                  <IngredientUnitField
+                    value={subfield.state.value}
+                    onChange={subfield.handleChange}
+                    onBlur={subfield.handleBlur}
+                  />
+                )}
+              </form.Field>
+              <form.Field name={`ingredients[${i}].notes`}>
+                {(subfield) => (
+                  <div className="mt-2 flex flex-col gap-2">
+                    <label htmlFor={`${fieldId}-notes`}>
+                      Preparation notes{" "}
+                      <span className="text-muted-foreground">· optional</span>
+                    </label>
+                    <Input
+                      id={`${fieldId}-notes`}
+                      value={subfield.state.value ?? ""}
+                      onChange={(event) =>
+                        subfield.handleChange(event.target.value)
+                      }
+                      onBlur={subfield.handleBlur}
+                      placeholder="e.g. chopped, diced, or softened"
+                      aria-describedby={`${fieldId}-notes-help`}
+                    />
+                    <p
+                      id={`${fieldId}-notes-help`}
+                      className="text-sm text-muted-foreground"
+                    >
+                      Shown with this ingredient when you cook.
+                    </p>
                   </div>
                 )}
               </form.Field>
             </div>
             <div className="flex w-full justify-end hover:cursor-pointer">
               <Button
-                disabled={!state.values.ingredients?.[i]?.name}
+                type="button"
+                disabled={
+                  !state.values.ingredients?.[i]?.name || hasEmptyCustomUnit
+                }
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();

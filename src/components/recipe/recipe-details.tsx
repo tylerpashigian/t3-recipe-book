@@ -71,7 +71,7 @@ const RecipeDetails = ({
     instructionSectionsWithSteps[0]?.name.trim() === "";
 
   return (
-    <div className="mx-auto w-full space-y-8 p-4 md:p-6">
+    <div className="mx-auto w-full space-y-8">
       <div className="flex w-full items-start justify-between">
         <div className="w-full space-y-4">
           <div className="flex w-full items-center gap-3">
@@ -227,10 +227,15 @@ const RecipeDetails = ({
                     return (
                       <li
                         key={index}
-                        className="items-start gap-3 text-sm leading-relaxed text-forked-secondary-foreground"
+                        className="items-start gap-3 break-words text-sm leading-relaxed text-forked-secondary-foreground"
                       >
                         {name}
                         {quantityWithUnit ? ` (${quantityWithUnit})` : null}
+                        {ingredient.notes?.trim() ? (
+                          <span className="block whitespace-pre-wrap text-xs text-muted-foreground">
+                            {ingredient.notes}
+                          </span>
+                        ) : null}
                       </li>
                     );
                   })}
