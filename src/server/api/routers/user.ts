@@ -7,7 +7,12 @@ export const userRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const user = await ctx.prisma.user.findFirst({
         where: { id: input.id },
-        include: { favorites: true },
+        select: {
+          name: true,
+          username: true,
+          image: true,
+          favorites: { select: { recipeId: true } },
+        },
       });
 
       const recipes = await ctx.prisma.recipe.findMany({
@@ -18,7 +23,7 @@ export const userRouter = createTRPCRouter({
       const favorites = await ctx.prisma.recipe.findMany({
         where: {
           id: {
-            in: user?.favorites.map((favorite) => favorite.recipeId),
+            in: user?.favorites.map((favorite) => favorite.recipeId) ?? [],
           },
         },
         include: { _count: { select: { favorites: true } }, categories: true },
@@ -33,6 +38,14 @@ export const userRouter = createTRPCRouter({
         };
       });
 
-      return { user, recipes: isoStringRecipes, favorites };
+      return {
+        user: user && {
+          name: user.name,
+          username: user.username,
+          image: user.image,
+        },
+        recipes: isoStringRecipes,
+        favorites,
+      };
     }),
 });
