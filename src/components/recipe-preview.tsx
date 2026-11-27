@@ -19,15 +19,36 @@ const RecipePreview = () => {
     ingredients: [
       {
         id: "1",
+        ingredientId: "preview-1",
         name: "All-purpose flour",
         recipeId: "1",
       },
-      { id: "2", name: "Active dry yeast", recipeId: "1" },
-      { id: "3", name: "Fresh mozzarella cheese", recipeId: "1" },
-      { id: "4", name: "Fresh basil leaves", recipeId: "1" },
-      { id: "5", name: "Olive oil", recipeId: "1" },
-      { id: "6", name: "Salt", recipeId: "1" },
-      { id: "7", name: "Ripe tomatoes", recipeId: "1" },
+      {
+        id: "2",
+        ingredientId: "preview-2",
+        name: "Active dry yeast",
+        recipeId: "1",
+      },
+      {
+        id: "3",
+        ingredientId: "preview-3",
+        name: "Fresh mozzarella cheese",
+        recipeId: "1",
+      },
+      {
+        id: "4",
+        ingredientId: "preview-4",
+        name: "Fresh basil leaves",
+        recipeId: "1",
+      },
+      { id: "5", ingredientId: "preview-5", name: "Olive oil", recipeId: "1" },
+      { id: "6", ingredientId: "preview-6", name: "Salt", recipeId: "1" },
+      {
+        id: "7",
+        ingredientId: "preview-7",
+        name: "Ripe tomatoes",
+        recipeId: "1",
+      },
     ],
     instructionSections: [
       {

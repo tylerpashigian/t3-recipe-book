@@ -79,7 +79,7 @@ type RecipeServiceType = {
 
 export const useRecipeService = (
   id?: string,
-  query?: { query?: string; categories?: string[]; ingredients?: string[] },
+  query?: { query?: string; categories?: string[]; ingredientIds?: string[] },
 ): RecipeServiceType => {
   const queryClient = useQueryClient();
 
@@ -98,7 +98,7 @@ export const useRecipeService = (
     api.recipes.getAll.useQuery({
       query: query?.query,
       categories: query?.categories,
-      ingredients: query?.ingredients,
+      ingredientIds: query?.ingredientIds,
     });
 
   const { isPending: isUpdating, mutateAsync: update } =
@@ -130,6 +130,18 @@ export const useRecipeService = (
       { onSuccess },
     );
 
+    void queryClient.invalidateQueries({
+      queryKey: getQueryKey(api.recipes.getAll),
+    });
+    if (
+      recipeToCreate.ingredients.some(
+        ({ newIngredientName }) => newIngredientName,
+      )
+    ) {
+      void queryClient.invalidateQueries({
+        queryKey: getQueryKey(api.recipes.getIngredients),
+      });
+    }
     return createdRecipe;
   };
 
@@ -153,6 +165,18 @@ export const useRecipeService = (
       };
     });
 
+    void queryClient.invalidateQueries({
+      queryKey: getQueryKey(api.recipes.getAll),
+    });
+    if (
+      recipeToUpdate.ingredients.some(
+        ({ newIngredientName }) => newIngredientName,
+      )
+    ) {
+      void queryClient.invalidateQueries({
+        queryKey: getQueryKey(api.recipes.getIngredients),
+      });
+    }
     return updatedRecipe;
   };
 

@@ -6,6 +6,7 @@ import {
   IngredientSchemaResponse,
 } from "./ingredient";
 import { type RecipesRouter } from "../routers/recipes";
+import { RecipeUrlSchema } from "./recipe-url";
 
 const CategorySchema = z.object({
   id: z.string(),
@@ -42,18 +43,42 @@ const BaseRecipeSchema = z.object({
   cookTime: z.number().optional().nullable(),
 });
 
+const optionalWholeNumber = z
+  .number()
+  .int()
+  .nonnegative()
+  .max(2_147_483_647)
+  .nullish();
+
 export const RecipeSchemaRequest = BaseRecipeSchema.extend({
   id: z.string().optional(),
-  ingredients: z.array(IngredientSchemaRequest),
+  name: z.string().trim().min(1, "Enter a recipe name."),
+  sourceUrl: RecipeUrlSchema.nullish(),
+  instructionSections: z.array(
+    InstructionSectionSchema.extend({
+      steps: z
+        .array(
+          InstructionStepSchema.extend({
+            content: z.string().trim().min(1, "Enter an instruction."),
+          }),
+        )
+        .min(1, "Add at least one step to each section."),
+    }),
+  ),
+  ingredients: z.array(IngredientSchemaRequest).max(150),
   authorId: z.string(),
-  calories: z.number().optional().nullable(),
-  protein: z.number().optional().nullable(),
-  carbs: z.number().optional().nullable(),
-  fat: z.number().optional().nullable(),
+  servings: optionalWholeNumber,
+  prepTime: optionalWholeNumber,
+  cookTime: optionalWholeNumber,
+  calories: optionalWholeNumber,
+  protein: optionalWholeNumber,
+  carbs: optionalWholeNumber,
+  fat: optionalWholeNumber,
 });
 
 export const RecipeSchemaResponse = BaseRecipeSchema.extend({
   id: z.string(),
+  sourceUrl: z.string().nullish(),
   name: z.string(),
   description: z.string(),
   ingredients: z.array(IngredientSchemaResponse),

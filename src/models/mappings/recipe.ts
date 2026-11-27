@@ -40,6 +40,7 @@ export const convertRecipeSchemaToRecipe = (
       id: data.recipe.id,
       name: data.recipe.name,
       description: data.recipe.description,
+      sourceUrl: data.recipe.sourceUrl,
       ingredients: data.recipe.ingredients.map(
         convertIngredientSchemaToIngredient,
       ),
@@ -84,15 +85,18 @@ export const convertRecipeToRecipeForm = (
     id: data?.id,
     name: data?.name ?? "",
     description: data?.description ?? "",
+    sourceUrl: data?.sourceUrl,
     ingredients:
       data?.ingredients.map((ingredient) => ({
-        id: ingredient.id,
+        lineId: ingredient.id,
+        ingredientId: ingredient.ingredientId,
         name: ingredient.name ?? "",
         quantity:
           ingredient.quantity === 0 ? null : ingredient.quantity ?? null,
         unit: ingredient.unit ?? null,
         notes: ingredient.notes ?? null,
-        recipeId: data.id,
+        section: ingredient.section,
+        originalLine: ingredient.originalLine,
       })) ?? [],
     servings: data?.servings,
     prepTime: data?.prepTime,
@@ -123,12 +127,8 @@ export const convertRecipeFormToRecipeRequest = (
     id: data.id ?? undefined,
     name: data.name,
     description: data.description,
-    ingredients: data.ingredients.map((ingredient) =>
-      convertIngredientFormToIngredientRequest(
-        ingredient,
-        data.id ?? undefined,
-      ),
-    ),
+    sourceUrl: data.sourceUrl,
+    ingredients: data.ingredients.map(convertIngredientFormToIngredientRequest),
     servings: data.servings,
     prepTime: data.prepTime,
     cookTime: data.cookTime,

@@ -69,6 +69,7 @@ model Recipe {
 
   name        String
   description String
+  sourceUrl   String?
   authorId    String
   servings    Int?
   prepTime    Int?
@@ -109,8 +110,12 @@ model Ingredient {
 }
 
 model IngredientInRecipe {
-  ingredientId String  @default(cuid())
-  recipeId     String  @default(cuid())
+  id           String  @id @default(cuid())
+  ingredientId String
+  recipeId     String
+  order        Int
+  section      String?
+  originalLine String?
   name         String
   quantity     Float?
   unit         String?
@@ -119,7 +124,8 @@ model IngredientInRecipe {
   ingredient Ingredient @relation(fields: [ingredientId], references: [id])
   recipe     Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
-  @@id([ingredientId, recipeId])
+  @@index([ingredientId, recipeId])
+  @@index([recipeId, order])
 }
 
 // Needs to be an explicit many to many relation to ensure uniqueness

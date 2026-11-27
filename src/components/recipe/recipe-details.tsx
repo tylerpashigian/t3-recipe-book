@@ -175,6 +175,16 @@ const RecipeDetails = ({
               {recipe.description}
             </p>
           ) : null}
+          {recipe.sourceUrl ? (
+            <a
+              href={recipe.sourceUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm underline"
+            >
+              Original recipe
+            </a>
+          ) : null}
         </div>
       </div>
 
@@ -226,9 +236,16 @@ const RecipeDetails = ({
                     );
                     return (
                       <li
-                        key={index}
+                        key={ingredient.id}
                         className="items-start gap-3 break-words text-sm leading-relaxed text-forked-secondary-foreground"
                       >
+                        {ingredient.section &&
+                        ingredient.section !==
+                          recipe.ingredients[index - 1]?.section ? (
+                          <span className="mb-1 block font-semibold">
+                            {ingredient.section}
+                          </span>
+                        ) : null}
                         {name}
                         {quantityWithUnit ? ` (${quantityWithUnit})` : null}
                         {ingredient.notes?.trim() ? (
