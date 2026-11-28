@@ -32,6 +32,7 @@ interface ComboboxProps {
   className?: string;
   placeholder?: string;
   disabled?: boolean;
+  "aria-label"?: string;
 }
 
 const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
@@ -45,6 +46,7 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
       allowsCustomValue = false,
       className,
       disabled = false,
+      "aria-label": ariaLabel,
       ...props
     },
     ref,
@@ -116,8 +118,10 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
         <PopoverTrigger asChild className={className}>
           <Button
             ref={ref}
+            type="button"
             variant="outline"
             role="combobox"
+            aria-label={ariaLabel}
             aria-expanded={open}
             className={`group w-full justify-between ${
               selected.length > 1 ? "h-full" : "h-10"

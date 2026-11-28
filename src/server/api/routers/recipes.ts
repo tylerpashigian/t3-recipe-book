@@ -1,6 +1,12 @@
+import { type Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { resolveRecipeIngredients } from "~/server/recipe-import/ingredient-selection";
+import { fetchRecipePage } from "~/server/recipe-import/fetch-recipe-page";
+import { extractRecipeSource } from "~/server/recipe-import/extract-recipe-source";
+import { prepareRecipeDraft } from "~/server/recipe-import/prepare-recipe-draft";
+import { RecipeUrlSchema } from "../models/recipe-url";
 import {
   createTRPCRouter,
   publicProcedure,
@@ -35,6 +41,28 @@ const normalizeInstructionSections = (
   }));
 };
 
+const validateCategorySelection = async (
+  tx: Prisma.TransactionClient,
+  categories: { id: string }[],
+) => {
+  const ids = [...new Set(categories.map(({ id }) => id))];
+  if (ids.length === 0) return [];
+
+  const existingCategories = await tx.recipeCategory.findMany({
+    where: { id: { in: ids } },
+    select: { id: true },
+  });
+
+  if (existingCategories.length !== ids.length) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "One or more selected recipe categories do not exist.",
+    });
+  }
+
+  return existingCategories;
+};
+
 export const recipesRouter = createTRPCRouter({
   getAll: publicProcedure
     .input(
@@ -43,7 +71,7 @@ export const recipesRouter = createTRPCRouter({
         query: z.string().optional(),
         // these should just be ids?
         categories: z.string().array().optional(),
-        ingredients: z.string().array().optional(),
+        ingredientIds: z.string().array().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -61,12 +89,12 @@ export const recipesRouter = createTRPCRouter({
                 },
               }
             : {}),
-          ...(input.ingredients?.length
+          ...(input.ingredientIds?.length
             ? {
-                AND: input.ingredients.map((ingredient) => ({
+                AND: input.ingredientIds.map((ingredientId) => ({
                   ingredients: {
                     some: {
-                      name: { equals: ingredient, mode: "insensitive" },
+                      ingredientId,
                     },
                   },
                 })),
@@ -108,7 +136,7 @@ export const recipesRouter = createTRPCRouter({
       const recipe = await ctx.prisma.recipe.findUnique({
         where: { id: input.id },
         include: {
-          ingredients: true,
+          ingredients: { orderBy: { order: "asc" } },
           categories: true,
           _count: { select: { favorites: true } },
           instructionSections: {
@@ -154,6 +182,55 @@ export const recipesRouter = createTRPCRouter({
           : undefined,
       });
     }),
+  importFromUrl: protectedProcedure
+    .input(z.object({ url: RecipeUrlSchema }))
+    .mutation(async ({ ctx, input }) => {
+      let source: ReturnType<typeof extractRecipeSource>;
+      try {
+        source = extractRecipeSource(await fetchRecipePage(input.url));
+      } catch {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "Forked couldn’t read that recipe page. Try another link or enter the recipe manually.",
+        });
+      }
+      const [catalog, categories] = await Promise.all([
+        ctx.prisma.ingredient.findMany({
+          select: { id: true, name: true },
+          orderBy: { name: "asc" },
+        }),
+        ctx.prisma.recipeCategory.findMany({
+          select: { id: true, name: true },
+          orderBy: { name: "asc" },
+        }),
+      ]);
+      let draft: Awaited<ReturnType<typeof prepareRecipeDraft>>;
+      try {
+        draft = await prepareRecipeDraft(
+          input.url,
+          source,
+          catalog,
+          categories,
+        );
+      } catch (error) {
+        console.warn("[recipe-import] draft failed", {
+          error: error instanceof Error ? error.name : "UnknownError",
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            "Forked couldn’t prepare the draft. Try again or enter the recipe manually.",
+        });
+      }
+      if (!draft.ingredients.length) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "No recipe ingredient lines were found on that page.",
+        });
+      }
+      return draft;
+    }),
   create: protectedProcedure
     .input(RecipeSchemaRequest)
     .mutation(async ({ ctx, input }) => {
@@ -162,37 +239,22 @@ export const recipesRouter = createTRPCRouter({
       );
 
       const recipe = await ctx.prisma.$transaction(async (tx) => {
+        const categories = await validateCategorySelection(
+          tx,
+          input.categories,
+        );
+        const ingredients = await resolveRecipeIngredients(
+          tx,
+          input.ingredients,
+        );
         const createdRecipe = await tx.recipe.create({
           data: {
             authorId: ctx.session.user.id,
             name: input.name,
             description: input.description ?? "",
-            ingredients: {
-              create: input.ingredients?.map(
-                ({ name, quantity, unit, notes }) => {
-                  return {
-                    name,
-                    quantity,
-                    unit,
-                    notes,
-                    ingredient: {
-                      connectOrCreate: {
-                        where: { name: name.toLowerCase() },
-                        create: { name: name.toLowerCase() },
-                      },
-                    },
-                  };
-                },
-              ),
-            },
-            categories: {
-              connectOrCreate: input.categories?.map(({ id, name }) => {
-                return {
-                  where: { id: id },
-                  create: { id, name },
-                };
-              }),
-            },
+            sourceUrl: input.sourceUrl,
+            ingredients: { create: ingredients.map(({ data }) => data) },
+            categories: { connect: categories },
             servings: input.servings,
             prepTime: input.prepTime,
             cookTime: input.cookTime,
@@ -222,7 +284,7 @@ export const recipesRouter = createTRPCRouter({
         return tx.recipe.findUniqueOrThrow({
           where: { id: createdRecipe.id },
           include: {
-            ingredients: true,
+            ingredients: { orderBy: { order: "asc" } },
             categories: true,
             instructionSections: {
               orderBy: { order: "asc" },
@@ -287,8 +349,37 @@ export const recipesRouter = createTRPCRouter({
       );
 
       const updatedRecipe = await ctx.prisma.$transaction(async (tx) => {
+        const categories = await validateCategorySelection(
+          tx,
+          input.categories,
+        );
+        const ingredients = await resolveRecipeIngredients(
+          tx,
+          input.ingredients,
+        );
+        const lineIds = ingredients.flatMap(({ lineId }) =>
+          lineId ? [lineId] : [],
+        );
+        if (new Set(lineIds).size !== lineIds.length) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Ingredient lines must be unique.",
+          });
+        }
+        if (lineIds.length) {
+          const count = await tx.ingredientInRecipe.count({
+            where: { recipeId: id, id: { in: lineIds } },
+          });
+          if (count !== lineIds.length) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message:
+                "An ingredient line is no longer on this recipe. Reload before editing.",
+            });
+          }
+        }
         await tx.recipe.update({
-          where: { id: input.id },
+          where: { id: input.id, authorId: ctx.session.user.id },
           data: {
             name: input.name,
             description: input.description,
@@ -299,43 +390,17 @@ export const recipesRouter = createTRPCRouter({
             protein: input.protein,
             carbs: input.carbs,
             fat: input.fat,
+            sourceUrl: input.sourceUrl,
             ingredients: {
-              deleteMany: {
-                NOT: input.ingredients
-                  ?.filter((ingredient) => ingredient.ingredientId)
-                  .map(({ ingredientId }) => ({
-                    ingredientId,
-                    recipeId: id,
-                  })),
-              },
-              create: input.ingredients
-                ?.filter((ingredient) => !ingredient.ingredientId)
-                .map(({ name, unit, quantity, notes }) => ({
-                  name,
-                  unit,
-                  quantity,
-                  notes,
-                  ingredient: {
-                    connectOrCreate: {
-                      where: { name: name.toLowerCase() },
-                      create: { name: name.toLowerCase() },
-                    },
-                  },
-                })),
-              updateMany: input.ingredients
-                ?.filter((ingredient) => ingredient.ingredientId)
-                .map(({ ingredientId, name, quantity, unit, notes }) => ({
-                  where: { ingredientId, recipeId: id },
-                  data: { name, quantity, unit, notes },
-                })),
+              deleteMany: { id: { notIn: lineIds } },
+              create: ingredients
+                .filter(({ lineId }) => !lineId)
+                .map(({ data }) => data),
+              update: ingredients.flatMap(({ lineId, data }) =>
+                lineId ? [{ where: { id: lineId }, data }] : [],
+              ),
             },
-            categories: {
-              connectOrCreate: input.categories?.map(({ id, name }) => ({
-                where: { id },
-                create: { id, name },
-              })),
-              set: input.categories?.map(({ id }) => ({ id })) ?? [],
-            },
+            categories: { set: categories },
           },
         });
 
@@ -435,7 +500,7 @@ export const recipesRouter = createTRPCRouter({
           where: { id: input.id },
           include: {
             favorites: true,
-            ingredients: true,
+            ingredients: { orderBy: { order: "asc" } },
             categories: true,
             instructionSections: {
               orderBy: { order: "asc" },

@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from "react";
+import { useId, useState } from "react";
 
 import { type useForm } from "@tanstack/react-form";
 import { Minus, Plus } from "lucide-react";
@@ -27,14 +27,12 @@ const IngredientForm = ({
 }) => {
   const state = form.useStore();
   const fieldId = useId();
-  const currentUnit = i === null ? null : state.values.ingredients[i]?.unit;
-  const hasEmptyCustomUnit = currentUnit != null && !currentUnit.trim();
-  const [ingredients, setIngredients] = useState(allIngredients);
-  useEffect(() => {
-    setIngredients(allIngredients);
-  }, [allIngredients]);
-
-  const nameError = "Please enter an ingredient name";
+  const ingredient = i === null ? undefined : state.values.ingredients[i];
+  const selected = allIngredients.find(
+    ({ id }) => id === ingredient?.ingredientId,
+  );
+  const hasEmptyCustomUnit =
+    ingredient?.unit != null && !ingredient.unit.trim();
 
   const [quantityIncrement, setQuantityIncrement] = useState<
     number | undefined
@@ -51,56 +49,104 @@ const IngredientForm = ({
             className="flex w-full flex-col items-center justify-between gap-2"
           >
             <div className="flex w-full min-w-0 flex-col gap-2">
-              <form.Field
-                key={`ingredients[${i}].name`}
-                name={`ingredients[${i}].name`}
-                validators={{
-                  onChange: ({ value }) =>
-                    value === "" ? nameError : undefined,
-                }}
-              >
-                {(subfield) => {
-                  return (
-                    <div className="flex flex-col gap-2">
-                      <Combobox
-                        aria-label="Ingredient name"
-                        isMultiSelect={false}
-                        allowsCustomValue={true}
-                        options={ingredients.map((ingredient) => ({
-                          label: toFirstLetterUppercase(ingredient.name),
-                          value: ingredient.name,
-                        }))}
-                        selected={
-                          subfield.state.value !== ""
-                            ? [
-                                {
-                                  label: toFirstLetterUppercase(
-                                    subfield.state.value,
-                                  ),
-                                  value: subfield.state.value?.toLowerCase(),
-                                },
-                              ]
-                            : []
-                        }
-                        onChange={(ingredients) => {
-                          const ingredient = ingredients.length
-                            ? ingredients[0]
-                            : undefined;
-                          !!ingredient &&
-                            subfield.handleChange(ingredient.label);
-                        }}
-                        placeholder="Select an Ingredient..."
-                      />
-                      {!subfield.state.value ? (
-                        <p className="text-xs text-red-400">
-                          Name is required, closing without a name will remove
-                          ingredient
-                        </p>
-                      ) : null}
-                    </div>
-                  );
-                }}
+              <div className="space-y-2">
+                <p className="font-bold">Pantry ingredient</p>
+                <Combobox
+                  aria-label="Pantry ingredient"
+                  isMultiSelect={false}
+                  options={allIngredients.map(({ id, name }) => ({
+                    label: toFirstLetterUppercase(name),
+                    value: id,
+                  }))}
+                  selected={
+                    selected
+                      ? [
+                          {
+                            label: toFirstLetterUppercase(selected.name),
+                            value: selected.id,
+                          },
+                        ]
+                      : []
+                  }
+                  onChange={([option]) => {
+                    if (!option || !ingredient) return;
+                    void form.replaceFieldValue("ingredients", i, {
+                      ...ingredient,
+                      ingredientId: option.value,
+                      newIngredientName: undefined,
+                      name: ingredient.name.trim()
+                        ? ingredient.name
+                        : option.label,
+                    });
+                  }}
+                  placeholder="Select an ingredient"
+                />
+                {ingredient?.newIngredientName === undefined ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (!ingredient) return;
+                      void form.replaceFieldValue("ingredients", i, {
+                        ...ingredient,
+                        ingredientId: undefined,
+                        newIngredientName: ingredient.name,
+                      });
+                    }}
+                  >
+                    Add a new catalog ingredient
+                  </Button>
+                ) : (
+                  <div className="space-y-1">
+                    <label htmlFor={`${fieldId}-catalog-name`}>
+                      New catalog name
+                    </label>
+                    <Input
+                      id={`${fieldId}-catalog-name`}
+                      maxLength={250}
+                      value={ingredient.newIngredientName}
+                      onChange={(event) => {
+                        const name = event.target.value;
+                        void form.replaceFieldValue("ingredients", i, {
+                          ...ingredient,
+                          newIngredientName: name,
+                          name:
+                            ingredient.name === ingredient.newIngredientName
+                              ? name
+                              : ingredient.name,
+                        });
+                      }}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Added when you save the recipe.
+                    </p>
+                  </div>
+                )}
+              </div>
+              <form.Field name={`ingredients[${i}].name`}>
+                {(field) => (
+                  <div className="space-y-1">
+                    <label htmlFor={`${fieldId}-name`} className="font-bold">
+                      Recipe wording
+                    </label>
+                    <Input
+                      id={`${fieldId}-name`}
+                      maxLength={250}
+                      value={field.state.value}
+                      onChange={(event) =>
+                        field.handleChange(event.target.value)
+                      }
+                      onBlur={field.handleBlur}
+                    />
+                  </div>
+                )}
               </form.Field>
+              {ingredient?.originalLine ? (
+                <p className="text-sm text-muted-foreground">
+                  Original line: {ingredient.originalLine}
+                </p>
+              ) : null}
               <p>
                 <span className="font-bold">Quantity: </span>
                 <span>
@@ -226,7 +272,13 @@ const IngredientForm = ({
               <Button
                 type="button"
                 disabled={
-                  !state.values.ingredients?.[i]?.name || hasEmptyCustomUnit
+                  !ingredient?.name.trim() ||
+                  (!ingredient.ingredientId &&
+                    !ingredient.newIngredientName?.trim()) ||
+                  (ingredient.quantity !== null &&
+                    (!Number.isFinite(ingredient.quantity) ||
+                      ingredient.quantity < 0)) ||
+                  hasEmptyCustomUnit
                 }
                 onClick={(e) => {
                   e.preventDefault();

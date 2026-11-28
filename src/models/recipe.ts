@@ -20,6 +20,7 @@ export type Recipe = {
   id: string;
   name: string;
   description: string;
+  sourceUrl?: string | null;
   ingredients: Ingredient[];
   instructionSections: InstructionSection[];
   servings?: number | null;
@@ -39,6 +40,7 @@ export type RecipeFormModel = {
   name: string;
   categories: Category[];
   description: string;
+  sourceUrl?: string | null;
   servings?: number | null;
   prepTime?: number | null;
   cookTime?: number | null;

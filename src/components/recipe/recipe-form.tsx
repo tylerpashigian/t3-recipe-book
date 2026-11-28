@@ -43,13 +43,62 @@ type Props = {
   categories?: Category[];
   allIngredients?: IngredientSummary[];
   recipe?: Recipe;
+  draft?: RecipeFormModel;
   isLoading?: boolean;
   onSubmit?: (recipe: RecipeFormModel) => Promise<void> | void;
   onCancel?: () => Promise<void> | void;
 };
 
+function recipeIssues(values: RecipeFormModel) {
+  const issues: string[] = [];
+  if (!values.name.trim()) issues.push("Enter a recipe name.");
+  const unresolved = values.ingredients.filter(
+    ({ ingredientId, newIngredientName }) =>
+      !ingredientId && !newIngredientName?.trim(),
+  ).length;
+  if (unresolved)
+    issues.push(
+      `Choose a match for ${unresolved} ingredient${
+        unresolved === 1 ? "" : "s"
+      }.`,
+    );
+  if (
+    values.ingredients.some(
+      ({ name, unit, quantity }) =>
+        !name.trim() ||
+        (unit !== null && !unit.trim()) ||
+        (quantity !== null && (!Number.isFinite(quantity) || quantity < 0)),
+    )
+  )
+    issues.push("Check ingredient wording, quantities and units.");
+  if (
+    [
+      values.servings,
+      values.prepTime,
+      values.cookTime,
+      values.calories,
+      values.protein,
+      values.carbs,
+      values.fat,
+    ].some((value) => value != null && (!Number.isInteger(value) || value < 0))
+  ) {
+    issues.push(
+      "Use whole, nonnegative numbers for servings, timing and nutrition.",
+    );
+  }
+  if (
+    values.instructionSections.some(
+      ({ steps }) =>
+        !steps.length || steps.some(({ content }) => !content.trim()),
+    )
+  )
+    issues.push("Add at least one non-empty step to each instruction section.");
+  return issues;
+}
+
 const RecipeForm = ({
   recipe,
+  draft,
   allIngredients = [],
   categories = [],
   isLoading = false,
@@ -60,7 +109,7 @@ const RecipeForm = ({
   const [isOpen, setIsOpen] = useState(false);
 
   const form = useForm<RecipeFormModel>({
-    defaultValues: { ...convertRecipeToRecipeForm(recipe) },
+    defaultValues: draft ?? convertRecipeToRecipeForm(recipe),
     onSubmit: async ({ value }) => {
       await onSubmitHandler(value);
     },
@@ -77,6 +126,7 @@ const RecipeForm = ({
   };
 
   const onSubmitHandler = async (value: RecipeFormModel) => {
+    if (recipeIssues(value).length) return;
     try {
       await onSubmit?.(value);
       form.reset();
@@ -91,7 +141,10 @@ const RecipeForm = ({
   >(undefined);
 
   const isCreating = recipe === undefined;
-  const buttonText = isCreating ? "Create" : "Update";
+  const buttonText = draft ? "Save recipe" : isCreating ? "Create" : "Update";
+  const catalogNames = new Map(
+    allIngredients.map(({ id, name }) => [id, name]),
+  );
 
   const addIngredientButton = (
     field: FieldApi<
@@ -105,12 +158,13 @@ const RecipeForm = ({
     return (
       <Button
         variant={"ghost"}
+        type="button"
+        aria-label="Add ingredient"
         onClick={(e) => {
           e.preventDefault();
           setIsCreatingIngredient(true);
 
           field.pushValue({
-            recipeId: recipe?.id,
             name: "",
             quantity: null,
             unit: null,
@@ -197,40 +251,58 @@ const RecipeForm = ({
           </div>
           <div className="flex flex-wrap gap-2">
             {!isCreating && (
-              <Button variant={"secondary"} onClick={onCancel}>
+              <Button type="button" variant={"secondary"} onClick={onCancel}>
                 <>Cancel</>
               </Button>
             )}
-            <form.Subscribe
-              selector={(state) =>
-                [
-                  state.canSubmit,
-                  state.isSubmitting,
-                  state.isTouched,
-                  state.isDirty,
-                ] as const
-              }
-            >
-              {([canSubmit, isSubmitting, isTouched, isDirty]) => {
+            <form.Subscribe>
+              {({ canSubmit, isSubmitting, isTouched, isDirty, values }) => {
+                const issues = recipeIssues(values);
                 return (
-                  <Button
-                    type="submit"
-                    disabled={
-                      isLoading ||
-                      !canSubmit ||
-                      isSubmitting ||
-                      !isTouched ||
-                      !isDirty ||
-                      isOpen
-                    }
-                  >
-                    <>{isLoading ? "Loading" : buttonText}</>
-                  </Button>
+                  <div className="flex flex-col items-start gap-2 sm:items-end">
+                    <Button
+                      type="submit"
+                      disabled={
+                        isLoading ||
+                        !canSubmit ||
+                        isSubmitting ||
+                        (!draft && (!isTouched || !isDirty)) ||
+                        isOpen ||
+                        Boolean(issues.length)
+                      }
+                    >
+                      {isLoading ? "Saving…" : buttonText}
+                    </Button>
+                    {(Boolean(draft) || isTouched) && issues.length > 0 ? (
+                      <ul
+                        className="text-sm text-destructive"
+                        aria-live="polite"
+                      >
+                        {issues.map((issue) => (
+                          <li key={issue}>{issue}</li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </div>
                 );
               }}
             </form.Subscribe>
           </div>
         </div>
+
+        {draft?.sourceUrl ? (
+          <p className="text-sm text-forked-secondary-foreground">
+            Review the imported draft before saving.{" "}
+            <a
+              href={draft.sourceUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="underline"
+            >
+              Open original recipe
+            </a>
+          </p>
+        ) : null}
 
         <Separator />
 
@@ -251,7 +323,9 @@ const RecipeForm = ({
                 name="name"
                 validators={{
                   onChange: ({ value }) =>
-                    value === "" ? "Please enter a recipe name" : undefined,
+                    value.trim() === ""
+                      ? "Please enter a recipe name"
+                      : undefined,
                 }}
               >
                 {(field) => (
@@ -284,6 +358,7 @@ const RecipeForm = ({
                   <>
                     <label className="font-bold">Recipe Categories</label>
                     <Combobox
+                      aria-label="Recipe Categories"
                       className="mt-2"
                       options={[...(categories ?? []).map(categoryToOption)]}
                       selected={(field.state.value ?? []).map(categoryToOption)}
@@ -534,25 +609,97 @@ const RecipeForm = ({
                               );
                               const quantityWithUnit =
                                 formatIngredientAmount(ingredient);
+                              const match = ingredient.ingredientId
+                                ? catalogNames.get(ingredient.ingredientId)
+                                : undefined;
+                              const needsMatch =
+                                !ingredient.ingredientId &&
+                                !ingredient.newIngredientName?.trim();
                               return (
                                 <div
                                   className="flex items-center justify-between"
-                                  key={`ingredients[${i}].name`}
+                                  key={ingredient.lineId ?? i}
                                 >
-                                  <p className="min-w-0 break-words text-sm leading-relaxed text-forked-secondary-foreground">
-                                    {name}
-                                    {quantityWithUnit
-                                      ? ` (${quantityWithUnit})`
-                                      : null}
-                                    {ingredient.notes?.trim() ? (
-                                      <span className="block whitespace-pre-wrap text-xs text-muted-foreground">
-                                        {ingredient.notes}
-                                      </span>
+                                  <div className="min-w-0 space-y-1 break-words text-sm leading-relaxed text-forked-secondary-foreground">
+                                    {ingredient.section ? (
+                                      <p className="text-xs font-semibold">
+                                        {ingredient.section}
+                                      </p>
                                     ) : null}
-                                  </p>
+                                    <p>
+                                      {name}
+                                      {quantityWithUnit
+                                        ? ` (${quantityWithUnit})`
+                                        : null}
+                                    </p>
+                                    {ingredient.notes?.trim() ? (
+                                      <p className="whitespace-pre-wrap text-xs text-muted-foreground">
+                                        {ingredient.notes}
+                                      </p>
+                                    ) : null}
+                                    {ingredient.originalLine ? (
+                                      <p className="text-xs text-muted-foreground">
+                                        Original: {ingredient.originalLine}
+                                      </p>
+                                    ) : null}
+                                    {needsMatch ? (
+                                      <p className="font-semibold text-destructive">
+                                        Needs match
+                                      </p>
+                                    ) : ingredient.newIngredientName ? (
+                                      <p>
+                                        Add on save:{" "}
+                                        {ingredient.newIngredientName}
+                                      </p>
+                                    ) : match ? (
+                                      <p>
+                                        {ingredient.ingredientId ===
+                                        ingredient.suggestedIngredientId
+                                          ? "Suggested match"
+                                          : "Pantry ingredient"}
+                                        : {toFirstLetterUppercase(match)}
+                                      </p>
+                                    ) : null}
+                                    {ingredient.alternativeIngredientIds?.map(
+                                      (id) => {
+                                        const alternative =
+                                          catalogNames.get(id);
+                                        if (
+                                          !alternative ||
+                                          id === ingredient.ingredientId
+                                        )
+                                          return null;
+                                        return (
+                                          <Button
+                                            key={id}
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() =>
+                                              void form.replaceFieldValue(
+                                                "ingredients",
+                                                i,
+                                                {
+                                                  ...ingredient,
+                                                  ingredientId: id,
+                                                  newIngredientName: undefined,
+                                                },
+                                              )
+                                            }
+                                          >
+                                            Use{" "}
+                                            {toFirstLetterUppercase(
+                                              alternative,
+                                            )}
+                                          </Button>
+                                        );
+                                      },
+                                    )}
+                                  </div>
                                   <div className="flex shrink-0 gap-2 hover:cursor-pointer">
                                     <Button
                                       variant={"ghost"}
+                                      aria-label={`Edit ingredient ${name}`}
                                       onClick={(e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
@@ -565,6 +712,7 @@ const RecipeForm = ({
                                     </Button>
                                     <Button
                                       variant={"ghost"}
+                                      aria-label={`Remove ingredient ${name}`}
                                       onClick={(e) => {
                                         e.preventDefault();
                                         deleteIngredient(i);

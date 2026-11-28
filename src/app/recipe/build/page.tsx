@@ -26,7 +26,7 @@ const BuildRecipe = () => {
   const { allIngredients } = useRecipe();
   const { recipes, isLoading: isRecipesLoading } = useRecipes({
     query: "",
-    ingredients: selectedIngredients?.map((ingredient) => ingredient.value),
+    ingredientIds: selectedIngredients?.map((ingredient) => ingredient.value),
   });
 
   return (
@@ -63,11 +63,12 @@ const BuildRecipe = () => {
                     <>
                       <label className="font-bold">Recipe Ingredients</label>
                       <Combobox
+                        aria-label="Recipe Ingredients"
                         isMultiSelect={true}
                         className="mt-2"
                         options={(allIngredients ?? []).map((ingredient) => ({
                           label: toFirstLetterUppercase(ingredient.name),
-                          value: ingredient.name,
+                          value: ingredient.id,
                         }))}
                         selected={field.state.value}
                         onChange={field.handleChange}

@@ -14,22 +14,27 @@ export const convertIngredientSchemaToIngredientSummary = (
 export const convertIngredientSchemaToIngredient = (
   ingredient: IngredientSchemaResponseType,
 ) => ({
-  id: ingredient.ingredientId,
+  id: ingredient.id,
+  ingredientId: ingredient.ingredientId,
   name: ingredient.name,
   quantity: ingredient.quantity,
   unit: ingredient.unit,
   notes: ingredient.notes ?? null,
+  section: ingredient.section,
+  originalLine: ingredient.originalLine,
   recipeId: ingredient.recipeId,
 });
 
 export const convertIngredientFormToIngredientRequest = (
   ingredient: IngredientFormModel,
-  recipeId: string | undefined,
 ) => ({
-  ingredientId: ingredient.id ?? undefined,
+  lineId: ingredient.lineId,
+  ingredientId: ingredient.ingredientId,
+  newIngredientName: ingredient.newIngredientName,
   name: ingredient.name,
   quantity: ingredient.quantity === 0 ? null : ingredient.quantity,
   unit: ingredient.unit?.trim() ? ingredient.unit.trim() : null,
   notes: ingredient.notes?.trim() ? ingredient.notes.trim() : null,
-  recipeId: recipeId,
+  section: ingredient.section,
+  originalLine: ingredient.originalLine,
 });
